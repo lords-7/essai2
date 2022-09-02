@@ -16,6 +16,7 @@ homebrew-shellenv() {
     return
   fi
 
+  echo
   case "$(/bin/ps -p "${PPID}" -c -o comm=)" in
     fish | -fish)
       echo "set -gx HOMEBREW_PREFIX \"${HOMEBREW_PREFIX}\";"
