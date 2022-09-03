@@ -142,8 +142,10 @@ module Kernel
 
   # Print a message prefixed with "Warning" (do this rarely).
   def opoo(message)
+    return unless (warning_msg = Formatter.warning(message, label: "Warning"))
+
     Tty.with($stderr) do |stderr|
-      stderr.puts Formatter.warning(message, label: "Warning")
+      stderr.puts warning_msg
     end
   end
 

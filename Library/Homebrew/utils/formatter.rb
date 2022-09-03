@@ -29,7 +29,12 @@ module Formatter
     label(label, string, :green)
   end
 
+  # Ignores duplicate warning messages
   def warning(string, label: nil)
+    @warning_cache ||= Set.new
+    return if @warning_cache.include?(string)
+
+    @warning_cache.add(string)
     label(label, string, :yellow)
   end
 
