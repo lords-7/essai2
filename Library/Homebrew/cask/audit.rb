@@ -496,7 +496,13 @@ module Cask
           message = "Signature verification failed:\n#{result.merged_output}\nmacOS on ARM requires applications " \
                     "to be signed. Please contact the upstream developer to let them know they should "
 
-          message += if result.stderr.include?("not signed at all")
+          not_signed = result.stderr.include?("not signed at all")
+
+          depends_on_intel = cask.depends_on.arch&.any? { |arch| arch[:type] == :intel }
+
+          next if not_signed && depends_on_intel
+
+          message += if not_signed
             "sign their app."
           else
             "fix the signature of their app."
