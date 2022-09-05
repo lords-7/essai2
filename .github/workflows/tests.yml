@@ -188,6 +188,16 @@ jobs:
           docker tag brew "homebrew/ubuntu16.04:master"
           docker push "homebrew/ubuntu16.04:master"
 
+      - name: Deploy the retired Docker image to GitHub Packages and Docker Hub
+        if: github.ref == 'refs/heads/master'
+        run: |
+          printf 'FROM alpine\nCMD echo "Error: homebrew/ubuntu16.04:master is retired. Use homebrew/brew or homebrew/ubuntu16.04 or homebrew/ubuntu22.04:master"; exit 1\n' |
+            docker build --tag=retired -
+          docker tag retired "ghcr.io/homebrew/ubuntu16.04:master"
+          docker push "ghcr.io/homebrew/ubuntu16.04:master"
+          docker tag retired "homebrew/ubuntu16.04:master"
+          docker push "homebrew/ubuntu16.04:master"
+
   tests:
     name: ${{ matrix.name }}
     needs: syntax
