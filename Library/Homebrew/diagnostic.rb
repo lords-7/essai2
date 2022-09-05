@@ -504,7 +504,9 @@ module Homebrew
           realpath = Pathname.new(p).realpath.to_s
           next if realpath.start_with?(real_cellar.to_s, HOMEBREW_CELLAR.to_s)
 
-          scripts += Dir.chdir(p) { Dir["*-config"] }.map { |c| File.join(p, c) }
+          scripts += Dir.chdir(p) { Dir["*-config"] }
+                        .map { |c| File.join(p, c) }
+                        .select { |f| File.file?(f) && File.executable?(f) }
         end
 
         return if scripts.empty?
