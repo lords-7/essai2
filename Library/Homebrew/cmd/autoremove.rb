@@ -14,6 +14,8 @@ module Homebrew
       EOS
       switch "-n", "--dry-run",
              description: "List what would be uninstalled, but do not actually uninstall anything."
+      switch "--include-build",
+             description: "Parse :build dependencies and do not uninstall them."
 
       named_args :none
     end
