@@ -168,6 +168,25 @@ module Homebrew
           are prone to breaking when GCC is updated. You should `brew reinstall` these formulae:
         EOS
       end
+
+      def check_ld_library_path
+        glibc = begin
+          Formula["glibc"]
+        rescue FormulaUnavailableError
+          nil
+        end
+        return unless glibc&.any_version_installed?
+
+        ld_library_paths = ENV["HOMEBREW_LD_LIBRARY_PATH"]&.split(":")
+        return if ld_library_paths.blank? || ld_library_paths.exclude?("#{HOMEBREW_PREFIX}/lib")
+
+        <<~EOS
+          Your LD_LIBRARY_PATH contains #{HOMEBREW_PREFIX}/lib.
+          This will break many things when `glibc` is installed.
+          You must unset LD_LIBRARY_PATH or adjust to to exclude
+          #{HOMEBREW_PREFIX}/lib.
+        EOS
+      end
     end
   end
 end
