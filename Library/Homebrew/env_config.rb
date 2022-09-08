@@ -42,6 +42,11 @@ module Homebrew
                      "`brew cleanup` will start running `brew autoremove` periodically.",
         boolean:     true,
       },
+      HOMEBREW_AUTOREMOVE_INCLUDE_BUILD:         {
+        description: "If set, `brew autoremove` will parse build dependencies and not remove them. " \
+                     "If not set, `brew autoremove` only considers runtime dependencies.",
+        boolean:     true,
+      },
       HOMEBREW_BAT:                              {
         description: "If set, use `bat` for the `brew cat` command.",
         boolean:     true,
