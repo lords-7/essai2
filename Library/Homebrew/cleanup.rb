@@ -596,7 +596,7 @@ module Homebrew
       removable_formulae = Formula.unused_formulae_with_no_dependents(formulae, casks)
       
       if include_build? || Homebrew::EnvConfig.autoremove_include_build?
-        removable_formulae -= Formula.formulae_with_build_dependents(removable_formulae)
+        removable_formulae -= Formula.installed.flat_map(&:build_dependencies)
       end
 
       return if removable_formulae.blank?
