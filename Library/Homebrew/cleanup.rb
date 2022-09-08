@@ -594,7 +594,7 @@ module Homebrew
       casks = Cask::Caskroom.casks
 
       removable_formulae = Formula.unused_formulae_with_no_dependents(formulae, casks)
-      
+
       if include_build? || Homebrew::EnvConfig.autoremove_include_build?
         removable_formulae -= Formula.installed.flat_map(&:build_dependencies)
       end
