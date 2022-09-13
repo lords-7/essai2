@@ -73,7 +73,7 @@ module SPDX
 
     license = license.delete_suffix "+"
     license_metadata = license_data["licenses"].find { |data| data["licenseId"] == license }
-    license_metadata["isOsiApproved"]
+    license_metadata["isOsiApproved"] || license_metadata["isFsfLibre"]
   end
 
   def valid_license?(license)
