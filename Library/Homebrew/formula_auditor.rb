@@ -196,13 +196,6 @@ module Homebrew
       if formula.license.present?
         licenses, exceptions = SPDX.parse_license_expression formula.license
 
-        sspl_licensed = licenses.any? { |license| license.to_s.start_with?("SSPL") }
-        if sspl_licensed && @core_tap
-          problem <<~EOS
-            Formula #{formula.name} is SSPL-licensed. Software under the SSPL must not be packaged in homebrew/core.
-          EOS
-        end
-
         non_standard_licenses = licenses.reject { |license| SPDX.valid_license? license }
         if non_standard_licenses.present?
           problem <<~EOS
@@ -210,6 +203,10 @@ module Homebrew
             For a list of valid licenses check: #{Formatter.url("https://spdx.org/licenses/")}
           EOS
         end
+
+        spdx_licenses = licenses - non_standard_licenses
+        non_osi_licenses = spdx_licenses.reject { |license| SPDX.open_source_license? license }
+        problem "Formula #{formula.name} has a non-open-source license." if @core_tap && non_osi_licenses.present?
 
         if @strict
           deprecated_licenses = licenses.select do |license|

@@ -67,6 +67,15 @@ module SPDX
     [licenses, exceptions]
   end
 
+  def open_source_license?(license)
+    return true if ALLOWED_LICENSE_SYMBOLS.include? license
+    return false unless valid_license?(license)
+
+    license = license.delete_suffix "+"
+    license_metadata = license_data["licenses"].find { |data| data["licenseId"] == license }
+    license_metadata["isOsiApproved"]
+  end
+
   def valid_license?(license)
     return ALLOWED_LICENSE_SYMBOLS.include? license if license.is_a? Symbol
 
