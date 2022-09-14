@@ -6,13 +6,19 @@ module Homebrew
   #
   # @api private
   class ResourceAuditor
-    attr_reader :name, :version, :checksum, :url, :mirrors, :using, :specs, :owner, :spec_name, :problems
+    attr_reader :name, :version, :checksum, :url, :fast_mirrors, :mirrors, :using, :specs, :owner, :spec_name,
+                :problems
 
     def initialize(resource, spec_name, options = {})
       @name     = resource.name
       @version  = resource.version
       @checksum = resource.checksum
       @url      = resource.url
+      @fast_mirrors = if defined?(resource.fast_mirrors)
+        resource.fast_mirrors
+      else
+        []
+      end
       @mirrors  = resource.mirrors
       @using    = resource.using
       @specs    = resource.specs
@@ -108,6 +114,19 @@ module Homebrew
       if Homebrew::SimulateSystem.simulating_or_running_on_macos? && spec_name == :stable &&
          owner.name != "ca-certificates" && curl_dep && !urls.find { |u| u.start_with?("http://") }
         problem "should always include at least one HTTP mirror"
+      end
+
+      fast_mirrors.each do |url|
+        substituted_url = url.sub("$HOMEBREW_BOTTLE_DOMAIN/", "/")
+                             .sub("${HOMEBREW_BOTTLE_DOMAIN}/", "/")
+                             .sub("$HOMEBREW_ARTIFACT_DOMAIN/", "/")
+                             .sub("${HOMEBREW_ARTIFACT_DOMAIN}/", "/")
+        next unless substituted_url.include?("$")
+
+        problem %W[
+          The URL "#{url}" contains unsupported variable interpolation.
+          Only `${HOMEBREW_BOTTLE_DOMAIN}` and `${HOMEBREW_ARTIFACT_DOMAIN}` are supported.
+        ].join(" ")
       end
 
       return unless @online
