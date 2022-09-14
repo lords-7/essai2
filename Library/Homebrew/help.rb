@@ -37,7 +37,7 @@ module Homebrew
         brew commands
         brew help [COMMAND]
         man brew
-        https://docs.brew.sh
+        brew docs
     EOS
     private_constant :HOMEBREW_HELP
 
