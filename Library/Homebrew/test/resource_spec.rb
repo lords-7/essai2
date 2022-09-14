@@ -119,6 +119,27 @@ describe Resource do
     end
   end
 
+  describe "#fast_mirrors" do
+    it "is empty by defaults" do
+      expect(resource.fast_mirrors).to be_empty
+    end
+
+    it "returns an array of mirrors added with #fast_mirror" do
+      resource.fast_mirror("foo")
+      resource.fast_mirror("bar")
+      expect(resource.fast_mirrors).to eq(%w[foo bar])
+    end
+
+    it "downloads from the first fast mirror if any fast mirrors are given" do
+      strategy = Class.new(CurlDownloadStrategy)
+      resource.url("foo", using: strategy)
+      resource.fast_mirror("bar")
+      resource.fast_mirror("baz")
+      expect(resource.url).to eq("foo")
+      expect(resource.downloader.mirrors).to eq(%w[baz foo])
+    end
+  end
+
   describe "#mirrors" do
     it "is empty by defaults" do
       expect(resource.mirrors).to be_empty
