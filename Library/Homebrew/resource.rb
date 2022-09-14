@@ -20,7 +20,7 @@ class Resource
   include FileUtils
   include OnSystem::MacOSAndLinux
 
-  attr_reader :mirrors, :specs, :using, :source_modified_time, :patches, :owner
+  attr_reader :fast_mirrors, :mirrors, :specs, :using, :source_modified_time, :patches, :owner
   attr_writer :version
   attr_accessor :download_strategy, :checksum
 
@@ -33,6 +33,7 @@ class Resource
     @name = name
     @url = nil
     @version = nil
+    @fast_mirrors = []
     @mirrors = []
     @specs = {}
     @checksum = nil
@@ -47,6 +48,7 @@ class Resource
     super
     @name = @name.dup
     @version = @version.dup
+    @fast_mirrors = @fast_mirrors.dup
     @mirrors = @mirrors.dup
     @specs = @specs.dup
     @checksum = @checksum.dup
@@ -58,6 +60,7 @@ class Resource
   def freeze
     @name.freeze
     @version.freeze
+    @fast_mirrors.freeze
     @mirrors.freeze
     @specs.freeze
     @checksum.freeze
@@ -78,8 +81,35 @@ class Resource
   end
 
   def downloader
-    @downloader ||= download_strategy.new(url, download_name, version,
-                                          mirrors: mirrors.dup, **specs)
+    return @downloader if @downloader.present?
+
+    # Substitute `HOMEBREW_BOTTLE_DOMAIN` and `HOMEBREW_ARTIFACT_DOMAIN` in URLs.
+    # Note that if the URL contains `HOMEBREW_BOTTLE_DOMAIN` and/or `HOMEBREW_ARTIFACT_DOMAIN` but
+    # the corresponding environment variable is unset, the URL will be ignored.
+    bottle_domain = if Homebrew::EnvConfig.bottle_domain == HOMEBREW_BOTTLE_DEFAULT_DOMAIN
+      "@@IGNORED@@"
+    else
+      Homebrew::EnvConfig.bottle_domain
+    end
+    artifact_domain = Homebrew::EnvConfig.artifact_domain.presence || "@@IGNORED@@"
+    normalized_fast_mirrors = fast_mirrors.map do |url|
+      url.sub("$HOMEBREW_BOTTLE_DOMAIN/", "#{bottle_domain}/")
+         .sub("${HOMEBREW_BOTTLE_DOMAIN}/", "#{bottle_domain}/")
+         .sub("$HOMEBREW_ARTIFACT_DOMAIN/", "#{artifact_domain}/")
+         .sub("${HOMEBREW_ARTIFACT_DOMAIN}/", "#{artifact_domain}/")
+    end
+    normalized_fast_mirrors = normalized_fast_mirrors.select { |url| url.exclude?("@@IGNORED@@") }
+
+    @downloader = if !normalized_fast_mirrors.empty? && download_strategy <= CurlDownloadStrategy
+      # Download from the first fast mirror. All other URLs are used as fallback mirrors.
+      download_strategy.new(normalized_fast_mirrors[0], download_name, version,
+                            mirrors: normalized_fast_mirrors[1...] + [url] + mirrors.dup, **specs)
+    else
+      download_strategy.new(url, download_name, version,
+                            mirrors: mirrors.dup, **specs)
+    end
+
+    @downloader
   end
 
   # Removes /s from resource names; this allows Go package names
@@ -248,6 +278,10 @@ class Resource
     @version = detect_version(val)
   end
 
+  def fast_mirror(val)
+    fast_mirrors << val
+  end
+
   def mirror(val)
     mirrors << val
   end
@@ -323,7 +357,7 @@ class ResourceStageContext
   # The {Mktemp} in which {#resource} is staged.
   attr_reader :staging
 
-  def_delegators :@resource, :version, :url, :mirrors, :specs, :using, :source_modified_time
+  def_delegators :@resource, :version, :url, :fast_mirrors, :mirrors, :specs, :using, :source_modified_time
   def_delegators :@staging, :retain!
 
   def initialize(resource, staging)
