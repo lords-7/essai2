@@ -5,7 +5,7 @@
 #:  The variables `HOMEBREW_PREFIX`, `HOMEBREW_CELLAR` and `HOMEBREW_REPOSITORY` are also exported to avoid querying them multiple times.
 #:  To help guarantee idempotence, this command produces no output when Homebrew's `bin` and `sbin` directories are first and second
 #:  respectively in your `PATH`. Consider adding evaluation of this command's output to your dotfiles (e.g. `~/.profile`,
-#:  `~/.bash_profile`, or `~/.zprofile`) with: `eval "$(brew shellenv)"`
+#:  `~/.bash_profile`, or `~/.zshenv`) with: `eval "$(brew shellenv)"`
 
 # HOMEBREW_CELLAR and HOMEBREW_PREFIX are set by extend/ENV/super.rb
 # HOMEBREW_REPOSITORY is set by bin/brew
