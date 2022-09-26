@@ -165,6 +165,8 @@ module Homebrew
       tap.install unless tap.installed?
     end
 
+    opoo "Casks are not supported on Linux" if args.cask? && Homebrew::SimulateSystem.simulating_or_running_on_linux?
+
     if args.ignore_dependencies?
       opoo <<~EOS
         #{Tty.bold}`--ignore-dependencies` is an unsupported Homebrew developer flag!#{Tty.reset}
