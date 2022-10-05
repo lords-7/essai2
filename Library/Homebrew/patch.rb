@@ -156,7 +156,7 @@ class ExternalPatch
         patch_files.each do |patch_file|
           ohai "Applying #{patch_file}"
           patch_file = patch_dir/patch_file
-          safe_system "patch", "-g", "0", "-f", "-#{strip}", "-i", patch_file
+          safe_system "patch", "-g", "0", "-f", "-#{strip}", "-i", patch_file, *resource.file
         end
       end
     end

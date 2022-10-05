@@ -319,6 +319,7 @@ class Resource
     def initialize(&block)
       @patch_files = []
       @directory = nil
+      @file = nil
       super "patch", &block
     end
 
@@ -332,6 +333,12 @@ class Resource
       return @directory if val.nil?
 
       @directory = val
+    end
+
+    def file(val = nil)
+      return @file if val.nil?
+
+      @file = val
     end
   end
 end
