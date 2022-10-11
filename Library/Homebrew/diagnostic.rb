@@ -879,7 +879,8 @@ module Homebrew
         <<~EOS
           Your Homebrew's prefix is not #{Homebrew::DEFAULT_PREFIX}.
           Some of Homebrew's bottles (binary packages) can only be used with the default
-          prefix (#{Homebrew::DEFAULT_PREFIX}).
+          prefix (#{Homebrew::DEFAULT_PREFIX}). If your Homebrew is located at #{Homebrew::DEFAULT_PREFIX},
+          make sure #{Homebrew::DEFAULT_PREFIX}/bin is in your PATH.
           #{please_create_pull_requests}
         EOS
       end
