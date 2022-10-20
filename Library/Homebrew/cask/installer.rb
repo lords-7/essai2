@@ -230,10 +230,14 @@ module Cask
       odebug "Installing artifacts"
       odebug "#{artifacts.length} #{"artifact".pluralize(artifacts.length)} defined", artifacts
 
+      flight_options = [:preflight, :postflight]
       artifacts.each do |artifact|
         next unless artifact.respond_to?(:install_phase)
 
         odebug "Installing artifact of class #{artifact.class}"
+        if flight_options.include?(artifact.class.dsl_key)
+          ohai "Maybe #{@cask.token} install will not work because of #{artifact.class.dsl_key}"
+        end
 
         next if artifact.is_a?(Artifact::Binary) && !binaries?
 
