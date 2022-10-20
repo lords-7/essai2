@@ -26,6 +26,7 @@ module Homebrew
 
     args.named.to_resolved_formulae.each do |f|
       ohai "Postinstalling #{f}"
+      ohai "Maybe #{f} install will not work"
       fi = FormulaInstaller.new(f, **{ debug: args.debug?, quiet: args.quiet?, verbose: args.verbose? }.compact)
       fi.post_install
     end
