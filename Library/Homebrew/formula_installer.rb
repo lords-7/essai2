@@ -1169,7 +1169,10 @@ class FormulaInstaller
     if pour_bottle?(output_warning: true)
       formula.fetch_bottle_tab
     elsif formula.core_formula? && Homebrew::EnvConfig.install_from_api?
-      odie "Unable to build #{formula.name} from source with HOMEBREW_INSTALL_FROM_API."
+      ohai <<~EOS
+        the postinstall may be outdated because HOMEBREW_INSTALL_FROM_API is set;
+        if you need the latest #{formula.name}, we recommended install without HOMEBREW_INSTALL_FROM_API.
+      EOS
     else
       formula.fetch_patches
       formula.resources.each(&:fetch)

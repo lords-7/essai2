@@ -236,7 +236,10 @@ module Cask
 
         odebug "Installing artifact of class #{artifact.class}"
         if flight_options.include?(artifact.class.dsl_key)
-          ohai "Maybe #{@cask.token} install will not work because of #{artifact.class.dsl_key}"
+          ohai <<~EOS
+            the #{artifact.class}" may be outdated because HOMEBREW_INSTALL_FROM_API is set;
+            if you need the latest #{@cask.token}, we recommended install without HOMEBREW_INSTALL_FROM_API.
+          EOS
         end
 
         next if artifact.is_a?(Artifact::Binary) && !binaries?
