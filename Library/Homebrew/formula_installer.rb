@@ -1089,6 +1089,9 @@ class FormulaInstaller
       HOMEBREW_LIBRARY_PATH/"postinstall.rb"
     ]
 
+    ohai "Maybe #{f} install will not work" if formula.core_formula? &&
+                                               Homebrew::EnvConfig.install_from_api?
+
     # Use the formula from the keg if:
     # * Installing from a local bottle, or
     # * The formula doesn't exist in the tap (or the tap isn't installed), or
