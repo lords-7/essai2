@@ -53,7 +53,7 @@ describe RuboCop::Cop::FormulaAudit::ComponentsOrder do
     end
 
     it "reports and corrects an offense when `bottle` precedes `livecheck`" do
-      expect_offense(<<~RUBY)
+      expect_offense(<<~'RUBY')
         class Foo < Formula
           homepage "https://brew.sh"
           url "https://brew.sh/foo-1.0.tgz"
@@ -68,7 +68,7 @@ describe RuboCop::Cop::FormulaAudit::ComponentsOrder do
         end
       RUBY
 
-      expect_correction(<<~RUBY)
+      expect_correction(<<~'RUBY')
         class Foo < Formula
           homepage "https://brew.sh"
           url "https://brew.sh/foo-1.0.tgz"

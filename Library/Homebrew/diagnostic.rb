@@ -926,7 +926,7 @@ module Homebrew
                  .gsub("This is an unsupported configuration, likely to break in " \
                        "the future and leave your machine in an unknown state.", "")
                  .gsub("System Integrity Protection status: ", "")
-                 .delete("\t\.")
+                 .delete("\t.")
                  .capitalize
                  .strip
           else

@@ -69,8 +69,8 @@ module Homebrew
 
           regex_prefix = Regexp.escape(match[:prefix] || "").gsub("\\-", "-")
 
-          # Use `\.t` instead of specific tarball extensions (e.g. .tar.gz)
-          suffix = match[:suffix]&.sub(Strategy::TARBALL_EXTENSION_REGEX, "\.t")
+          # Use `.t` instead of specific tarball extensions (e.g. .tar.gz)
+          suffix = match[:suffix]&.sub(Strategy::TARBALL_EXTENSION_REGEX, ".t")
           regex_suffix = Regexp.escape(suffix || "").gsub("\\-", "-")
 
           # Example directory regex: `%r{href=["']?v?(\d+(?:\.\d+)+)/}i`

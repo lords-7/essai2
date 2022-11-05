@@ -184,7 +184,9 @@ module GitHub
       # This is a no-op if the user is opting out of using the GitHub API.
       return block_given? ? yield({}) : {} if Homebrew::EnvConfig.no_github_api?
 
-      args = ["--header", "Accept: application/vnd.github+json", "--write-out", "\n%\{http_code}"]
+      # rubocop:disable Style/FormatStringToken
+      args = ["--header", "Accept: application/vnd.github+json", "--write-out", "\n%{http_code}"]
+      # rubocop:enable Style/FormatStringToken
 
       token = credentials
       args += ["--header", "Authorization: token #{token}"] unless credentials_type == :none

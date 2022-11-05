@@ -40,7 +40,7 @@ describe Homebrew::Livecheck do
   let(:r) { f.resources.first }
 
   let(:c) do
-    Cask::CaskLoader.load(+<<-RUBY)
+    Cask::CaskLoader.load(+<<-'RUBY')
       cask "test" do
         version "0.0.1,2"
 
@@ -216,7 +216,7 @@ describe Homebrew::Livecheck do
     end
 
     let(:c_homebrew_curl) do
-      Cask::CaskLoader.load(+<<-RUBY)
+      Cask::CaskLoader.load(+<<-'RUBY')
         cask "test" do
           version "0.0.1,2"
 
