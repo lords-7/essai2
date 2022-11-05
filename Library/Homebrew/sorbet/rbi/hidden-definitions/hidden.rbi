@@ -3287,9 +3287,13 @@ module CopHelper
 
   def autocorrect_source_file(source); end
 
+  def configuration(); end
+
   def inspect_source(source, file=T.unsafe(nil)); end
 
   def parse_source(source, file=T.unsafe(nil)); end
+
+  def registry(); end
 end
 
 module CopHelper
