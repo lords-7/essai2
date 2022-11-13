@@ -68,9 +68,12 @@ module PyPI
       end
 
       sdist = json["urls"].find { |url| url["packagetype"] == "sdist" }
-      return json["info"]["name"] if sdist.nil?
-
-      @pypi_info = [json["info"]["name"], sdist["url"], sdist["digests"]["sha256"], json["info"]["version"]]
+      @pypi_info = [
+        json["info"]["name"],
+        sdist.presence && sdist["url"],
+        sdist.presence && sdist["digests"]["sha256"],
+        json["info"]["version"],
+      ]
     end
 
     sig { returns(T::Boolean) }
@@ -93,9 +96,9 @@ module PyPI
     end
 
     # Compare only names so we can use .include? and .uniq on a Package array
-    sig { params(other: Package).returns(T::Boolean) }
+    sig { params(other: T.untyped).returns(T::Boolean) }
     def ==(other)
-      same_package?(other)
+      other.is_a?(Package) && same_package?(other)
     end
     alias eql? ==
 
@@ -167,30 +170,34 @@ module PyPI
       end
     end
 
+    input_packages = []
     if main_package.blank?
-      return if ignore_non_pypi_packages
-
-      odie <<~EOS
-        Could not infer PyPI package name from URL:
-          #{Formatter.url(formula.stable.url)}
-      EOS
+      if ignore_non_pypi_packages
+        return if extra_packages.blank?
+      else
+        odie <<~EOS
+          Could not infer PyPI package name from URL:
+            #{Formatter.url(formula.stable.url)}
+        EOS
+      end
+    else
+      if main_package.valid_pypi_package?
+        input_packages << main_package
+      elsif ignore_non_pypi_packages
+        return if extra_packages.blank?
+      else
+        odie "\"#{main_package}\" is not available on PyPI."
+      end
+      main_package.version = version if version.present?
     end
-
-    unless main_package.valid_pypi_package?
-      return if ignore_non_pypi_packages
-
-      odie "\"#{main_package}\" is not available on PyPI."
-    end
-
-    main_package.version = version if version.present?
 
     extra_packages = (extra_packages || []).map { |p| Package.new p }
     exclude_packages = (exclude_packages || []).map { |p| Package.new p }
-    exclude_packages += %W[#{main_package.name} argparse pip setuptools wsgiref].map { |p| Package.new p }
+    exclude_packages << Package.new(main_package.name) if main_package.present?
+    exclude_packages += %w[argparse pip setuptools wsgiref].map { |p| Package.new p }
     # remove packages from the exclude list if we've explicitly requested them as an extra package
     exclude_packages.delete_if { |package| extra_packages.include?(package) }
 
-    input_packages = [main_package]
     extra_packages.each do |extra_package|
       if !extra_package.valid_pypi_package? && !ignore_non_pypi_packages
         odie "\"#{extra_package}\" is not available on PyPI."
