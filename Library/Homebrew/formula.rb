@@ -921,6 +921,14 @@ class Formula
     prefix/"etc/bash_completion.d"
   end
 
+  # The directory where the formula's Bash completion files should be
+  # installed that depend on `bash-completion@2` or Bash 4+.
+  # This is symlinked into `HOMEBREW_PREFIX` after installation or with
+  # `brew link` for formulae that are not keg-only.
+  def bash_completion2
+    share/"bash-completion/completions"
+  end
+
   # The directory where the formula's zsh completion files should be
   # installed.
   # This is symlinked into `HOMEBREW_PREFIX` after installation or with
