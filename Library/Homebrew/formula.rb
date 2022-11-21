@@ -1515,7 +1515,7 @@ class Formula
   # Standard parameters for configure builds.
   sig { returns(T::Array[String]) }
   def std_configure_args
-    ["--disable-debug", "--disable-dependency-tracking", "--prefix=#{prefix}", "--libdir=#{lib}"]
+    ["--disable-debug", "--disable-dependency-tracking", "--with-pic", "--prefix=#{prefix}", "--libdir=#{lib}"]
   end
 
   # Standard parameters for cargo builds.
@@ -1541,6 +1541,7 @@ class Formula
       -DCMAKE_INSTALL_PREFIX=#{install_prefix}
       -DCMAKE_INSTALL_LIBDIR=#{install_libdir}
       -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
       -DCMAKE_FIND_FRAMEWORK=#{find_framework}
       -DCMAKE_VERBOSE_MAKEFILE=ON
       -Wno-dev
