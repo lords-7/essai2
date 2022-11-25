@@ -27,7 +27,7 @@ The type of change you want to make influences which of Homebrew's main reposito
 3. Add your pushable forked repository as a new remote:
 
    ```sh
-   git remote add <YOUR_USERNAME> https://github.com/<YOUR_USERNAME>/brew.git
+   git remote add <YOUR_USERNAME> git@github.com:<YOUR_USERNAME>/brew.git
    ```
 
    * `<YOUR_USERNAME>` is your GitHub username, not your local machine username.
@@ -45,7 +45,7 @@ The type of change you want to make influences which of Homebrew's main reposito
 3. Add your pushable forked repository as a new remote:
 
    ```sh
-   git remote add <YOUR_USERNAME> https://github.com/<YOUR_USERNAME>/homebrew-core.git
+   git remote add <YOUR_USERNAME> git@github.com:<YOUR_USERNAME>/homebrew-core.git
    ```
 
    * `<YOUR_USERNAME>` is your GitHub username, not your local machine username.
@@ -63,7 +63,7 @@ The type of change you want to make influences which of Homebrew's main reposito
 3. Add your pushable forked repository as a new remote:
 
    ```sh
-   git remote add <YOUR_USERNAME> https://github.com/<YOUR_USERNAME>/homebrew-cask.git
+   git remote add <YOUR_USERNAME> git@github.com:<YOUR_USERNAME>/homebrew-cask.git
    ```
 
    * `<YOUR_USERNAME>` is your GitHub username, not your local machine username.
