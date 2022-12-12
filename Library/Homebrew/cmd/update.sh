@@ -430,8 +430,8 @@ EOS
     setup_git
   fi
 
-  [[ -f "${HOMEBREW_CORE_REPOSITORY}/.git/shallow" ]] && HOMEBREW_CORE_SHALLOW=1
-  [[ -f "${HOMEBREW_LIBRARY}/Taps/homebrew/homebrew-cask/.git/shallow" ]] && HOMEBREW_CASK_SHALLOW=1
+  [[ -f "${HOMEBREW_CORE_REPOSITORY}/.git/shallow" ]] && ( git -C "${HOMEBREW_CORE_REPOSITORY}" remote -v | grep "github.com" ) && HOMEBREW_CORE_SHALLOW=1
+  [[ -f "${HOMEBREW_LIBRARY}/Taps/homebrew/homebrew-cask/.git/shallow" ]] && ( git -C "${HOMEBREW_LIBRARY}/Taps/homebrew/homebrew-cask" remote -v | grep "github.com" ) && HOMEBREW_CASK_SHALLOW=1
   if [[ -n "${HOMEBREW_CORE_SHALLOW}" && -n "${HOMEBREW_CASK_SHALLOW}" ]]
   then
     SHALLOW_COMMAND_PHRASE="These commands"
