@@ -21,9 +21,9 @@ module OS
       # This may be a beta version for a beta macOS.
       sig { params(macos: MacOS::Version).returns(String) }
       def latest_version(macos: MacOS.version)
-        latest_stable = "13.4"
+        latest_stable = "14.2"
         case macos
-        when "13" then "14.1"
+        when "13" then latest_stable
         when "12" then latest_stable
         when "11" then "13.2.1"
         when "10.15" then "12.4"
@@ -359,8 +359,8 @@ module OS
       sig { returns(String) }
       def minimum_version
         case MacOS.version
-        when "13" then "14.0.0"
-        when "12" then "13.0.0"
+        when "13" then "14.1.0"
+        when "12" then "13.1.0"
         when "11" then "12.5.0"
         when "10.15" then "11.0.0"
         when "10.14" then "10.0.0"
