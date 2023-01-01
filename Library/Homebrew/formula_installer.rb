@@ -872,7 +872,7 @@ class FormulaInstaller
 
     if @env.present?
       args << "--env=#{@env}"
-    elsif formula.env.std? || formula.deps.select(&:build?).any? { |d| d.name == "scons" }
+    elsif formula.env.std?
       args << "--env=std"
     end
 
