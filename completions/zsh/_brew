@@ -57,7 +57,10 @@ __brew_formulae() {
   local -a list
   local comp_cachename=brew_formulae
   if ! _retrieve_cache $comp_cachename; then
-    list=( $(brew formulae) )
+    list=( 
+        ${(f)"$( brew formulae )"}
+        $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-core/Aliases/*(N)
+    )
     _store_cache $comp_cachename list
   fi
   _describe -t formulae 'all formulae' list
