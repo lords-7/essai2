@@ -68,7 +68,7 @@ module Homebrew
 
     return if cleanup.unremovable_kegs.empty?
 
-    ofail <<~EOS
+    opoo <<~EOS
       Could not cleanup old kegs! Fix your permissions on:
         #{cleanup.unremovable_kegs.join "\n  "}
     EOS
