@@ -134,7 +134,7 @@ class Cmd
     when :cxx
       cxxflags + args + cppflags
     when :ccE
-      args + cppflags
+      cflags + args + cppflags
     when :cpp
       args + cppflags
     when :ld

@@ -800,7 +800,10 @@ class CoreTap < Tap
     # Tests override homebrew-core locations and we don't want to auto-tap in them.
     return if ENV["HOMEBREW_TESTS"]
 
-    safe_system HOMEBREW_BREW_FILE, "tap", instance.name
+    # Restore user path as it'll be refiltered by HOMEBREW_BREW_FILE
+    with_env PATH: ENV.fetch("HOMEBREW_PATH") do
+      safe_system HOMEBREW_BREW_FILE, "tap", instance.name
+    end
   end
 
   def remote
