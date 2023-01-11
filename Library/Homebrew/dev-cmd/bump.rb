@@ -27,6 +27,9 @@ module Homebrew
              description: "Check only casks."
       switch "--open-pr",
              description: "Open a pull request for the new version if there are none already open."
+      switch "-f", "--force",
+             depends_on:  "--open-pr",
+             description: "Ignore duplicate open PRs."
       flag   "--limit=",
              description: "Limit number of package results returned."
       flag   "--start-with=",
@@ -280,7 +283,15 @@ module Homebrew
     return unless new_version
     return if pull_requests
 
-    system HOMEBREW_BREW_FILE, "bump-#{type}-pr", "--no-browse",
-           "--message=Created by `brew bump`", "--version=#{new_version}", name
+    options = [
+      "bump-#{type}-pr",
+      "--no-browse",
+      "--message=Created by `brew bump`",
+      "--version=#{new_version}",
+      name,
+    ]
+    options << "--force" if args.force?
+
+    system HOMEBREW_BREW_FILE, *options
   end
 end
