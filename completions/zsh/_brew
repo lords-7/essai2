@@ -483,6 +483,7 @@ _brew_bottle() {
 _brew_bump() {
   _arguments \
     '--debug[Display any debugging information]' \
+    '--force[Ignore duplicate open PRs]' \
     '--full-name[Print formulae/casks with fully-qualified names]' \
     '--help[Show this message]' \
     '--limit[Limit number of package results returned]' \

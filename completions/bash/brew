@@ -438,6 +438,7 @@ _brew_bump() {
       __brewcomp "
       --cask
       --debug
+      --force
       --formula
       --full-name
       --help
