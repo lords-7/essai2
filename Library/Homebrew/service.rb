@@ -1,6 +1,8 @@
 # typed: true
 # frozen_string_literal: true
 
+require "extend/on_system"
+
 module Homebrew
   # The {Service} class implements the DSL methods used in a formula's
   # `service` block and stores related instance variables. Most of these methods
@@ -8,6 +10,7 @@ module Homebrew
   class Service
     extend T::Sig
     extend Forwardable
+    include OnSystem::MacOSAndLinux
 
     RUN_TYPE_IMMEDIATE = :immediate
     RUN_TYPE_INTERVAL = :interval
@@ -33,8 +36,15 @@ module Homebrew
       @formula
     end
 
-    sig { params(command: T.nilable(T.any(T::Array[String], String, Pathname))).returns(T.nilable(Array)) }
-    def run(command = nil)
+    sig {
+      params(
+        command: T.nilable(T.any(T::Array[String], String, Pathname)),
+        macos: T.nilable(T.any(T::Array[String], String, Pathname)),
+        linux: T.nilable(T.any(T::Array[String], String, Pathname))
+      ).returns(T.nilable(Array))
+    }
+    def run(command = nil, macos: nil, linux: nil)
+      command ||= on_system_conditional(macos: macos, linux: linux)
       case T.unsafe(command)
       when nil
         @run
