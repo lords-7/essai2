@@ -526,7 +526,7 @@ module Homebrew
         <<~EOS
           Homebrew is not on the default git origin branch and may not receive
           updates. If this is a surprise to you, check out the default branch with:
-            git -C $(brew --repo) checkout #{repo.git_origin_branch}"
+            git -C $(brew --repo) checkout #{repo.git_origin_branch}
         EOS
       end
 
