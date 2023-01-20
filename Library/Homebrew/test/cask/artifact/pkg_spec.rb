@@ -77,4 +77,52 @@ describe Cask::Artifact::Pkg, :cask do
       pkg.install_phase(command: fake_system_command)
     end
   end
+
+  describe "target" do
+    describe "with volume target" do
+      let(:cask) { Cask::CaskLoader.load(cask_path("with-pkg-target")) }
+
+      it "runs the system installer on the specified pkgs with the specified target" do
+        pkg = cask.artifacts.find { |a| a.is_a?(described_class) }
+
+        expect(fake_system_command).to receive(:run!).with(
+          "/usr/sbin/installer",
+          args:         ["-pkg", cask.staged_path.join("MyFancyPkg", "Fancy.pkg"),
+                         "-target", "/Volumes/Macintosh HD2"],
+          sudo:         true,
+          print_stdout: true,
+          env:          {
+            "LOGNAME"  => ENV.fetch("USER"),
+            "USER"     => ENV.fetch("USER"),
+            "USERNAME" => ENV.fetch("USER"),
+          },
+        )
+
+        pkg.install_phase(command: fake_system_command)
+      end
+    end
+
+    describe "with CurrentUserHomeDirectory target" do
+      let(:cask) { Cask::CaskLoader.load(cask_path("with-pkg-target-current-user-home-directory")) }
+
+      it "runs the system installer on the specified pkgs with the specified target" do
+        pkg = cask.artifacts.find { |a| a.is_a?(described_class) }
+
+        expect(fake_system_command).to receive(:run!).with(
+          "/usr/sbin/installer",
+          args:         ["-pkg", cask.staged_path.join("MyFancyPkg", "Fancy.pkg"),
+                         "-target", "CurrentUserHomeDirectory"],
+          sudo:         false,
+          print_stdout: true,
+          env:          {
+            "LOGNAME"  => ENV.fetch("USER"),
+            "USER"     => ENV.fetch("USER"),
+            "USERNAME" => ENV.fetch("USER"),
+          },
+        )
+
+        pkg.install_phase(command: fake_system_command)
+      end
+    end
+  end
 end

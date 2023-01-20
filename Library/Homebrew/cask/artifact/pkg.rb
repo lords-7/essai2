@@ -18,7 +18,7 @@ module Cask
       attr_reader :path, :stanza_options
 
       def self.from_args(cask, path, **stanza_options)
-        stanza_options.assert_valid_keys!(:allow_untrusted, :choices)
+        stanza_options.assert_valid_keys!(:allow_untrusted, :choices, :target)
         new(cask, path, **stanza_options)
       end
 
@@ -54,7 +54,7 @@ module Cask
 
         args = [
           "-pkg",    path,
-          "-target", "/"
+          "-target", target
         ]
         args << "-verboseR" if verbose
         args << "-allowUntrusted" if stanza_options.fetch(:allow_untrusted, false)
@@ -65,7 +65,8 @@ module Cask
             "USER"     => User.current,
             "USERNAME" => User.current,
           }
-          command.run!("/usr/sbin/installer", sudo: true, args: args, print_stdout: true, env: env)
+          sudo = target != "CurrentUserHomeDirectory"
+          command.run!("/usr/sbin/installer", sudo: sudo, args: args, print_stdout: true, env: env)
         end
       end
 
@@ -80,6 +81,10 @@ module Cask
         ensure
           file.unlink
         end
+      end
+
+      def target
+        stanza_options.fetch(:target, "/")
       end
     end
   end
