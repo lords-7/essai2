@@ -246,7 +246,6 @@ module Cask
         "conflicts_with" => conflicts_with,
         "container"      => container&.pairs,
         "auto_updates"   => auto_updates,
-        "languages"      => languages,
       }
     end
 
