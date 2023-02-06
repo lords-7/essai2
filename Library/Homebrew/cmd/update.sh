@@ -4,6 +4,7 @@
 #:
 #:        --merge                      Use `git merge` to apply updates (rather than `git rebase`).
 #:        --auto-update                Run on auto-updates (e.g. before `brew install`). Skips some slower steps.
+#:        --tap=TAP                    Specify the name(s) of the taps to be updated. May be passed more than once.
 #:    -f, --force                      Always do a slower, full update check (even if unnecessary).
 #:    -q, --quiet                      Make some output more quiet
 #:    -v, --verbose                    Print the directories checked and `git` operations performed.
@@ -329,6 +330,7 @@ homebrew-update() {
   local DIR
   local DIRS
   local UPSTREAM_BRANCH
+  local ALLOWLISTED_TAPS=()
 
   for option in "$@"
   do
@@ -344,6 +346,7 @@ homebrew-update() {
       --force) HOMEBREW_UPDATE_FORCE=1 ;;
       --simulate-from-current-branch) HOMEBREW_SIMULATE_FROM_CURRENT_BRANCH=1 ;;
       --auto-update) export HOMEBREW_UPDATE_AUTO=1 ;;
+      --tap=*) ALLOWLISTED_TAPS+=("${option#*--tap=}") ;;
       --*) ;;
       -*)
         [[ "${option}" == *v* ]] && HOMEBREW_VERBOSE=1
@@ -565,7 +568,24 @@ EOS
   rm -f "${update_failed_file}"
   rm -f "${missing_remote_ref_dirs_file}"
 
-  DIRS=("${HOMEBREW_REPOSITORY}" "${HOMEBREW_LIBRARY}"/Taps/*/*)
+  DIRS=("${HOMEBREW_REPOSITORY}")
+
+  # If the user specified any taps by name with -t or --tap,
+  # include only those taps in our list of DIRS to update.
+  if [[ "${#ALLOWLISTED_TAPS[@]}" == "0" ]]
+  then
+    DIRS+=("${HOMEBREW_LIBRARY}"/Taps/*/*)
+  else
+    for DIR in "${HOMEBREW_LIBRARY}"/Taps/*/*
+    do
+      local relative_dir="${DIR#"${HOMEBREW_LIBRARY}/Taps/"}"
+      local tap="${relative_dir/homebrew-/}"
+      if [[ " ${ALLOWLISTED_TAPS[*]} " == *" ${tap} "* ]]
+      then
+        DIRS+=("${DIR}")
+      fi
+    done
+  fi
 
   for DIR in "${DIRS[@]}"
   do
