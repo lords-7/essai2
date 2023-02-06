@@ -327,6 +327,7 @@ EOS
 homebrew-update() {
   local option
   local DIR
+  local DIRS
   local UPSTREAM_BRANCH
 
   for option in "$@"
@@ -564,7 +565,9 @@ EOS
   rm -f "${update_failed_file}"
   rm -f "${missing_remote_ref_dirs_file}"
 
-  for DIR in "${HOMEBREW_REPOSITORY}" "${HOMEBREW_LIBRARY}"/Taps/*/*
+  DIRS=("${HOMEBREW_REPOSITORY}" "${HOMEBREW_LIBRARY}"/Taps/*/*)
+
+  for DIR in "${DIRS[@]}"
   do
     if [[ -z "${HOMEBREW_NO_INSTALL_FROM_API}" && -n "${HOMEBREW_UPDATE_AUTO}" ]] &&
        [[ "${DIR}" == "${HOMEBREW_CORE_REPOSITORY}" || "${DIR}" == "${HOMEBREW_CASK_REPOSITORY}" ]]
@@ -723,7 +726,7 @@ EOS
     export HOMEBREW_MISSING_REMOTE_REF_DIRS
   fi
 
-  for DIR in "${HOMEBREW_REPOSITORY}" "${HOMEBREW_LIBRARY}"/Taps/*/*
+  for DIR in "${DIRS[@]}"
   do
     if [[ -z "${HOMEBREW_NO_INSTALL_FROM_API}" ]] &&
        [[ -z "${HOMEBREW_DEVELOPER}" || -n "${HOMEBREW_UPDATE_AUTO}" ]] &&
