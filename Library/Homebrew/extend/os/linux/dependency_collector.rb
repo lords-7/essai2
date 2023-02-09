@@ -9,6 +9,7 @@ class DependencyCollector
   undef gcc_dep_if_needed
   undef glibc_dep_if_needed
   undef init_global_dep_tree_if_needed!
+  undef parse_symbol_spec
 
   sig { params(related_formula_names: T::Set[String]).returns(T.nilable(Dependency)) }
   def gcc_dep_if_needed(related_formula_names)
@@ -31,6 +32,18 @@ class DependencyCollector
     return unless formula_for(GLIBC)
 
     Dependency.new(GLIBC)
+  end
+
+  def parse_symbol_spec(spec, tags)
+    case spec
+    when :arch                  then ArchRequirement.new(tags)
+    when :codesign              then CodesignRequirement.new(tags)
+    when :linux                 then LinuxRequirement.new(tags)
+    when :macos                 then MacOSRequirement.new(tags) if tags.empty?
+    when :maximum_macos, :xcode then nil
+    else
+      raise ArgumentError, "Unsupported special dependency #{spec.inspect}"
+    end
   end
 
   private
