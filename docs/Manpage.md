@@ -352,7 +352,7 @@ is already installed but outdated.
 * `--keep-tmp`:
   Retain the temporary files created during installation.
 * `--debug-symbols`:
-  Generate debug symbols on build. Source will be retained in a cache directory. 
+  Generate debug symbols on build. Source will be retained in a cache directory.
 * `--build-bottle`:
   Prepare the formula for eventual bottling during installation, skipping any post-install steps.
 * `--bottle-arch`:
@@ -561,7 +561,7 @@ reinstalled formulae or, every 30 days, for all formulae.
 * `--keep-tmp`:
   Retain the temporary files created during installation.
 * `--debug-symbols`:
-  Generate debug symbols on build. Source will be retained in a cache directory. 
+  Generate debug symbols on build. Source will be retained in a cache directory.
 * `--display-times`:
   Print install times for each formula at the end of the run.
 * `-g`, `--git`:
@@ -753,7 +753,7 @@ upgraded formulae or, every 30 days, for all formulae.
 * `--keep-tmp`:
   Retain the temporary files created during installation.
 * `--debug-symbols`:
-  Generate debug symbols on build. Source will be retained in a cache directory. 
+  Generate debug symbols on build. Source will be retained in a cache directory.
 * `--display-times`:
   Print install times for each package at the end of the run.
 * `--cask`:
@@ -1986,6 +1986,11 @@ example, run `export HOMEBREW_NO_INSECURE_REDIRECT=1` rather than just
   <br>Use this URL as the download mirror for Homebrew JSON API. If metadata files at that URL are temporarily unavailable, the default API domain will be used as a fallback mirror.
 
   *Default:* `https://formulae.brew.sh/api`.
+
+- `HOMEBREW_API_MAX_TIME`
+  <br>Maximum time (seconds) allowed for Homebrew JSON API.
+
+  *Default:* `10`.
 
 - `HOMEBREW_ARCH`
   <br>Linux only: Pass this value to a type name representing the compiler's `-march` option.

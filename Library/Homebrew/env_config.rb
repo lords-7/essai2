@@ -22,6 +22,10 @@ module Homebrew
         default_text: "`https://formulae.brew.sh/api`.",
         default:      HOMEBREW_API_DEFAULT_DOMAIN,
       },
+      HOMEBREW_API_MAX_TIME:                     {
+        description: "Maximum time (seconds) allowed for Homebrew JSON API.",
+        default:     10,
+      },
       HOMEBREW_ARCH:                             {
         description: "Linux only: Pass this value to a type name representing the compiler's `-march` option.",
         default:     "native",

@@ -19,9 +19,6 @@ module Homebrew
 
     HOMEBREW_CACHE_API = (HOMEBREW_CACHE/"api").freeze
 
-    # Set a longer timeout just for large(r) files.
-    JSON_API_MAX_TIME = 10
-
     sig { params(endpoint: String).returns(Hash) }
     def fetch(endpoint)
       return cache[endpoint] if cache.present? && cache.key?(endpoint)
@@ -52,7 +49,7 @@ module Homebrew
         begin
           # Disable retries here, we handle them ourselves below.
           Utils::Curl.curl_download(*curl_args, url, to: target,
-                                    max_time: JSON_API_MAX_TIME, retries: 0,
+                                    max_time: Homebrew::EnvConfig.api_max_time.to_i, retries: 0,
                                     show_error: false)
         rescue ErrorDuringExecution
           if url == default_url
