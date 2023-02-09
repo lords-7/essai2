@@ -1990,7 +1990,7 @@ example, run `export HOMEBREW_NO_INSECURE_REDIRECT=1` rather than just
 - `HOMEBREW_API_MAX_TIME`
   <br>Maximum time (seconds) allowed for Homebrew JSON API.
 
-  *Default:* `10`.
+  *Default:* `30`.
 
 - `HOMEBREW_ARCH`
   <br>Linux only: Pass this value to a type name representing the compiler's `-march` option.
