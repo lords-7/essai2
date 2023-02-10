@@ -266,7 +266,7 @@ auto-update() {
 
     if [[ -z "${HOMEBREW_AUTO_UPDATE_SECS}" ]]
     then
-      if [[ -z "${HOMEBREW_NO_INSTALL_FROM_API}" ]]
+      if [[ -z "${HOMEBREW_NO_INSTALL_FROM_API}" && -z "${HOMEBREW_DEFER_API_UPDATES}" ]]
       then
         # 24 hours
         HOMEBREW_AUTO_UPDATE_SECS="86400"

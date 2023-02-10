@@ -41,7 +41,8 @@ module Homebrew
         description:  "Run `brew update` once every `HOMEBREW_AUTO_UPDATE_SECS` seconds before some commands, " \
                       "e.g. `brew install`, `brew upgrade` and `brew tap`. Alternatively, " \
                       "disable auto-update entirely with HOMEBREW_NO_AUTO_UPDATE.",
-        default_text: "86400 (24 hours) or 300 (5 minutes) if HOMEBREW_NO_INSTALL_FROM_API is set.",
+        default_text: "86400 (24 hours) or 300 (5 minutes) if HOMEBREW_NO_INSTALL_FROM_API or " \
+                      "HOMEBREW_DEFER_API_UPDATES is set.",
       },
       HOMEBREW_AUTOREMOVE:                       {
         description: "If set, calls to `brew cleanup` and `brew uninstall` will automatically " \
@@ -150,6 +151,10 @@ module Homebrew
       },
       HOMEBREW_DISPLAY_INSTALL_TIMES:            {
         description: "If set, print install times for each formula at the end of the run.",
+        boolean:     true,
+      },
+      HOMEBREW_DEFER_API_UPDATES:                {
+        description: "If set, API data will only be fetched on `brew update`.",
         boolean:     true,
       },
       HOMEBREW_EDITOR:                           {

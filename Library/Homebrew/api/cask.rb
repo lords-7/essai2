@@ -23,8 +23,15 @@ module Homebrew
         sig { returns(Hash) }
         def all_casks
           @all_casks ||= begin
-            json_casks = Homebrew::API.fetch_json_api_file "cask.json",
-                                                           target: HOMEBREW_CACHE_API/"cask.json"
+            target = HOMEBREW_CACHE_API/"cask.json"
+            json_casks = if Homebrew::EnvConfig.defer_api_updates?
+              begin
+                JSON.parse(target.read)
+              rescue JSON::ParserError
+                nil # fallback to force download
+              end
+            end
+            json_casks = Homebrew::API.fetch_json_api_file "cask.json", target: target if json_casks.nil?
 
             json_casks.to_h do |json_cask|
               [json_cask["token"], json_cask.except("token")]

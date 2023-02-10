@@ -18,8 +18,15 @@ module Homebrew
         sig { returns(Hash) }
         def all_formulae
           @all_formulae ||= begin
-            json_formulae = Homebrew::API.fetch_json_api_file "formula.json",
-                                                              target: HOMEBREW_CACHE_API/"formula.json"
+            target = HOMEBREW_CACHE_API/"formula.json"
+            json_formulae = if Homebrew::EnvConfig.defer_api_updates?
+              begin
+                JSON.parse(target.read)
+              rescue JSON::ParserError
+                nil # fallback to force download
+              end
+            end
+            json_formulae = Homebrew::API.fetch_json_api_file "formula.json", target: target if json_formulae.nil?
 
             @all_aliases = {}
             json_formulae.to_h do |json_formula|
