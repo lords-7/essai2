@@ -24,6 +24,8 @@ module Homebrew
     JSON_API_SPEED_MARGIN = 100 # bytes/sec
     JSON_API_SPEED_TIME = 10 # seconds of downloading under the margin
 
+    JSON_API_PROGRESS_TIME = 5 # seconds until progress information is displayed
+
     sig { params(endpoint: String).returns(Hash) }
     def fetch(endpoint)
       return cache[endpoint] if cache.present? && cache.key?(endpoint)
@@ -48,14 +50,31 @@ module Homebrew
       url = "#{Homebrew::EnvConfig.api_domain}/#{endpoint}"
       default_url = "#{HOMEBREW_API_DEFAULT_DOMAIN}/#{endpoint}"
       curl_args = %W[--compressed --speed-limit #{JSON_API_SPEED_MARGIN} --speed-time #{JSON_API_SPEED_TIME}]
-      curl_args.prepend("--silent") unless Context.current.debug?
 
       begin
         begin
           args = curl_args.dup
           args.prepend("--time-cond", target) if target.exist? && !target.empty?
-          # Disable retries here, we handle them ourselves below.
-          Utils::Curl.curl_download(*args, url, to: target, retries: 0, show_error: false)
+
+          rerr, werr = IO.pipe
+          download_thread = Thread.new do
+            Thread.current.report_on_exception = false
+            # Disable retries here, we handle them ourselves below.
+            Utils::Curl.curl_download(*args, url, to: target, retries: 0, print_stderr: werr, show_error: false)
+          ensure
+            werr.close
+          end
+
+          if $stderr.tty? && !Context.current.debug?
+            unless download_thread.join(JSON_API_PROGRESS_TIME)
+              $stderr.ohai "Downloading #{endpoint}..."
+              IO.copy_stream(rerr, $stderr)
+              download_thread.join
+            end
+          else
+            IO.copy_stream(rerr, $stderr) if Context.current.debug?
+            download_thread.join
+          end
         rescue ErrorDuringExecution
           if url == default_url
             raise unless target.exist?
@@ -69,7 +88,11 @@ module Homebrew
             retry
           end
 
+          IO.copy_stream(rerr, $stderr)
           opoo "#{target.basename}: update failed, falling back to cached version."
+        ensure
+          werr&.close
+          rerr&.close
         end
 
         JSON.parse(target.read)
