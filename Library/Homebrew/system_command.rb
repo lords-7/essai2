@@ -53,10 +53,20 @@ class SystemCommand
     each_output_line do |type, line|
       case type
       when :stdout
-        $stdout << redact_secrets(line, @secrets) if print_stdout?
+        stdout = if @print_stdout == true
+          $stdout
+        else
+          @print_stdout
+        end
+        stdout << redact_secrets(line, @secrets) if stdout
         @output << [:stdout, line]
       when :stderr
-        $stderr << redact_secrets(line, @secrets) if print_stderr?
+        stderr = if @print_stderr == true
+          $stderr
+        else
+          @print_stderr
+        end
+        stderr << redact_secrets(line, @secrets) if stderr
         @output << [:stderr, line]
       end
     end
@@ -74,8 +84,8 @@ class SystemCommand
       env:          T::Hash[String, String],
       input:        T.any(String, T::Array[String]),
       must_succeed: T::Boolean,
-      print_stdout: T::Boolean,
-      print_stderr: T::Boolean,
+      print_stdout: T.any(IO, T::Boolean),
+      print_stderr: T.any(IO, T::Boolean),
       debug:        T.nilable(T::Boolean),
       verbose:      T.nilable(T::Boolean),
       secrets:      T.any(String, T::Array[String]),
@@ -128,7 +138,7 @@ class SystemCommand
 
   attr_reader :executable, :args, :input, :chdir, :env
 
-  attr_predicate :sudo?, :print_stdout?, :print_stderr?, :must_succeed?
+  attr_predicate :sudo?, :must_succeed?
 
   sig { returns(T::Boolean) }
   def debug?
