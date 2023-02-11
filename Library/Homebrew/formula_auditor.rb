@@ -283,10 +283,12 @@ module Homebrew
              dep_f.keg_only_reason.applicable? &&
              formula.requirements.none?(LinuxRequirement) &&
              !formula.tap&.audit_exception(:provided_by_macos_depends_on_allowlist, dep.name)
-            new_formula_problem(
-              "Dependency '#{dep.name}' is provided by macOS; " \
-              "please replace 'depends_on' with 'uses_from_macos'.",
-            )
+            message = if dep_f.requirements.any? { |r| r.is_a?(MacOSRequirement) && !r.version }
+              "please remove it."
+            else
+              "please replace 'depends_on' with 'uses_from_macos'."
+            end
+            new_formula_problem "Dependency '#{dep.name}' is provided by macOS; #{message}"
           end
 
           dep.options.each do |opt|
