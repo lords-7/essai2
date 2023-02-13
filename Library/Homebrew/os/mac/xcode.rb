@@ -267,7 +267,7 @@ module OS
       # The original Mavericks CLT package ID
       EXECUTABLE_PKG_ID = "com.apple.pkg.CLTools_Executables"
       MAVERICKS_NEW_PKG_ID = "com.apple.pkg.CLTools_Base" # obsolete
-      PKG_PATH = "/Library/Developer/CommandLineTools"
+      PKG_PATH = `/usr/bin/xcode-select -p`.chop.freeze
 
       # Returns true even if outdated tools are installed.
       sig { returns(T::Boolean) }
@@ -387,7 +387,8 @@ module OS
 
       sig { returns(T.nilable(String)) }
       def detect_clang_version
-        version_output = Utils.popen_read("#{PKG_PATH}/usr/bin/clang", "--version")
+        # When command line tools paths is set to the ones found at the xcode installation the clang binary doesn't exist, but the gcc binary exists (which is the same as clang on mac)
+        version_output = Utils.popen_read("#{PKG_PATH}/usr/bin/gcc", "--version")
         version_output[/clang-(\d+(\.\d+)+)/, 1]
       end
 
@@ -412,7 +413,9 @@ module OS
       def detect_version
         version = T.let(nil, T.nilable(String))
         [EXECUTABLE_PKG_ID, MAVERICKS_NEW_PKG_ID].each do |id|
-          next unless File.exist?("#{PKG_PATH}/usr/bin/clang")
+          # When command line tools paths is set to the ones found at the xcode installation the clang binary doesn't exist, but the gcc binary exists (which is the same as clang on mac)
+
+          next unless File.exist?("#{PKG_PATH}/usr/bin/gcc")
 
           version = MacOS.pkgutil_info(id)[/version: (.+)$/, 1]
           return version if version
