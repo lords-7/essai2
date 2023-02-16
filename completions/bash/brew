@@ -1,11 +1,5 @@
 # Bash completion script for brew(1)
 
-if test -v POSIXLY_CORRECT || test -o posix 
-then
-  echo "Homebrew Bash completions do not work in POSIX mode" 1>&2
-  return
-fi
-
 __brewcomp_words_include() {
   local element idx 
   for (( idx = 1; idx < COMP_CWORD; idx++ ))
@@ -29,8 +23,7 @@ __brewcomp() {
 
   list=${list%"${sep}"}
 
-  IFS="${sep}"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${list}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${list}" -- "${cur}")"
 }
 
 # Don't use __brewcomp() in any of the __brew_complete_foo functions, as
@@ -39,42 +32,42 @@ __brew_complete_formulae() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local formulae
   formulae="$(brew formulae)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${formulae}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${formulae}" -- "${cur}")"
 }
 
 __brew_complete_casks() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local casks
   casks="$(brew casks)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${casks}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${casks}" -- "${cur}")"
 }
 
 __brew_complete_installed_formulae() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local installed_formulae
   installed_formulae="$(command ls "${HOMEBREW_CELLAR:-$(brew --cellar)}" 2>/dev/null)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${installed_formulae}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${installed_formulae}" -- "${cur}")"
 }
 
 __brew_complete_installed_casks() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local installed_casks
   installed_casks="$(command ls "$(brew --caskroom)" 2>/dev/null)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${installed_casks}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${installed_casks}" -- "${cur}")"
 }
 
 __brew_complete_outdated_formulae() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local outdated_formulae
   outdated_formulae="$(brew outdated --formula --quiet)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${outdated_formulae}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${outdated_formulae}" -- "${cur}")"
 }
 
 __brew_complete_outdated_casks() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local outdated_casks
   outdated_casks="$(brew outdated --cask --quiet)"
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${outdated_casks}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${outdated_casks}" -- "${cur}")"
 }
 
 __brew_complete_tapped() {
@@ -108,7 +101,7 @@ __brew_complete_commands() {
   then
     cmds="$(< "${HOMEBREW_REPOSITORY}/completions/internal_commands_list.txt" \grep -v instal$)"
   fi
-  while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${cmds}" -- "${cur}")
+  IFS=$'\n' read -r -d '' -a COMPREPLY <<< "$(compgen -W "${cmds}" -- "${cur}")"
   export __HOMEBREW_COMMANDS=${cmds}
 }
 
