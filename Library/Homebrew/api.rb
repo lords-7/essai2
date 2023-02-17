@@ -101,9 +101,16 @@ module Homebrew
       return cache[raw_endpoint] if cache.present? && cache.key?(raw_endpoint)
 
       # This API sometimes returns random 404s so needs a fallback at formulae.brew.sh.
-      raw_source_url = "https://raw.githubusercontent.com/Homebrew/homebrew-cask/#{raw_endpoint}"
+      raw_source_url = "#{Homebrew::EnvConfig.api_source_domain}/Homebrew/homebrew-cask/#{raw_endpoint}"
       api_source_url = "#{HOMEBREW_API_DEFAULT_DOMAIN}/cask-source/#{name}.rb"
+
       output = Utils::Curl.curl_output("--fail", raw_source_url)
+      if (!output.success? || output.blank?) &&
+         Homebrew::EnvConfig.api_source_domain != HOMEBREW_API_SOURCE_DEFAULT_DOMAIN
+        # Fall back to the default domain and try again
+        raw_source_url = "#{HOMEBREW_API_SOURCE_DEFAULT_DOMAIN}/Homebrew/homebrew-cask/#{raw_endpoint}"
+        output = Utils::Curl.curl_output("--fail", raw_source_url)
+      end
 
       if !output.success? || output.blank?
         output = Utils::Curl.curl_output("--fail", api_source_url)

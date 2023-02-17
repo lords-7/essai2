@@ -41,7 +41,7 @@ Metrics/PerceivedComplexity:
 Metrics/MethodLength:
   Max: 232
 Metrics/ModuleLength:
-  Max: 481
+  Max: 489
   Exclude:
     # TODO: extract more of the bottling logic
     - "dev-cmd/bottle.rb"

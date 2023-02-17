@@ -4406,6 +4406,8 @@ module Homebrew::EnvConfig
 
   def self.api_domain(); end
 
+  def self.api_source_domain(); end
+
   def self.arch(); end
 
   def self.artifact_domain(); end
@@ -5463,6 +5465,7 @@ class Object
   GZIP_BUFFER_SIZE = ::T.let(nil, ::T.untyped)
   HIDDEN_DESC_PLACEHOLDER = ::T.let(nil, ::T.untyped)
   HOMEBREW_API_DEFAULT_DOMAIN = ::T.let(nil, ::T.untyped)
+  HOMEBREW_API_SOURCE_DEFAULT_DOMAIN = ::T.let(nil, ::T.untyped)
   HOMEBREW_BOTTLES_EXTNAME_REGEX = ::T.let(nil, ::T.untyped)
   HOMEBREW_BOTTLE_DEFAULT_DOMAIN = ::T.let(nil, ::T.untyped)
   HOMEBREW_BREWED_CURL_PATH = ::T.let(nil, ::T.untyped)

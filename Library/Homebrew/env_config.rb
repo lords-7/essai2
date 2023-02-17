@@ -22,6 +22,14 @@ module Homebrew
         default_text: "`https://formulae.brew.sh/api`.",
         default:      HOMEBREW_API_DEFAULT_DOMAIN,
       },
+      HOMEBREW_API_SOURCE_DOMAIN:                {
+        description:  "Use this URL as the download mirror for cask Ruby source downloads, " \
+                      "which the Homebrew API may defer to install some packages. " \
+                      "If files at that URL are temporarily unavailable, " \
+                      "the default domain will be used as a fallback mirror.",
+        default_text: "`https://raw.githubusercontent.com`.",
+        default:      HOMEBREW_API_SOURCE_DEFAULT_DOMAIN,
+      },
       HOMEBREW_ARCH:                             {
         description: "Linux only: Pass this value to a type name representing the compiler's `-march` option.",
         default:     "native",
