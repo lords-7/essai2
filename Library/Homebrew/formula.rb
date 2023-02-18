@@ -1954,7 +1954,6 @@ class Formula
     ohai "#{verb} #{name} from #{tap}"
   end
 
-  # @private
   def tap_git_head
     tap&.git_head
   end

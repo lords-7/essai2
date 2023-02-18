@@ -41,5 +41,7 @@ module Cask
     def livecheck; end
 
     def livecheckable?; end
+
+    def tap_git_head; end
   end
 end
