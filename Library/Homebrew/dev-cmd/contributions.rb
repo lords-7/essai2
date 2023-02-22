@@ -19,11 +19,9 @@ module Homebrew
   sig { returns(CLI::Parser) }
   def contributions_args
     Homebrew::CLI::Parser.new do
-      usage_banner "`contributions` <email|username> [<--repositories>`=`] [<--csv>]"
+      usage_banner "`contributions` [<email|username>] [<--repositories>`=`] [<--csv>]"
       description <<~EOS
-        Contributions to Homebrew repos for a user.
-
-        The first argument is a GitHub username (e.g. "BrewTestBot") or an email address (e.g. "brewtestbot@brew.sh").
+        Contributions to Homebrew repos.
       EOS
 
       comma_array "--repositories",
@@ -37,10 +35,11 @@ module Homebrew
       flag "--to=",
            description: "Date (ISO-8601 format) to stop searching contributions."
 
+      flag "--user=",
+           description: "A GitHub username or email address of a specific person to find contribution data for."
+
       switch "--csv",
              description: "Print a CSV of a user's contributions across repositories over the time period."
-
-      named_args number: 1
     end
   end
 
@@ -59,25 +58,25 @@ module Homebrew
       args.repositories
     end
 
-    if args.named.first == "maintainers"
-      return ofail "CSVs not yet supported for the full list of maintainers at once." if args.csv?
+    return ofail "CSVs not yet supported for the full list of maintainers at once." if args.csv? && args.user.nil?
 
-      maintainers = GitHub.members_by_team("Homebrew", "maintainers")
-      maintainers.each do |username, full_name|
-        puts "Determining contributions for #{username}..." if args.verbose?
-        # TODO: Using `full_name` to scan the `git log` undercounts some
-        # contributions as people might not always have used the same Git
-        # author name as they have set now on GitHub.
-        # TODO: We could potentially get around this using Git's `.mailmap` feature, or does that only do emails?
-        results[username] = scan_repositories(repos, full_name, args)
-        puts "#{username} contributed #{total(results[username])} times #{time_period(args)}."
-      end
-    else
-      user = args.named.first
-      results[user] = scan_repositories(repos, user, args)
-      puts "#{user} contributed #{total(results[user])} times #{time_period(args)}."
-      puts generate_csv(user, results[user]) if args.csv?
+    maintainers = GitHub.members_by_team("Homebrew", "maintainers")
+    maintainers.each do |username, full_name|
+      puts "Determining contributions for #{username}..." if args.verbose?
+      # TODO: Using `full_name` to scan the `git log` undercounts some
+      # contributions as people might not always have used the same Git
+      # author name as they have set now on GitHub.
+      # TODO: We could potentially get around this using Git's `.mailmap` feature, or does that only do emails?
+      results[username] = scan_repositories(repos, full_name, args)
+      puts "#{username} contributed #{total(results[username])} times #{time_period(args)}."
     end
+
+    return unless args.user
+
+    user = args.user
+    results[user] = scan_repositories(repos, user, args)
+    puts "#{user} contributed #{total(results[user])} times #{time_period(args)}."
+    puts generate_csv(user, results[user]) if args.csv?
   end
 
   sig { params(repo: String).returns(Pathname) }
