@@ -61,13 +61,14 @@ module Homebrew
     return ofail "CSVs not yet supported for the full list of maintainers at once." if args.csv? && args.user.nil?
 
     maintainers = GitHub.members_by_team("Homebrew", "maintainers")
-    maintainers.each do |username, full_name|
+    maintainers.each do |username, _|
       puts "Determining contributions for #{username}..." if args.verbose?
-      # TODO: Using `full_name` to scan the `git log` undercounts some
-      # contributions as people might not always have used the same Git
-      # author name as they have set now on GitHub.
-      # TODO: We could potentially get around this using Git's `.mailmap` feature, or does that only do emails?
-      results[username] = scan_repositories(repos, full_name, args)
+      # TODO: Using the GitHub username to scan the `git log` undercounts some
+      # contributions as people might not always have configured their Git
+      # committer details to match the ones on GitHub.
+      # TODO: Switch to using the GitHub APIs instead of `git log` if
+      # they ever support trailers.
+      results[username] = scan_repositories(repos, username, args)
       puts "#{username} contributed #{total(results[username])} times #{time_period(args)}."
     end
 
@@ -140,8 +141,8 @@ module Homebrew
 
       data[repo] = {
         commits:       GitHub.repo_commit_count_for_user(repo_full_name, person),
-        coauthorships: git_log_trailers_cmd(T.must(repo_path), "Co-authored-by", args),
-        signoffs:      git_log_trailers_cmd(T.must(repo_path), "Signed-off-by", args),
+        coauthorships: git_log_trailers_cmd(T.must(repo_path), "Co-authored-by", person, args),
+        signoffs:      git_log_trailers_cmd(T.must(repo_path), "Signed-off-by", person, args),
       }
     end
 
