@@ -101,6 +101,11 @@ module GitRepositoryExtension
     popen_git("log", "-1", "--pretty=%B", commit, "--", safe: safe, err: :out)&.strip
   end
 
+  sig { returns(T::Boolean) }
+  def git_dirty?
+    !system Utils::Git.git, "diff-index", "--quiet", "HEAD"
+  end
+
   private
 
   sig { params(args: T.untyped, safe: T::Boolean, err: T.nilable(Symbol)).returns(T.nilable(String)) }

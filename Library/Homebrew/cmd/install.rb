@@ -196,6 +196,19 @@ module Homebrew
       )
     end
 
+    # Cover confusion from editing formulae on an install updated to 4.0.0.
+    if args.build_from_source? && !Homebrew::EnvConfig.no_install_from_api? && !Homebrew::EnvConfig.developer? &&
+       !Homebrew::EnvConfig.no_env_hints? && formulae.any?(&:core_formula?) && CoreTap.instance.installed?
+      core_path = CoreTap.instance.path
+      if (core_path.git_origin_branch.present? && !core_path.git_default_origin_branch?) || core_path.git_dirty?
+        opoo "Local changes to Homebrew/core detected."
+        puts "Homebrew no longer reads from local Homebrew/core clones by default."
+        puts "If you are intentionally making an edit to Homebrew/core formula,"
+        puts "set HOMEBREW_NO_INSTALL_FROM_API for your local clone to be used."
+        puts "If you don't know what these edits are, run `brew untap Homebrew/core`."
+      end
+    end
+
     # if the user's flags will prevent bottle only-installations when no
     # developer tools are available, we need to stop them early on
     build_flags = []
