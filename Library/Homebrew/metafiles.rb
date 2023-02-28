@@ -12,6 +12,7 @@ module Metafiles
     .org .pod .rdoc .rst .rtf .textile .txt .wiki
   ]).freeze
   BASENAMES = Set.new(%w[about authors changelog changes history news notes notice readme todo]).freeze
+  EXTERNAL_DEPENDENCY_METADATA = Set.new(%w[Cargo.lock go.sum]).freeze
 
   module_function
 
@@ -22,6 +23,8 @@ module Metafiles
   end
 
   def copy?(file)
+    return true if EXTERNAL_DEPENDENCY_METADATA.include?(File.basename(file))
+
     file = file.downcase
     return true if LICENSES.include? file.split(/\.|-/).first
 
