@@ -8,30 +8,12 @@ then
   return
 fi
 
-__brewcomp_words_include() {
-  local element idx 
-  for (( idx = 1; idx < COMP_CWORD; idx++ ))
-  do
-    element=${COMP_WORDS[idx]}
-    [[ -n ${element} && ${element} == "$1" ]] && return 0
-  done
-  return 1
-}
-
 __brewcomp() {
   # break $1 on space, tab, and newline characters,
   # and turn it into a newline separated list of words
-  local list s sep=$'\n' IFS=$' \t\n'
+  local list
   local cur=${COMP_WORDS[COMP_CWORD]}
-
-  for s in $1
-  do
-    __brewcomp_words_include "${s}" || list+="${s}${sep}"
-  done
-
-  list=${list%"${sep}"}
-
-  IFS="${sep}"
+  list=$(echo "$1" | tr '[:space:]' '\n' | sort -u)
   while read -r line; do COMPREPLY+=("${line}"); done < <(compgen -W "${list}" -- "${cur}")
 }
 
