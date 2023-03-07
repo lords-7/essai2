@@ -25,6 +25,7 @@ module Homebrew
       interactive: false,
       keep_tmp: false,
       debug_symbols: false,
+      cc: nil,
       force: false,
       debug: false,
       quiet: false,
@@ -63,6 +64,7 @@ module Homebrew
             interactive:                interactive,
             keep_tmp:                   keep_tmp,
             debug_symbols:              debug_symbols,
+            cc:                         cc,
             force:                      force,
             debug:                      debug,
             quiet:                      quiet,
@@ -115,6 +117,7 @@ module Homebrew
       interactive: false,
       keep_tmp: false,
       debug_symbols: false,
+      cc: nil,
       force: false,
       debug: false,
       quiet: false,
@@ -136,6 +139,8 @@ module Homebrew
       options |= formula.build.used_options
       options &= formula.options
 
+      cc ||= formula.build.compiler
+
       FormulaInstaller.new(
         formula,
         **{
@@ -149,6 +154,7 @@ module Homebrew
           interactive:                interactive,
           keep_tmp:                   keep_tmp,
           debug_symbols:              debug_symbols,
+          cc:                         cc,
           force:                      force,
           debug:                      debug,
           quiet:                      quiet,
@@ -250,6 +256,7 @@ module Homebrew
       interactive: false,
       keep_tmp: false,
       debug_symbols: false,
+      cc: nil,
       force: false,
       debug: false,
       quiet: false,
@@ -336,6 +343,7 @@ module Homebrew
           interactive:                interactive,
           keep_tmp:                   keep_tmp,
           debug_symbols:              debug_symbols,
+          cc:                         cc,
           force:                      force,
           debug:                      debug,
           quiet:                      quiet,
@@ -405,6 +413,7 @@ module Homebrew
           interactive:                interactive,
           keep_tmp:                   keep_tmp,
           debug_symbols:              debug_symbols,
+          cc:                         cc,
           force:                      force,
           debug:                      debug,
           quiet:                      quiet,
