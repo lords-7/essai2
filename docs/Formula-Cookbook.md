@@ -891,7 +891,7 @@ There are two ways to add `launchd` plists and `systemd` services to a formula, 
 This table lists the options you can set within a `service` block. Only the `run` field is required which indicates what to run.
 
 | method                  | default      | macOS | Linux | description |
-|-------------------------| ------------ | :---: |:-----:| ----------- |
+| ----------------------- | ------------ | :---: | :---: | ----------- |
 | `run`                   | -            |  yes  |  yes  | command to execute: an array with arguments or a path
 | `run_type`              | `:immediate` |  yes  |  yes  | type of service: `:immediate`, `:interval` or `:cron`
 | `interval`              | -            |  yes  |  yes  | controls the start interval, required for the `:interval` type
