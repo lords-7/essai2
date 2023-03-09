@@ -355,6 +355,21 @@ module Homebrew
       @run&.map(&:to_s)
     end
 
+    sig { params(value: T.nilable(Integer)).returns(T.nilable(Integer)) }
+    def nice(value = nil)
+      case T.unsafe(value)
+      when nil
+        @nice
+      when Integer
+        if value < -20 or value > 19
+          raise TypeError, "Service#nice value should be between -20 to 19"
+        end
+        @nice = value
+      else
+        raise TypeError, "Service#nice expects an Integer"
+      end
+    end
+
     # Returns the `String` command to run manually instead of the service.
     # @return [String]
     sig { returns(String) }
@@ -391,6 +406,7 @@ module Homebrew
       base[:LegacyTimers] = @macos_legacy_timers if @macos_legacy_timers == true
       base[:TimeOut] = @restart_delay if @restart_delay.present?
       base[:ProcessType] = @process_type.to_s.capitalize if @process_type.present?
+      base[:Nice] = @nice if @nice.present?
       base[:StartInterval] = @interval if @interval.present? && @run_type == RUN_TYPE_INTERVAL
       base[:WorkingDirectory] = @working_dir if @working_dir.present?
       base[:RootDirectory] = @root_dir if @root_dir.present?
@@ -459,6 +475,7 @@ module Homebrew
 
       options << "Restart=always" if @keep_alive.present? && @keep_alive[:always].present?
       options << "RestartSec=#{restart_delay}" if @restart_delay.present?
+      options << "Nice=#{@nice}" if nice.present?
       options << "WorkingDirectory=#{@working_dir}" if @working_dir.present?
       options << "RootDirectory=#{@root_dir}" if @root_dir.present?
       options << "StandardInput=file:#{@input_path}" if @input_path.present?
