@@ -472,7 +472,7 @@ module Homebrew
 
       options << "Restart=always" if @keep_alive.present? && @keep_alive[:always].present?
       options << "RestartSec=#{restart_delay}" if @restart_delay.present?
-      options << "Nice=#{@nice}" if nice.present?
+      options << "Nice=#{@nice}" if @nice.present?
       options << "WorkingDirectory=#{@working_dir}" if @working_dir.present?
       options << "RootDirectory=#{@root_dir}" if @root_dir.present?
       options << "StandardInput=file:#{@input_path}" if @input_path.present?
