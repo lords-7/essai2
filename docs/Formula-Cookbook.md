@@ -891,7 +891,7 @@ There are two ways to add `launchd` plists and `systemd` services to a formula, 
 This table lists the options you can set within a `service` block. Only the `run` field is required which indicates what to run.
 
 | method                  | default      | macOS | Linux | description |
-| ----------------------- | ------------ | :---: | :---: | ----------- |
+|-------------------------| ------------ | :---: |:-----:| ----------- |
 | `run`                   | -            |  yes  |  yes  | command to execute: an array with arguments or a path
 | `run_type`              | `:immediate` |  yes  |  yes  | type of service: `:immediate`, `:interval` or `:cron`
 | `interval`              | -            |  yes  |  yes  | controls the start interval, required for the `:interval` type
@@ -909,6 +909,7 @@ This table lists the options you can set within a `service` block. Only the `run
 | `process_type`          | -            |  yes  | no-op | type of process to manage: `:background`, `:standard`, `:interactive` or `:adaptive`
 | `macos_legacy_timers`   | -            |  yes  | no-op | timers created by `launchd` jobs are coalesced unless this is set
 | `sockets`               | -            |  yes  | no-op | socket that is created as an accesspoint to the service
+| `nice`                  | -            |  yes  |  yes  | Sets the default scheduling priority (nice level). from `-20` highest to `19` lowest.
 
 For services that are kept alive after starting you can use the default `run_type`:
 
