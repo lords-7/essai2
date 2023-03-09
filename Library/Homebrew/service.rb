@@ -355,11 +355,9 @@ module Homebrew
       @run&.map(&:to_s)
     end
 
-    sig { params(value: T.nilable(Integer)).returns(T.nilable(Integer)) }
-    def nice(value = nil)
-      case T.unsafe(value)
-      when nil
-        @nice
+    sig { params(value: Integer).returns(T.nilable(Integer)) }
+    def nice(value)
+      case value
       when Integer
         raise TypeError, "Service#nice value should be between -20 to 19" if (value < -20) || (value > 19)
 
