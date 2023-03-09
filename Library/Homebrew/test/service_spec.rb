@@ -49,6 +49,45 @@ describe Homebrew::Service do
     end
   end
 
+  describe "#nice" do
+    it "returns a valid nice level" do
+      f = stub_formula do
+        service do
+          run opt_bin/"beanstalkd"
+          nice -10
+        end
+      end
+
+      expect(f.service.nice).to be(-10)
+    end
+
+    it "throws for nice too low" do
+      f = stub_formula do
+        service do
+          run opt_bin/"beanstalkd"
+          nice -21
+        end
+      end
+
+      expect do
+        f.service.manual_command
+      end.to raise_error TypeError, "Service#nice value should be between -20 to 19"
+    end
+
+    it "throws for nice too high" do
+      f = stub_formula do
+        service do
+          run opt_bin/"beanstalkd"
+          nice 20
+        end
+      end
+
+      expect do
+        f.service.manual_command
+      end.to raise_error TypeError, "Service#nice value should be between -20 to 19"
+    end
+  end
+
   describe "#keep_alive" do
     it "throws for unexpected keys" do
       f = stub_formula do
@@ -196,6 +235,7 @@ describe Homebrew::Service do
           launch_only_once true
           process_type :interactive
           restart_delay 30
+          nice 5
           interval 5
           macos_legacy_timers true
         end
@@ -234,6 +274,8 @@ describe Homebrew::Service do
         \t</array>
         \t<key>ProcessType</key>
         \t<string>Interactive</string>
+        \t<key>Nice</key>
+        \t<integer>5</integer>
         \t<key>ProgramArguments</key>
         \t<array>
         \t\t<string>#{HOMEBREW_PREFIX}/opt/formula_name/bin/beanstalkd</string>
@@ -606,6 +648,7 @@ describe Homebrew::Service do
           keep_alive true
           process_type :interactive
           restart_delay 30
+          nice -15
           macos_legacy_timers true
         end
       end
@@ -624,6 +667,7 @@ describe Homebrew::Service do
         ExecStart=#{HOMEBREW_PREFIX}/opt/#{name}/bin/beanstalkd test
         Restart=always
         RestartSec=30
+        Nice=-15
         WorkingDirectory=#{HOMEBREW_PREFIX}/var
         RootDirectory=#{HOMEBREW_PREFIX}/var
         StandardInput=file:#{HOMEBREW_PREFIX}/var/in/beanstalkd
