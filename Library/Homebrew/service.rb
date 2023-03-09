@@ -361,9 +361,8 @@ module Homebrew
       when nil
         @nice
       when Integer
-        if value < -20 or value > 19
-          raise TypeError, "Service#nice value should be between -20 to 19"
-        end
+        raise TypeError, "Service#nice value should be between -20 to 19" if (value < -20) || (value > 19)
+
         @nice = value
       else
         raise TypeError, "Service#nice expects an Integer"

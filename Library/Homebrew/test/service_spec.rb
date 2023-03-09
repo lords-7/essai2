@@ -54,7 +54,7 @@ describe Homebrew::Service do
       f = stub_formula do
         service do
           run opt_bin/"beanstalkd"
-          nice -10
+          nice(-10)
         end
       end
 
@@ -65,7 +65,7 @@ describe Homebrew::Service do
       f = stub_formula do
         service do
           run opt_bin/"beanstalkd"
-          nice -21
+          nice(-21)
         end
       end
 
@@ -648,7 +648,7 @@ describe Homebrew::Service do
           keep_alive true
           process_type :interactive
           restart_delay 30
-          nice -15
+          nice(-15)
           macos_legacy_timers true
         end
       end
