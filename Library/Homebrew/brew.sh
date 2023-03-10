@@ -271,6 +271,7 @@ auto-update() {
 
   AUTO_UPDATE_COMMANDS=(
     install
+    outdated
     upgrade
     bump-formula-pr
     bump-cask-pr
