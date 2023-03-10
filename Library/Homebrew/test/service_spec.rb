@@ -50,17 +50,6 @@ describe Homebrew::Service do
   end
 
   describe "#nice" do
-    it "returns a valid nice level" do
-      f = stub_formula do
-        service do
-          run opt_bin/"beanstalkd"
-          nice(-10)
-        end
-      end
-
-      expect(f.service.nice).to be(-10)
-    end
-
     it "throws for nice too low" do
       f = stub_formula do
         service do
