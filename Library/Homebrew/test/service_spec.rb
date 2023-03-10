@@ -261,10 +261,10 @@ describe Homebrew::Service do
         \t\t<string>StandardIO</string>
         \t\t<string>System</string>
         \t</array>
-        \t<key>ProcessType</key>
-        \t<string>Interactive</string>
         \t<key>Nice</key>
         \t<integer>5</integer>
+        \t<key>ProcessType</key>
+        \t<string>Interactive</string>
         \t<key>ProgramArguments</key>
         \t<array>
         \t\t<string>#{HOMEBREW_PREFIX}/opt/formula_name/bin/beanstalkd</string>
