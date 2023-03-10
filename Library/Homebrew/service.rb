@@ -362,8 +362,6 @@ module Homebrew
         raise TypeError, "Service#nice value should be between -20 to 19" if (value < -20) || (value > 19)
 
         @nice = value
-      else
-        raise TypeError, "Service#nice expects an Integer"
       end
     end
 
