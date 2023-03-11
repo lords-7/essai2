@@ -60,7 +60,7 @@ describe Homebrew::Service do
 
       expect do
         f.service.manual_command
-      end.to raise_error TypeError, "Service#nice value should be between -20 to 19"
+      end.to raise_error TypeError, "Service#nice value should be between -20..19"
     end
 
     it "throws for nice too high" do
@@ -73,7 +73,7 @@ describe Homebrew::Service do
 
       expect do
         f.service.manual_command
-      end.to raise_error TypeError, "Service#nice value should be between -20 to 19"
+      end.to raise_error TypeError, "Service#nice value should be between -20..19"
     end
   end
 
