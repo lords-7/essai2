@@ -23,7 +23,7 @@ module Homebrew
 
     KEEP_ALIVE_KEYS = [:always, :successful_exit, :crashed, :path].freeze
 
-    NICE_RANGE = -20..19
+    NICE_RANGE = (-20..19).freeze
 
     # sig { params(formula: Formula).void }
     def initialize(formula, &block)
@@ -363,7 +363,7 @@ module Homebrew
       when nil
         @nice
       when Integer
-        if (NICE_RANGE).cover?(value)
+        if NICE_RANGE.cover?(value)
           @nice = value
         else
           raise TypeError,
