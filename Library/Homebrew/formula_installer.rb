@@ -39,6 +39,7 @@ class FormulaInstaller
   attr_predicate :installed_as_dependency?, :installed_on_request?
   attr_predicate :show_summary_heading?, :show_header?
   attr_predicate :force_bottle?, :ignore_deps?, :only_deps?, :interactive?, :git?, :force?, :overwrite?, :keep_tmp?
+  attr_predicate :poured_bottle?
   attr_predicate :debug_symbols?
   attr_predicate :verbose?, :debug?, :quiet?
 
@@ -447,7 +448,7 @@ class FormulaInstaller
 
     build_bottle_preinstall if build_bottle?
 
-    unless @poured_bottle
+    unless poured_bottle?
       build
       clean
 
@@ -778,7 +779,7 @@ class FormulaInstaller
 
     install_service
 
-    fix_dynamic_linkage(keg) if !@poured_bottle || !formula.bottle_specification.skip_relocation?
+    fix_dynamic_linkage(keg) if !poured_bottle? || !formula.bottle_specification.skip_relocation?
 
     Homebrew::Install.global_post_install
 
@@ -1031,18 +1032,38 @@ class FormulaInstaller
       return
     end
 
-    if formula.service? && formula.service.command.present?
-      service_path = formula.systemd_service_path
-      service_path.atomic_write(formula.service.to_systemd_unit)
-      service_path.chmod 0644
-
-      if formula.service.timed?
-        timer_path = formula.systemd_timer_path
-        timer_path.atomic_write(formula.service.to_systemd_timer)
-        timer_path.chmod 0644
-      end
+    if poured_bottle?
+      Homebrew::Service.new(@formula).replace_text("$HOME", Dir.home)
+    else
+      install_systemd
+      install_launchd
     end
+  rescue Exception => e # rubocop:disable Lint/RescueException
+    puts e
+    ofail "Failed to install service files"
+    odebug e, e.backtrace
+  end
 
+  sig { void }
+  def install_systemd
+    return unless formula.service?
+    return if formula.service.command.blank?
+
+    service = formula.service.to_systemd_unit
+    service_path = formula.systemd_service_path
+    service_path.atomic_write(service)
+    service_path.chmod 0644
+
+    return unless formula.service.timed?
+
+    timer = formula.service.to_systemd_timer
+    timer_path = formula.systemd_timer_path
+    timer_path.atomic_write(timer)
+    timer_path.chmod 0644
+  end
+
+  sig { void }
+  def install_launchd
     service = if formula.service? && formula.service.command.present?
       formula.service.to_plist
     elsif formula.plist
@@ -1056,10 +1077,6 @@ class FormulaInstaller
     launchd_service_path.chmod 0644
     log = formula.var/"log"
     log.mkpath if service.include? log.to_s
-  rescue Exception => e # rubocop:disable Lint/RescueException
-    puts e
-    ofail "Failed to install service files"
-    odebug e, e.backtrace
   end
 
   sig { params(keg: Keg).void }

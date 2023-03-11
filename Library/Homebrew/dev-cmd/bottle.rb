@@ -392,6 +392,7 @@ module Homebrew
       begin
         keg.delete_pyc_files!
 
+        formula.service.replace_text(Dir.home, "$HOME") if formula.service?
         changed_files = keg.replace_locations_with_placeholders unless args.skip_relocation?
 
         Formula.clear_cache
@@ -483,6 +484,7 @@ module Homebrew
       ensure
         ignore_interrupts do
           original_tab&.write
+          formula.service.replace_text("$HOME", Dir.home) if formula.service?
           keg.replace_placeholders_with_locations changed_files unless args.skip_relocation?
         end
       end

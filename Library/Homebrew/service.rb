@@ -497,5 +497,24 @@ module Homebrew
 
       timer + options.join("\n")
     end
+
+    # Replace text in-place in all service files.
+    sig { params(to_replace: String, replacement: String).void }
+    def replace_text(to_replace, replacement)
+      [
+        @formula.systemd_service_path,
+        @formula.systemd_timer_path,
+        @formula.launchd_service_path,
+      ].each do |service_path|
+        next unless service_path.exist?
+
+        service = service_path.read
+        next unless service.include?(to_replace)
+
+        service.gsub!(to_replace, replacement)
+        service_path.atomic_write(service)
+        service_path.chmod(0644)
+      end
+    end
   end
 end
