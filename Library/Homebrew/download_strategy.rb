@@ -468,7 +468,7 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
       timeout: timeout
     )
 
-    odebug "Failed to get headers for #{url}", "#{error}" unless status.success?
+    odebug "Failed to get headers for #{url}", error unless status.success?
 
     parsed_output = parse_curl_output(output)
 

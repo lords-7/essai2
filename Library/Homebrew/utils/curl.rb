@@ -132,20 +132,26 @@ module Utils
                               timeout: end_time&.remaining,
                               **command_options
 
-      return result if result.success? || args.include?("--http1.1")
+      return result if result.success? || args.include?("--http0.9") || args.include?("--http1.1")
 
-      raise Timeout::Error, result.stderr.lines.last.chomp if timeout && result.status.exitstatus == 28
-
-      # Error in the HTTP2 framing layer
-      if result.status.exitstatus == 16
+      case result.status.exitstatus
+      when 1 # Unsupported protocol
+        # Received HTTP/0.9 when not allowed
+        if result.stderr.lines.last.include?("HTTP/0.9")
+          return curl_with_workarounds(
+            *args, "--http0.9",
+            timeout: end_time&.remaining, **command_options, **options
+          )
+        end
+      when 16 # Error in the HTTP2 framing layer
         return curl_with_workarounds(
           *args, "--http1.1",
           timeout: end_time&.remaining, **command_options, **options
         )
-      end
-
-      # This is a workaround for https://github.com/curl/curl/issues/1618.
-      if result.status.exitstatus == 56 # Unexpected EOF
+      when 28 # Timeout
+        raise Timeout::Error, result.stderr.lines.last.chomp if timeout
+      when 56 # Unexpected EOF
+        # This is a workaround for https://github.com/curl/curl/issues/1618.
         out = curl_output("-V").stdout
 
         # If `curl` doesn't support HTTP2, the exception is unrelated to this bug.
