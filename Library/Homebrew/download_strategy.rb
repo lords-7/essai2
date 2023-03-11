@@ -463,10 +463,13 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
       url = url.sub(%r{^https?://#{GitHubPackages::URL_DOMAIN}/}o, "#{domain.chomp("/")}/")
     end
 
-    output, _, _status = curl_output(
+    output, error, status = curl_output(
       "--location", "--silent", "--head", "--request", "GET", url.to_s,
       timeout: timeout
     )
+
+    odebug "Failed to get headers for #{url}", "#{error}" unless status.success?
+
     parsed_output = parse_curl_output(output)
 
     lines = output.to_s.lines.map(&:chomp)
