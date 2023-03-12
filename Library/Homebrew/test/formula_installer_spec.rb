@@ -275,6 +275,37 @@ describe FormulaInstaller do
       expect(timer_path).to exist
     end
 
+    describe "when using bottled service files" do
+      let(:formula) { Testball.new }
+
+      before do
+        formula.opt_prefix.mkpath
+
+        content = "<key>WorkingDirectory</key>\n<string>$HOME</string>"
+        formula.launchd_service_path.write(content)
+        formula.systemd_service_path.write(content)
+        formula.systemd_timer_path.write(content)
+      end
+
+      after do
+        FileUtils.rm_rf formula.opt_prefix
+      end
+
+      it "replaces $HOME with local home directory" do
+        installer = described_class.new(formula)
+        expect(installer).to receive(:poured_bottle?).and_return(true)
+        expect(installer).not_to receive(:install_launchd)
+        expect(installer).not_to receive(:install_systemd)
+        expect { installer.install_service }
+          .not_to output(/Error: Failed to install service files/).to_stderr
+
+        updated_content = "<key>WorkingDirectory</key>\n<string>#{Dir.home}</string>"
+        expect(formula.launchd_service_path.read).to eq(updated_content)
+        expect(formula.systemd_service_path.read).to eq(updated_content)
+        expect(formula.systemd_timer_path.read).to eq(updated_content)
+      end
+    end
+
     it "returns without definition" do
       formula = Testball.new
       path = formula.launchd_service_path
