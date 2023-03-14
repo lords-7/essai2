@@ -363,12 +363,9 @@ module Homebrew
       when nil
         @nice
       when Integer
-        if NICE_RANGE.cover?(value)
-          @nice = value
-        else
-          raise TypeError,
-                "Service#nice value should be between #{NICE_RANGE}"
-        end
+        raise TypeError, "Service#nice value should be in #{NICE_RANGE}" unless NICE_RANGE.cover?(value)
+
+        @nice = value
       else
         raise TypeError, "Service#nice expects an Integer"
       end
