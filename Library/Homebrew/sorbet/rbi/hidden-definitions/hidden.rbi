@@ -2963,6 +2963,11 @@ module Cask::Cache
   extend ::T::Private::Methods::SingletonMethodHooks
 end
 
+module Cask::CaskLoader::ILoader
+  extend ::T::Private::Abstract::Hooks
+  extend ::T::InterfaceWrapper::Helpers
+end
+
 class Cask::CaskQuarantineError
   extend ::T::Private::Methods::MethodHooks
   extend ::T::Private::Methods::SingletonMethodHooks
