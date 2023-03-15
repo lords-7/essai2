@@ -49,6 +49,9 @@ module Homebrew::EnvConfig
   sig { returns(String) }
   def self.cache; end
 
+  sig { returns(T.nilable(String)) }
+  def self.cask_opts; end
+
   sig { returns(Integer) }
   def self.cleanup_max_age_days; end
 
@@ -153,6 +156,9 @@ module Homebrew::EnvConfig
 
   sig { returns(String) }
   def self.logs; end
+
+  sig { returns(Proc) }
+  def self.make_jobs; end
 
   sig { returns(T::Boolean) }
   def self.no_analytics?; end
