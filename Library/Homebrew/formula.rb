@@ -3201,6 +3201,9 @@ class Formula
     # <pre>keg_only :versioned_formulae</pre>
     # <pre>keg_only "because I want it so"</pre>
     def keg_only(reason, explanation = "")
+      if !Homebrew::EnvConfig.no_install_from_api? && reason.is_a?(String)
+        reason = reason.gsub(HOMEBREW_PREFIX, HOMEBREW_PREFIX_PLACEHOLDER)
+      end
       @keg_only_reason = KegOnlyReason.new(reason, explanation)
     end
 

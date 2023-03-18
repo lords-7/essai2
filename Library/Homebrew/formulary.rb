@@ -181,11 +181,6 @@ module Formulary
         end
       end
 
-      if (keg_only_reason = json_formula["keg_only_reason"]).present?
-        reason = Formulary.convert_to_string_or_symbol keg_only_reason["reason"]
-        keg_only reason, keg_only_reason["explanation"]
-      end
-
       if (deprecation_date = json_formula["deprecation_date"]).present?
         reason = Formulary.convert_to_deprecate_disable_reason_string_or_symbol json_formula["deprecation_reason"]
         deprecate! date: deprecation_date, because: reason
@@ -267,6 +262,14 @@ module Formulary
       def caveats
         self.class.instance_variable_get(:@caveats_string)
             &.gsub(HOMEBREW_PREFIX_PLACEHOLDER, HOMEBREW_PREFIX)
+      end
+
+      @keg_only_reason = json_formula["keg_only_reason"]
+      def keg_only_reason
+        return unless (keg_only_reason = self.class.instance_variable_get(:@keg_only_reason))
+
+        reason = keg_only_reason["reason"]&.gsub(HOMEBREW_PREFIX_PLACEHOLDER, HOMEBREW_PREFIX)
+        KegOnlyReason.new(Formulary.convert_to_string_or_symbol(reason), keg_only_reason["explanation"])
       end
 
       @tap_git_head_string = json_formula["tap_git_head"]
