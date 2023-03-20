@@ -2096,7 +2096,7 @@ class Formula
       "version_scheme"           => version_scheme,
       "bottle"                   => {},
       "keg_only"                 => keg_only?,
-      "keg_only_reason"          => keg_only_reason&.to_hash,
+      "keg_only_reason"          => keg_only_reason.gsub(HOMEBREW_PREFIX, HOMEBREW_PREFIX_PLACEHOLDER)&.to_hash,
       "options"                  => [],
       "build_dependencies"       => dependencies.select(&:build?)
                                                 .map(&:name)
@@ -3201,9 +3201,6 @@ class Formula
     # <pre>keg_only :versioned_formulae</pre>
     # <pre>keg_only "because I want it so"</pre>
     def keg_only(reason, explanation = "")
-      if !Homebrew::EnvConfig.no_install_from_api? && reason.is_a?(String)
-        reason = reason.gsub(HOMEBREW_PREFIX, HOMEBREW_PREFIX_PLACEHOLDER)
-      end
       @keg_only_reason = KegOnlyReason.new(reason, explanation)
     end
 
