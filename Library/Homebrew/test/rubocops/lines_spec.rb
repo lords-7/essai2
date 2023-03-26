@@ -57,4 +57,31 @@ describe RuboCop::Cop::FormulaAudit::Lines do
       RUBY
     end
   end
+
+  context "when auditing resource blocks" do
+    it "allows `on_*` blocks or conditionals" do
+      expect_no_offenses(<<~RUBY)
+        class Foo < Formula
+          resource "bar" do
+            on_arm do
+              platform = "arm"
+            end
+            on_intel do
+              platform = "intel"
+            end
+            url "https://brew.sh/bar-\#{platform}-1.0.tgz"
+          end
+        end
+      RUBY
+
+      expect_no_offenses(<<~RUBY)
+        class Foo < Formula
+          resource "baz" do
+            platform = Hardware::CPU.arm? ? "arm" : "intel"
+            url "https://brew.sh/baz-\#{platform}-1.0.tgz"
+          end
+        end
+      RUBY
+    end
+  end
 end
