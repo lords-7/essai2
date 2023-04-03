@@ -3,7 +3,7 @@
 
 require "formula"
 require "cli/parser"
-require "cask/caskroom"
+require "cask"
 require "dependencies_helpers"
 
 module Homebrew

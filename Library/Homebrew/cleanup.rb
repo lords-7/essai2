@@ -4,7 +4,7 @@
 require "utils/bottles"
 
 require "formula"
-require "cask/cask_loader"
+require "cask"
 require "set"
 
 module Homebrew
@@ -566,7 +566,6 @@ module Homebrew
 
     def self.autoremove(dry_run: false)
       require "utils/autoremove"
-      require "cask/caskroom"
 
       # If this runs after install, uninstall, reinstall or upgrade,
       # the cache of installed formulae may no longer be valid.

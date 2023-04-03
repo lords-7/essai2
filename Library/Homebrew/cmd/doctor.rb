@@ -3,7 +3,7 @@
 
 require "diagnostic"
 require "cli/parser"
-require "cask/caskroom"
+require "cask"
 
 module Homebrew
   extend T::Sig

@@ -4,7 +4,7 @@
 require "formula"
 require "fetch"
 require "cli/parser"
-require "cask/download"
+require "cask"
 
 module Homebrew
   extend T::Sig

@@ -6,10 +6,7 @@ require "formula"
 require "diagnostic"
 require "migrator"
 require "cli/parser"
-require "cask/cask_loader"
-require "cask/exceptions"
-require "cask/installer"
-require "cask/uninstall"
+require "cask"
 require "uninstall"
 
 module Homebrew

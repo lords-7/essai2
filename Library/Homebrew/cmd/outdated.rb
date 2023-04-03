@@ -4,8 +4,7 @@
 require "formula"
 require "keg"
 require "cli/parser"
-require "cask/cmd"
-require "cask/caskroom"
+require "cask"
 require "api"
 
 module Homebrew

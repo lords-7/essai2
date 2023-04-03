@@ -6,6 +6,7 @@ require "caveats"
 require "cli/parser"
 require "options"
 require "formula"
+require "cask"
 require "keg"
 require "tab"
 require "json"
@@ -375,8 +376,6 @@ module Homebrew
   end
 
   def info_cask(cask, args:)
-    require "cask/info"
-
     Cask::Info.info(cask)
   end
 end

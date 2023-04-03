@@ -1,10 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "cask/cmd/abstract_command"
-require "cask/info"
-require "cask/cask_loader"
-require "cask/caskroom"
+require "cask"
 
 module Homebrew
   module MissingFormula

@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "formulary"
-require "cask/cask_loader"
+require "cask"
 require "cli/parser"
 
 class String

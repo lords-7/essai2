@@ -18,6 +18,7 @@ require "cli/parser"
 require "json"
 require "formula_auditor"
 require "tap_auditor"
+require "cask"
 
 module Homebrew
   extend T::Sig
@@ -239,9 +240,6 @@ module Homebrew
     cask_results = if audit_casks.empty?
       {}
     else
-      require "cask/cmd/abstract_command"
-      require "cask/cmd/audit"
-
       # For switches, we add `|| nil` so that `nil` will be passed instead of `false` if they aren't set.
       # This way, we can distinguish between "not set" and "set to false".
       Cask::Cmd::Audit.audit_casks(
