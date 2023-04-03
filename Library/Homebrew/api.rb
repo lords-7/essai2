@@ -1,9 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "api/analytics"
-require "api/cask"
-require "api/formula"
 require "extend/cachable"
 
 module Homebrew
@@ -14,6 +11,10 @@ module Homebrew
     extend T::Sig
 
     extend Cachable
+
+    autoload :Analytics, "api/analytics"
+    autoload :Cask, "api/cask"
+    autoload :Formula, "api/formula"
 
     HOMEBREW_CACHE_API = (HOMEBREW_CACHE/"api").freeze
 
