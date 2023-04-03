@@ -4,6 +4,11 @@
 require "delegate"
 require "api"
 require "cli/args"
+require "cask"
+
+autoload :Formulary, "formulary"
+autoload :Keg, "keg"
+autoload :MissingFormula, "missing_formula"
 
 module Homebrew
   module CLI
@@ -14,12 +19,6 @@ module Homebrew
       extend T::Sig
 
       def initialize(*args, parent: Args.new, override_spec: nil, force_bottle: false, flags: [], cask_options: false)
-        require "cask/cask"
-        require "cask/cask_loader"
-        require "formulary"
-        require "keg"
-        require "missing_formula"
-
         @args = args
         @override_spec = override_spec
         @force_bottle = force_bottle
