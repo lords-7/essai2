@@ -7,9 +7,7 @@ require "tab"
 require "keg"
 require "formula_versions"
 require "cli/parser"
-require "utils/inreplace"
 require "erb"
-require "utils/gzip"
 require "api"
 
 BOTTLE_ERB = <<-EOS

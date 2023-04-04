@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "cli/parser"
-require "utils/git"
 require "formulary"
 require "software_spec"
 require "tap"

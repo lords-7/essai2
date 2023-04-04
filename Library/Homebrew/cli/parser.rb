@@ -6,7 +6,6 @@ require "cask/config"
 require "cli/args"
 require "optparse"
 require "set"
-require "utils/tty"
 
 COMMAND_DESC_WIDTH = 80
 OPTION_DESC_WIDTH = 45

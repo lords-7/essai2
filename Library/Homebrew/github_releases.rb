@@ -1,7 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "utils/github"
 require "json"
 
 # GitHub Releases client.

@@ -1,7 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "utils/link"
 require "settings"
 require "erb"
 

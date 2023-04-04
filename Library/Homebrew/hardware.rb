@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "utils/popen"
-
 # Helper module for querying hardware information.
 module Hardware
   # Helper module for querying CPU information.

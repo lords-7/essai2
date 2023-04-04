@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "securerandom"
-require "utils/tty"
 
 module GitHub
   # Helper functions for interacting with GitHub Actions.

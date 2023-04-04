@@ -3,7 +3,6 @@
 
 require "formula"
 require "formula_versions"
-require "utils/curl"
 require "utils/github/actions"
 require "utils/shared_audits"
 require "utils/spdx"

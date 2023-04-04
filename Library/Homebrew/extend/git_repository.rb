@@ -1,9 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "utils/git"
-require "utils/popen"
-
 # Extensions to {Pathname} for querying Git repository information.
 # @see Utils::Git
 # @api private

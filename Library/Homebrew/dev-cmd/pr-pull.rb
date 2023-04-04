@@ -3,7 +3,6 @@
 
 require "download_strategy"
 require "cli/parser"
-require "utils/github"
 require "tmpdir"
 require "formula"
 

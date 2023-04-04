@@ -11,9 +11,6 @@ require "lock_file"
 require "mechanize/version"
 require "mechanize/http/content_disposition_parser"
 
-require "utils/curl"
-require "utils/github"
-
 require "github_packages"
 
 require "extend/time"

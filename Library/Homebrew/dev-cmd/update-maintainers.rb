@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "cli/parser"
-require "utils/github"
 require "manpages"
 
 module Homebrew

@@ -1,26 +1,21 @@
 # typed: true
 # frozen_string_literal: true
 
+autoload :Formatter, "utils/formatter"
+autoload :GitHub, "utils/github"
+autoload :Tty, "utils/tty"
+
 require "time"
 
-require "utils/analytics"
+require "context"
+require "extend/kernel"
+require "PATH"
+require "tap_constants"
 require "utils/curl"
 require "utils/fork"
-require "utils/formatter"
 require "utils/gems"
-require "utils/git"
 require "utils/git_repository"
-require "utils/github"
-require "utils/gzip"
-require "utils/inreplace"
-require "utils/link"
 require "utils/popen"
-require "utils/repology"
-require "utils/svn"
-require "utils/tty"
-require "tap_constants"
-require "PATH"
-require "extend/kernel"
 
 module Homebrew
   extend Context
@@ -88,6 +83,13 @@ end
 
 module Utils
   extend T::Sig
+
+  autoload :Analytics, "utils/analytics"
+  autoload :Git, "utils/git"
+  autoload :Gzip, "utils/gzip"
+  autoload :Inreplace, "utils/inreplace"
+  autoload :Link, "utils/link"
+  autoload :Svn, "utils/svn"
 
   # Removes the rightmost segment from the constant expression in the string.
   #

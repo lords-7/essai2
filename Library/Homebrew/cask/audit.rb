@@ -5,8 +5,6 @@ require "cask/denylist"
 require "cask/download"
 require "digest"
 require "livecheck/livecheck"
-require "utils/curl"
-require "utils/git"
 require "utils/shared_audits"
 
 module Cask

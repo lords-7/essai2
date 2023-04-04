@@ -3,6 +3,7 @@
 
 require "cli/parser"
 require "livecheck/livecheck"
+require "utils/repology"
 
 module Homebrew
   extend T::Sig

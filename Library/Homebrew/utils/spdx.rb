@@ -1,9 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "utils/curl"
-require "utils/github"
-
 # Helper module for updating SPDX license data.
 #
 # @api private
