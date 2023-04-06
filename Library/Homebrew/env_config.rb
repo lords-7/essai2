@@ -344,6 +344,11 @@ module Homebrew
         description: "If set, use Pry for the `brew irb` command.",
         boolean:     true,
       },
+      HOMEBREW_UPGRADE_GREEDY:                   {
+        description: "Pass the given option to `--greedy` when invoking `brew upgrade <formula>. Acceptable " \
+                     "options include `greedy`, `auto_updates` and `latest`. If set, the option will default" \
+                     "to `--greedy`",
+      },
       HOMEBREW_SIMULATE_MACOS_ON_LINUX:          {
         description: "If set, running Homebrew on Linux will simulate certain macOS code paths. This is useful " \
                      "when auditing macOS formulae while on Linux.",
@@ -492,6 +497,29 @@ module Homebrew
     sig { returns(T::Boolean) }
     def automatically_set_no_install_from_api?
       ENV["HOMEBREW_AUTOMATICALLY_SET_NO_INSTALL_FROM_API"].present?
+    end
+
+    sig { returns(T::Array[String]) }
+    def upgrade_greedy_opts
+      Shellwords.shellsplit(ENV.fetch("HOMEBREW_UPGRADE_GREEDY", ""))
+    end
+
+    sig { returns(T::Boolean) }
+    def upgrade_greedy_latest?
+      upgrade_greedy_opts.include?("latest")
+    end
+
+    sig { returns(T::Boolean) }
+    def upgrade_greedy_auto_updates?
+      upgrade_greedy_opts.include?("auto_updates")
+    end
+
+    sig { returns(T::Boolean) }
+    def upgrade_greedy?
+      return true if upgrade_greedy_opts.include?("greedy")
+      return true if upgrade_greedy_opts.include?("1")
+
+      false
     end
   end
 end

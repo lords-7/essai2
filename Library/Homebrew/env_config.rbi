@@ -229,6 +229,9 @@ module Homebrew::EnvConfig
   sig { returns(T::Boolean) }
   def self.update_to_tag?; end
 
+  sig { returns(T::Array[String]) }
+  def self.upgrade_greedy_opts; end
+
   sig { returns(T::Boolean) }
   def self.verbose?; end
 
