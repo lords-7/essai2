@@ -9,6 +9,7 @@ require "json"
 require "json/add/exception"
 require "forwardable"
 require "set"
+require "tmpdir"
 
 # Only require "core_ext" here to ensure we're only requiring the minimum of
 # what we need.
