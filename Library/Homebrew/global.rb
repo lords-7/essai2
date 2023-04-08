@@ -154,3 +154,5 @@ require "utils"
 require "official_taps"
 require "tap"
 require "tap_constants"
+
+autoload :Cask, "cask"

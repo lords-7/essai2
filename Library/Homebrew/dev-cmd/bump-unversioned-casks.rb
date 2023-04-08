@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "timeout"
-require "cask"
 require "cli/parser"
 require "tap"
 require "unversioned_cask_checker"

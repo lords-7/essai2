@@ -8,7 +8,6 @@ require "install"
 require "reinstall"
 require "cli/parser"
 require "cleanup"
-require "cask"
 require "upgrade"
 require "api"
 

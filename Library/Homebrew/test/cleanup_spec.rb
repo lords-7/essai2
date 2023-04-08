@@ -3,7 +3,6 @@
 
 require "test/support/fixtures/testball"
 require "cleanup"
-require "cask/cache"
 require "fileutils"
 
 describe Homebrew::Cleanup do

@@ -1,7 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask"
 require "cli/parser"
 require "utils/tar"
 

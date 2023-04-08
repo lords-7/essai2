@@ -5,7 +5,6 @@ require "cli/parser"
 require "formula_installer"
 require "install"
 require "upgrade"
-require "cask"
 require "api"
 
 module Homebrew

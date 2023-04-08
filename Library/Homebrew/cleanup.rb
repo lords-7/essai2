@@ -4,7 +4,6 @@
 require "utils/bottles"
 
 require "formula"
-require "cask"
 require "set"
 
 module Homebrew

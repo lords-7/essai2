@@ -1,9 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/config"
-require "cask/cache"
-
 require "test/support/helper/cask/install_helper"
 require "test/support/helper/cask/never_sudo_system_command"
 

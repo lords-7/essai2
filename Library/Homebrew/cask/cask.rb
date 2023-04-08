@@ -1,10 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/cask_loader"
-require "cask/config"
-require "cask/dsl"
-require "cask/metadata"
 require "utils/bottles"
 require "extend/api_hashable"
 
@@ -178,8 +174,6 @@ module Cask
     end
 
     def new_download_sha
-      require "cask/installer"
-
       # Call checksumable? before hashing
       @new_download_sha ||= Installer.new(self, verify_download_integrity: false)
                                      .download(quiet: true)

@@ -17,7 +17,6 @@ require "cli/parser"
 require "json"
 require "formula_auditor"
 require "tap_auditor"
-require "cask"
 
 module Homebrew
   extend T::Sig

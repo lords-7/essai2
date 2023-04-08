@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/cask_loader"
-
 module Test
   module Helper
     module Cask

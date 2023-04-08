@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/dsl/base"
-
 shared_examples Cask::DSL::Base do
   it "supports the token method" do
     expect(dsl.token).to eq(cask.token)

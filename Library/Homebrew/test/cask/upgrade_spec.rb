@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/upgrade"
-
 describe Cask::Upgrade, :cask do
   let(:version_latest_path_2) { version_latest.config.appdir.join("Caffeine Pro.app") }
   let(:version_latest_path_1) { version_latest.config.appdir.join("Caffeine Mini.app") }

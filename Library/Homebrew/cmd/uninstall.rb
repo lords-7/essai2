@@ -6,7 +6,6 @@ require "formula"
 require "diagnostic"
 require "migrator"
 require "cli/parser"
-require "cask"
 require "uninstall"
 
 module Homebrew

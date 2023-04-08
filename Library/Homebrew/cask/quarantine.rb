@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "development_tools"
-require "cask/exceptions"
 
 module Cask
   # Helper module for quarantining files.

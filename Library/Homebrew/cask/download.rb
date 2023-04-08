@@ -2,8 +2,6 @@
 # frozen_string_literal: true
 
 require "fileutils"
-require "cask/cache"
-require "cask/quarantine"
 
 module Cask
   # A download corresponding to a {Cask}.

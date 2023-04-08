@@ -106,8 +106,6 @@ module Cask
 
         Homebrew.auditing = true
 
-        require "cask/auditor"
-
         casks.to_h do |cask|
           odebug "Auditing Cask #{cask}"
           [cask.sourcefile_path, Auditor.audit(cask, **options)]

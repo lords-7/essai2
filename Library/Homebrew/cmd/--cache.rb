@@ -3,7 +3,6 @@
 
 require "fetch"
 require "cli/parser"
-require "cask"
 
 module Homebrew
   extend T::Sig

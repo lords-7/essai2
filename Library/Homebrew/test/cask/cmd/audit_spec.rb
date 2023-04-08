@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/auditor"
-
 describe Cask::Cmd::Audit, :cask do
   let(:cask) { Cask::Cask.new("cask") }
   let(:cask_with_many_languages) { Cask::CaskLoader.load(cask_path("with-many-languages")) }

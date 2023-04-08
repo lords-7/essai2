@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/uninstall"
-
 describe Cask::Uninstall, :cask do
   it "displays the uninstallation progress" do
     caffeine = Cask::CaskLoader.load(cask_path("local-caffeine"))

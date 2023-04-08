@@ -3,9 +3,6 @@
 
 require "cask/cmd/audit"
 require "cask/cmd/install"
-require "cask/cask_loader"
-require "cask/download"
-require "cask/quarantine"
 
 describe Cask::Quarantine, :cask do
   matcher :be_quarantined do

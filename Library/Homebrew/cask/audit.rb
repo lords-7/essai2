@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/denylist"
-require "cask/download"
 require "digest"
 require "livecheck/livecheck"
 require "utils/shared_audits"

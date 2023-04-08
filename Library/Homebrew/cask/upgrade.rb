@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "env_config"
-require "cask/config"
 
 module Cask
   # @api private
@@ -133,8 +132,6 @@ module Cask
       old_cask, new_cask,
       binaries:, force:, quarantine:, require_sha:, skip_cask_deps:, verbose:
     )
-      require "cask/installer"
-
       start_time = Time.now
       odebug "Started upgrade process for Cask #{old_cask}"
       old_config = old_cask.config

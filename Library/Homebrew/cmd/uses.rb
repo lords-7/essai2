@@ -7,7 +7,6 @@
 
 require "formula"
 require "cli/parser"
-require "cask"
 require "dependencies_helpers"
 require "ostruct"
 

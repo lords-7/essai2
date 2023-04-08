@@ -103,8 +103,6 @@ module Cask
           return
         end
 
-        require "cask/installer"
-
         casks.each do |cask|
           Installer.new(cask, **options).install
         rescue CaskAlreadyInstalledError => e

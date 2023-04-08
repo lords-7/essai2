@@ -9,7 +9,6 @@ require "version"
 require "development_tools"
 require "utils/shell"
 require "system_config"
-require "cask"
 
 module Homebrew
   # Module containing diagnostic checks.

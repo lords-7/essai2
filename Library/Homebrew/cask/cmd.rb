@@ -7,8 +7,6 @@ require "shellwords"
 require "cli/parser"
 require "extend/optparse"
 
-require "cask/config"
-
 require "cask/cmd/abstract_command"
 require "cask/cmd/audit"
 require "cask/cmd/install"

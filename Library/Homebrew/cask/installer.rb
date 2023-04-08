@@ -5,10 +5,6 @@ require "formula_installer"
 require "unpack_strategy"
 require "utils/topological_hash"
 
-require "cask/config"
-require "cask/download"
-require "cask/quarantine"
-
 require "cgi"
 
 module Cask

@@ -33,8 +33,6 @@ module Cask
         quarantine: nil,
         zap: nil
       )
-        require "cask/installer"
-
         options = {
           binaries:       binaries,
           verbose:        verbose,

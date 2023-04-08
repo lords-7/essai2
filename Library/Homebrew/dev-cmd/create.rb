@@ -6,7 +6,6 @@ require "formula_creator"
 require "missing_formula"
 require "cli/parser"
 require "utils/pypi"
-require "cask"
 
 module Homebrew
   extend T::Sig

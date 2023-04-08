@@ -6,6 +6,7 @@ require "cask/exceptions"
 
 module Cask
   autoload :Artifact, "cask/artifact"
+  autoload :ArtifactSet, "cask/artifact_set"
   autoload :Audit, "cask/audit"
   autoload :Auditor, "cask/auditor"
   autoload :Cache, "cask/cache"

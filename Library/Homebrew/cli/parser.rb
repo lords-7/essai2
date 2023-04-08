@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "env_config"
-require "cask"
 require "cli/args"
 require "optparse"
 require "set"

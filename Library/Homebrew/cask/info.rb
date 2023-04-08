@@ -8,8 +8,6 @@ module Cask
   # @api private
   class Info
     def self.get_info(cask)
-      require "cask/installer"
-
       output = +"#{title_info(cask)}\n"
       output << "#{Formatter.url(cask.homepage)}\n" if cask.homepage
       output << installation_info(cask)

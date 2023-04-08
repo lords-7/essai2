@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "bundle_version"
-require "cask"
 
 module Homebrew
   # Check unversioned casks for updates by extracting their

@@ -4,7 +4,6 @@
 require "delegate"
 require "api"
 require "cli/args"
-require "cask"
 
 autoload :Formulary, "formulary"
 autoload :Keg, "keg"

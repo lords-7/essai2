@@ -98,8 +98,6 @@ describe Utils::Autoremove do
   shared_context "with formulae and casks for dependency testing" do
     include_context "with formulae for dependency testing"
 
-    require "cask/cask_loader"
-
     let(:cask_one_dep) do
       Cask::CaskLoader.load(+<<-RUBY)
         cask "red" do

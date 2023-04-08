@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "formulary"
-require "cask"
 require "cli/parser"
 
 class String
@@ -71,7 +70,6 @@ module Homebrew
 
     require "formula"
     require "keg"
-    require "cask"
 
     ohai "Interactive Homebrew Shell", "Example commands available with: `brew irb --examples`"
     if args.pry?

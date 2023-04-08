@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/macos"
-
 module Cask
   # Helper class for uninstalling `.pkg` installers.
   #

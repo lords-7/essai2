@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "formula"
-require "cask"
 
 # Helper module for validating syntax in taps.
 #

@@ -1,8 +1,6 @@
 # typed: false
 # frozen_string_literal: true
 
-require "cask/list"
-
 describe Cask::List, :cask do
   it "lists the installed Casks in a pretty fashion" do
     casks = %w[local-caffeine local-transmission].map { |c| Cask::CaskLoader.load(c) }

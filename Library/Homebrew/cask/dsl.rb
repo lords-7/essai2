@@ -5,25 +5,8 @@ require "locale"
 require "lazy_object"
 require "livecheck"
 
-require "cask/artifact"
-require "cask/artifact_set"
-
-require "cask/caskroom"
-require "cask/exceptions"
-
-require "cask/dsl/base"
-require "cask/dsl/caveats"
-require "cask/dsl/conflicts_with"
-require "cask/dsl/container"
-require "cask/dsl/depends_on"
-require "cask/dsl/postflight"
-require "cask/dsl/preflight"
-require "cask/dsl/uninstall_postflight"
-require "cask/dsl/uninstall_preflight"
-require "cask/dsl/version"
-
+# TODO: Move into the cask namespace
 require "cask/url"
-require "cask/utils"
 
 require "extend/on_system"
 
@@ -32,6 +15,17 @@ module Cask
   #
   # @api private
   class DSL
+    autoload :Base, "cask/dsl/base"
+    autoload :Caveats, "cask/dsl/caveats"
+    autoload :ConflictsWith, "cask/dsl/conflicts_with"
+    autoload :Container, "cask/dsl/container"
+    autoload :DependsOn, "cask/dsl/depends_on"
+    autoload :Postflight, "cask/dsl/postflight"
+    autoload :Preflight, "cask/dsl/preflight"
+    autoload :UninstallPostflight, "cask/dsl/uninstall_postflight"
+    autoload :UninstallPreflight, "cask/dsl/uninstall_preflight"
+    autoload :Version, "cask/dsl/version"
+
     ORDINARY_ARTIFACT_CLASSES = [
       Artifact::Installer,
       Artifact::App,
