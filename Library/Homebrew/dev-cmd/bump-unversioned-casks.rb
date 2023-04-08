@@ -2,9 +2,7 @@
 # frozen_string_literal: true
 
 require "timeout"
-require "cask/download"
-require "cask/installer"
-require "cask/cask_loader"
+require "cask"
 require "cli/parser"
 require "tap"
 require "unversioned_cask_checker"

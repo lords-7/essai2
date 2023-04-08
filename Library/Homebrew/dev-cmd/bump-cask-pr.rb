@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "cask"
-require "cask/download"
 require "cli/parser"
 require "utils/tar"
 

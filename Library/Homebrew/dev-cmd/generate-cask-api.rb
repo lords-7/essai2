@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "cli/parser"
-require "cask/cask"
+require "cask"
 
 module Homebrew
   extend T::Sig
