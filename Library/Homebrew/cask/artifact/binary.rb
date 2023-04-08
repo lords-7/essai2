@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/artifact/symlinked"
-
 module Cask
   module Artifact
     # Artifact corresponding to the `binary` stanza.

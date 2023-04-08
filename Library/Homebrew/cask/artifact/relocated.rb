@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/artifact/abstract_artifact"
-
 module Cask
   module Artifact
     # Superclass for all artifacts which have a source and a target location.

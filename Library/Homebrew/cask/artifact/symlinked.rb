@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/artifact/relocated"
-
 module Cask
   module Artifact
     # Superclass for all artifacts which are installed by symlinking them to the target location.

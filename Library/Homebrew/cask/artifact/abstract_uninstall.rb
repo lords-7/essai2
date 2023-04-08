@@ -4,7 +4,6 @@
 require "timeout"
 
 require "utils/user"
-require "cask/artifact/abstract_artifact"
 
 module Cask
   module Artifact

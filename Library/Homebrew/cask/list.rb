@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/artifact/relocated"
-
 module Cask
   # @api private
   class List

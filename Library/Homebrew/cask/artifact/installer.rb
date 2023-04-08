@@ -1,8 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-require "cask/artifact/abstract_artifact"
-
 module Cask
   module Artifact
     # Artifact corresponding to the `installer` stanza.
