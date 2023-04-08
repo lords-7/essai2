@@ -1,10 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-autoload :Formatter, "utils/formatter"
-autoload :GitHub, "utils/github"
-autoload :Tty, "utils/tty"
-
 require "time"
 
 require "context"
@@ -16,6 +12,9 @@ require "utils/fork"
 require "utils/gems"
 require "utils/git_repository"
 require "utils/popen"
+require "utils/formatter"
+require "utils/github"
+require "utils/tty"
 
 module Homebrew
   extend Context

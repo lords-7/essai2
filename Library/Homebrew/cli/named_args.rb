@@ -4,10 +4,9 @@
 require "delegate"
 require "api"
 require "cli/args"
-
-autoload :Formulary, "formulary"
-autoload :Keg, "keg"
-autoload :MissingFormula, "missing_formula"
+require "formulary"
+require "keg"
+require "missing_formula"
 
 module Homebrew
   module CLI
