@@ -346,6 +346,8 @@ module Homebrew
       EOS
     end
 
+    commit_message = "#{formula.name} #{new_formula_version}"
+
     if new_url =~ %r{^https://github\.com/([\w-]+)/([\w-]+)/archive/refs/tags/(v?[.0-9]+)\.tar\.}
       owner = Regexp.last_match(1)
       repo = Regexp.last_match(2)
@@ -360,11 +362,20 @@ module Homebrew
       if github_release_data.present?
         pre = "pre" if github_release_data["prerelease"].present?
         pr_message += <<~XML
+
           <details>
-            <summary>#{pre}release notes</summary>
-            <pre>#{github_release_data["body"]}</pre>
+          <summary>#{pre}release notes</summary>
+
+          #{github_release_data["body"]}
+
           </details>
         XML
+
+        commit_message += <<~MESSAGE
+
+          #{pre}release notes:
+          #{github_release_data["body"]}
+        MESSAGE
       end
     end
 
@@ -375,7 +386,7 @@ module Homebrew
       remote:           remote,
       remote_branch:    remote_branch,
       branch_name:      "bump-#{formula.name}-#{new_formula_version}",
-      commit_message:   "#{formula.name} #{new_formula_version}",
+      commit_message:   commit_message,
       previous_branch:  previous_branch,
       tap:              formula.tap,
       tap_remote_repo:  tap_remote_repo,
