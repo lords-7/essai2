@@ -72,6 +72,7 @@ brew update --force --quiet
 chmod -R go-w "$(brew --prefix)/share/zsh"
 ```
 
+
 Make sure you avoid installing into:
 
 * Directories with names that contain spaces. Homebrew itself can handle spaces, but many build scripts cannot.
