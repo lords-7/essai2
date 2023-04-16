@@ -6,6 +6,7 @@ require "extend/cachable"
 require "tab"
 require "utils/bottles"
 require "service"
+require "cgi"
 
 require "active_support/core_ext/hash/deep_transform_values"
 
@@ -257,6 +258,7 @@ module Formulary
       resource "ruby-source" do
         tap_git_head = json_formula.fetch("tap_git_head", "HEAD")
         ruby_source_path = json_formula.fetch("ruby_source_path", "Formula/#{name}.rb")
+        ruby_source_path = CGI.escape(ruby_source_path)
         ruby_source_sha256 = json_formula.dig("ruby_source_checksum", "sha256")
 
         url "https://raw.githubusercontent.com/Homebrew/homebrew-core/#{tap_git_head}/#{ruby_source_path}"
