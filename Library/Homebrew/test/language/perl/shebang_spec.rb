@@ -5,17 +5,10 @@ require "language/perl"
 require "utils/shebang"
 
 describe Language::Perl::Shebang do
-  let(:file) { Tempfile.new("perl-shebang") }
+  let(:file) { File.open("#{TEST_TMPDIR}/perl-shebang", "w") }
   let(:perl_f) do
     formula "perl" do
       url "https://brew.sh/perl-1.0.tgz"
-    end
-  end
-  let(:f) do
-    formula "foo" do
-      url "https://brew.sh/foo-1.0.tgz"
-
-      uses_from_macos "perl"
     end
   end
 
@@ -29,13 +22,20 @@ describe Language::Perl::Shebang do
     file.flush
   end
 
-  after { file.unlink }
+  after { FileUtils.rm file }
 
   describe "#detected_perl_shebang" do
     it "can be used to replace Perl shebangs" do
-      allow(Formulary).to receive(:factory)
       allow(Formulary).to receive(:factory).with(perl_f.name).and_return(perl_f)
-      Utils::Shebang.rewrite_shebang described_class.detected_perl_shebang(f), file.path
+      formula "foo" do
+        include Language::Perl::Shebang # rubocop:disable RSpec/DescribedClass (does not resolve in this context)
+        url "https://brew.sh/foo-1.0.tgz"
+        uses_from_macos "perl"
+
+        def install
+          rewrite_shebang detected_perl_shebang, Pathname("#{TEST_TMPDIR}/perl-shebang")
+        end
+      end.install
 
       expected_shebang = if OS.mac?
         "/usr/bin/perl#{MacOS.preferred_perl_version}"
