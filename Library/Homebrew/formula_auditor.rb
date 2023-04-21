@@ -662,12 +662,6 @@ module Homebrew
       stable_url_version = Version.parse(stable.url)
       stable_url_minor_version = stable_url_version.minor.to_i
 
-      formula_suffix = stable.version.patch.to_i
-      throttled_rate = formula.tap&.audit_exception(:throttled_formulae, formula.name)
-      if throttled_rate && formula_suffix.modulo(throttled_rate).nonzero?
-        problem "should only be updated every #{throttled_rate} releases on multiples of #{throttled_rate}"
-      end
-
       case (url = stable.url)
       when /[\d._-](alpha|beta|rc\d)/
         matched = Regexp.last_match(1)

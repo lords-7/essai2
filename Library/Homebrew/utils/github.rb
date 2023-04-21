@@ -508,20 +508,52 @@ module GitHub
     nil
   end
 
-  def self.fetch_pull_requests(name, tap_remote_repo, state: nil, version: nil)
+  def self.fetch_pull_requests(name, tap_remote_repo, state: nil, version: nil, merged: nil, created: nil)
     if version.present?
-      query = "#{name} #{version} is:pr"
+      query = "#{name} #{version}"
       regex = /(^|\s)#{Regexp.quote(name)}(:|,|\s)(.*\s)?#{Regexp.quote(version)}(:|,|\s|$)/i
     else
-      query = "#{name} is:pr"
+      query = name.to_s
       regex = /(^|\s)#{Regexp.quote(name)}(:|,|\s|$)/i
     end
-    issues_for_formula(query, tap_remote_repo: tap_remote_repo, state: state).select do |pr|
-      pr["html_url"].include?("/pull/") && regex.match?(pr["title"])
+    query += " is:pr"
+    query += " created:#{created}" if created
+    issues_for_formula(query, tap_remote_repo: tap_remote_repo, state: state).select do |issue|
+      title = issue.fetch("title")
+      next false unless title.match?(regex)
+
+      pr = issue["pull_request"]
+      next false unless pr
+
+      (merged.nil? || pr["merged_at"].nil? != merged)
     end
   rescue API::RateLimitExceededError => e
     opoo e.message
     []
+  end
+
+  sig { params(name: String, tap_remote_repo: String, file: String, days: Integer).void }
+  def self.check_recently_merged_pull_requests(name, tap_remote_repo, file:, days:)
+    after = DateTime.now - days
+    created = ">#{after.strftime("%Y-%m-%d")}"
+
+    pull_requests = fetch_pull_requests(
+      name,
+      tap_remote_repo,
+      state:   "closed",
+      merged:  true,
+      created: created,
+    ).select do |pr|
+      get_pull_request_changed_files(
+        tap_remote_repo, pr["number"]
+      ).any? { |f| f["filename"] == file }
+    end
+    return unless (pr = pull_requests&.first)
+
+    odie <<~EOS
+      Updates for #{name} are throttled and a pull request was already merged in the last #{days} days:
+      #{pr["title"]} #{pr["html_url"]}
+    EOS
   end
 
   def self.check_for_duplicate_pull_requests(name, tap_remote_repo, state:, file:, args:, version: nil)
@@ -530,7 +562,7 @@ module GitHub
         tap_remote_repo, pr["number"]
       ).any? { |f| f["filename"] == file }
     end
-    return if pull_requests.blank?
+    return if pull_requests.none?
 
     duplicates_message = <<~EOS
       These #{state} pull requests may be duplicates:

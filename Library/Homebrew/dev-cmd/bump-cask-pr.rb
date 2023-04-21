@@ -108,8 +108,11 @@ module Homebrew
     old_hash = cask.sha256
 
     check_pull_requests(cask, state: "open", args: args)
-    # if we haven't already found open requests, try for an exact match across closed requests
-    check_pull_requests(cask, state: "closed", args: args, version: new_version) if new_version.present?
+    if new_version.present?
+      check_cask_throttle(cask, args: args)
+      # If we haven't already found open or merged pull requests, try for an exact match across closed requests.
+      check_pull_requests(cask, state: "closed", args: args, version: new_version)
+    end
 
     old_contents = File.read(cask.sourcefile_path)
 
@@ -198,10 +201,12 @@ module Homebrew
 
     commit_message ||= "#{cask.token}: update checksum" if new_hash
 
-    Utils::Inreplace.inreplace_pairs(cask.sourcefile_path,
-                                     replacement_pairs.uniq.compact,
-                                     read_only_run: args.dry_run?,
-                                     silent:        args.quiet?)
+    Utils::Inreplace.inreplace_pairs(
+      cask.sourcefile_path,
+      replacement_pairs.uniq.compact,
+      read_only_run: args.dry_run?,
+      silent:        args.quiet?,
+    )
 
     run_cask_audit(cask, old_contents, args: args)
     run_cask_style(cask, old_contents, args: args)
@@ -217,13 +222,28 @@ module Homebrew
     GitHub.create_bump_pr(pr_info, args: args)
   end
 
-  def check_pull_requests(cask, state:, args:, version: nil)
+  def check_cask_throttle(cask, args:)
     tap_remote_repo = cask.tap.full_name || cask.tap.remote_repo
-    GitHub.check_for_duplicate_pull_requests(cask.token, tap_remote_repo,
-                                             state:   state,
-                                             version: version,
-                                             file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
-                                             args:    args)
+
+    throttle_days = formula.tap.audit_exceptions.dig(:throttled_casks, cask.token) || 0
+    return if throttle_days.zero?
+
+    GitHub.check_recently_merged_pull_requests(
+      cask.token, tap_remote_repo,
+      file: cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
+      days: throttle_days
+    )
+  end
+
+  def check_pull_requests(cask, state:, args:, version: nil, days: nil)
+    tap_remote_repo = cask.tap.full_name || cask.tap.remote_repo
+    GitHub.check_for_duplicate_pull_requests(
+      cask.token, tap_remote_repo,
+      state:   state,
+      version: version,
+      file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
+      args:    args
+    )
   end
 
   def run_cask_audit(cask, old_contents, args:)

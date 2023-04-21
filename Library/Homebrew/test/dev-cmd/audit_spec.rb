@@ -657,7 +657,6 @@ module Homebrew
     end
 
     describe "#audit_specs" do
-      let(:throttle_list) { { throttled_formulae: { "foo" => 10 } } }
       let(:versioned_head_spec_list) { { versioned_head_spec_allowlist: ["foo"] } }
 
       it "doesn't allow to miss a checksum" do
@@ -693,54 +692,6 @@ module Homebrew
 
         fa.audit_specs
         expect(fa.problems).to be_empty
-      end
-
-      it "allows versions with no throttle rate" do
-        fa = formula_auditor "bar", <<~RUBY, core_tap: true, tap_audit_exceptions: throttle_list
-          class Bar < Formula
-            url "https://brew.sh/foo-1.0.1.tgz"
-            sha256 "31cccfc6630528db1c8e3a06f6decf2a370060b982841cfab2b8677400a5092e"
-          end
-        RUBY
-
-        fa.audit_specs
-        expect(fa.problems).to be_empty
-      end
-
-      it "allows major/minor versions with throttle rate" do
-        fa = formula_auditor "foo", <<~RUBY, core_tap: true, tap_audit_exceptions: throttle_list
-          class Foo < Formula
-            url "https://brew.sh/foo-1.0.0.tgz"
-            sha256 "31cccfc6630528db1c8e3a06f6decf2a370060b982841cfab2b8677400a5092e"
-          end
-        RUBY
-
-        fa.audit_specs
-        expect(fa.problems).to be_empty
-      end
-
-      it "allows patch versions to be multiples of the throttle rate" do
-        fa = formula_auditor "foo", <<~RUBY, core_tap: true, tap_audit_exceptions: throttle_list
-          class Foo < Formula
-            url "https://brew.sh/foo-1.0.10.tgz"
-            sha256 "31cccfc6630528db1c8e3a06f6decf2a370060b982841cfab2b8677400a5092e"
-          end
-        RUBY
-
-        fa.audit_specs
-        expect(fa.problems).to be_empty
-      end
-
-      it "doesn't allow patch versions that aren't multiples of the throttle rate" do
-        fa = formula_auditor "foo", <<~RUBY, core_tap: true, tap_audit_exceptions: throttle_list
-          class Foo < Formula
-            url "https://brew.sh/foo-1.0.1.tgz"
-            sha256 "31cccfc6630528db1c8e3a06f6decf2a370060b982841cfab2b8677400a5092e"
-          end
-        RUBY
-
-        fa.audit_specs
-        expect(fa.problems.first[:message]).to match "should only be updated every 10 releases on multiples of 10"
       end
 
       it "allows non-versioned formulae to have a `HEAD` spec" do

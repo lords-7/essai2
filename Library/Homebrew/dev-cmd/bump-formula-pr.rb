@@ -446,27 +446,30 @@ module Homebrew
       return if version.null?
     end
 
-    check_throttle(formula, version)
+    check_formula_throttle(formula, tap_remote_repo)
     check_closed_pull_requests(formula, tap_remote_repo, args: args, version: version)
   end
 
-  def check_throttle(formula, new_version)
-    throttled_rate = formula.tap.audit_exceptions.dig(:throttled_formulae, formula.name)
-    return if throttled_rate.blank?
+  def check_formula_throttle(formula, tap_remote_repo)
+    throttle_days = formula.tap.audit_exceptions.dig(:throttled_formulae, formula.name) || 0
+    return if throttle_days.zero?
 
-    formula_suffix = Version.new(new_version).patch.to_i
-    return if formula_suffix.modulo(throttled_rate).zero?
-
-    odie "#{formula} should only be updated every #{throttled_rate} releases on multiples of #{throttled_rate}"
+    GitHub.check_recently_merged_pull_requests(
+      formula.name, tap_remote_repo,
+      file: formula.path.relative_path_from(formula.tap.path).to_s,
+      days: throttle_days
+    )
   end
 
   def check_closed_pull_requests(formula, tap_remote_repo, args:, version:)
     # if we haven't already found open requests, try for an exact match across closed requests
-    GitHub.check_for_duplicate_pull_requests(formula.name, tap_remote_repo,
-                                             version: version,
-                                             state:   "closed",
-                                             file:    formula.path.relative_path_from(formula.tap.path).to_s,
-                                             args:    args)
+    GitHub.check_for_duplicate_pull_requests(
+      formula.name, tap_remote_repo,
+      version: version,
+      state:   "closed",
+      file:    formula.path.relative_path_from(formula.tap.path).to_s,
+      args:    args
+    )
   end
 
   def alias_update_pair(formula, new_formula_version)
