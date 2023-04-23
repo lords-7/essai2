@@ -24,7 +24,7 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
     it "accepts a string" do
       expect(formula).to receive(:system)
         .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "foo")
+              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "--no-build-isolation", "foo")
         .and_return(true)
       virtualenv.pip_install "foo"
     end
@@ -32,7 +32,8 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
     it "accepts a multi-line strings" do
       expect(formula).to receive(:system)
         .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "foo", "bar")
+              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed",
+              "--no-build-isolation", "foo", "bar")
         .and_return(true)
 
       virtualenv.pip_install <<~EOS
@@ -44,12 +45,14 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
     it "accepts an array" do
       expect(formula).to receive(:system)
         .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "foo")
+              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed",
+              "--no-build-isolation", "foo")
         .and_return(true)
 
       expect(formula).to receive(:system)
         .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "bar")
+              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed",
+              "--no-build-isolation", "bar")
         .and_return(true)
 
       virtualenv.pip_install ["foo", "bar"]
@@ -61,18 +64,11 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
       expect(res).to receive(:stage).and_yield
       expect(formula).to receive(:system)
         .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", Pathname.pwd)
+              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed",
+              "--no-build-isolation", Pathname.pwd)
         .and_return(true)
 
       virtualenv.pip_install res
-    end
-
-    it "works without build isolation" do
-      expect(formula).to receive(:system)
-        .with(dir/"bin/pip", "install", "-v", "--no-deps", "--no-binary", ":all:",
-              "--use-feature=no-binary-enable-wheel-cache", "--ignore-installed", "--no-build-isolation", "foo")
-        .and_return(true)
-      virtualenv.pip_install("foo", build_isolation: false)
     end
   end
 
@@ -93,7 +89,7 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
       FileUtils.touch src_bin/"kilroy"
       bin_after = Dir.glob(src_bin/"*")
 
-      expect(virtualenv).to receive(:pip_install).with("foo", { build_isolation: true })
+      expect(virtualenv).to receive(:pip_install).with("foo")
       expect(Dir).to receive(:[]).with(src_bin/"*").twice.and_return(bin_before, bin_after)
 
       virtualenv.pip_install_and_link "foo"
@@ -122,7 +118,7 @@ describe Language::Python::Virtualenv::Virtualenv, :needs_python do
       FileUtils.touch src_man/"man5/kilroy.5"
       man_after = Dir.glob(src_man/"**/*")
 
-      expect(virtualenv).to receive(:pip_install).with("foo", { build_isolation: true })
+      expect(virtualenv).to receive(:pip_install).with("foo")
       expect(Dir).to receive(:[]).with(src_bin/"*").and_return([])
       expect(Dir).to receive(:[]).with(src_man/"man*/*").and_return(man_before)
       expect(Dir).to receive(:[]).with(src_bin/"*").and_return([])
