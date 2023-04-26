@@ -27,12 +27,19 @@ module Homebrew
     {{ content }}
   EOS
 
-  def html_template(title)
+  def html_template(title, aliases)
+    redirect_list = ""
+    aliases.each do |item|
+      redirect_list += "  - /formula/#{item}\n"
+    end
+
     <<~EOS
       ---
       title: #{title}
       layout: formula
-      redirect_from: /formula-linux/#{title}
+      redirect_from:
+        - /formula-linux/#{title}
+      #{redirect_list}
       ---
       {{ content }}
     EOS
@@ -50,14 +57,22 @@ module Homebrew
     Formulary.enable_factory_cache!
     Formula.generating_hash!
 
+    # invert the hash but group duplicates
+    tap_renames = tap.formula_renames.each_with_object({}) { |(k, v), o| (o[v]||=[])<<k }
+
     tap.formula_names.each do |name|
       formula = Formulary.factory(name)
       name = formula.name
       json = JSON.pretty_generate(formula.to_hash_with_variations)
 
+      renames = tap_renames.fetch(name, [])
       File.write("_data/formula/#{name.tr("+", "_")}.json", "#{json}\n")
+      File.write("formula/#{name}.html", html_template(name, renames))
       File.write("api/formula/#{name}.json", FORMULA_JSON_TEMPLATE)
-      File.write("formula/#{name}.html", html_template(name))
+      # redirects are only supported for HTML so simply store a copy here
+      renames.each do |original|
+        File.write("api/formula/#{original}.json", FORMULA_JSON_TEMPLATE)
+      end
     rescue
       onoe "Error while generating data for formula '#{name}'."
       raise

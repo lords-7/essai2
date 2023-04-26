@@ -27,11 +27,16 @@ module Homebrew
     {{ content }}
   EOS
 
-  def html_template(title)
+  def html_template(title, aliases)
+    redirect_list = aliases.present? ? "redirect_from:\n" : ""
+    aliases.each do |item|
+      redirect_list += "  - /formula/#{item}\n"
+    end
     <<~EOS
       ---
       title: #{title}
       layout: cask
+      #{redirect_list}
       ---
       {{ content }}
     EOS
@@ -56,7 +61,7 @@ module Homebrew
       File.write("_data/cask/#{name}.json", "#{json}\n")
       File.write("api/cask/#{name}.json", CASK_JSON_TEMPLATE)
       File.write("api/cask-source/#{name}.rb", path.read)
-      File.write("cask/#{name}.html", html_template(name))
+      File.write("cask/#{name}.html", html_template(name, []))
     rescue
       onoe "Error while generating data for cask '#{path.stem}'."
       raise
