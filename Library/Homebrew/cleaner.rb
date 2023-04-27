@@ -39,10 +39,9 @@ class Cleaner
     # Of these 3 only 'info/#{name}/dir' is safe to keep since the rest will
     # conflict with other formulae because they use a shared location.
     #
-    # See [cleaner: recursively delete info `dir`s by gromgit · Pull Request
-    # #11597][1], [emacs 28.1 bottle does not contain `dir` file · Issue
-    # #100190][2], and [Keep `info/#{f.name}/dir` files in cleaner by
-    # timvisher][3] for more info.
+    # See pull requests [11597 (cleaner: recursively delete info `dir`s)][1] and
+    # [13215 (keep `info/#{f.name}/dir` files in cleaner)][3] and issue
+    # [100190 (emacs 28.1 bottle does not contain `dir` file)][2] for more info.
     #
     # [1]: https://github.com/Homebrew/brew/pull/11597
     # [2]: https://github.com/Homebrew/homebrew-core/issues/100190

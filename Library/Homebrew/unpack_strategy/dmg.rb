@@ -50,7 +50,7 @@ module UnpackStrategy
         tries = 0
         result = loop do
           # We need to use `find` here instead of Ruby in order to properly handle
-          # file names containing special characters, such as “e” + “´” vs. “é”.
+          # file names containing special characters, such as "e" + "´" vs. "é". # rubocop:disable Style/AsciiComments
           r = system_command("find", args: [".", "-print0"], chdir: pathname, print_stderr: false)
           tries += 1
 
