@@ -508,16 +508,16 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
     filenames = parsed_headers.flat_map do |headers|
       next [] unless (header = headers["content-disposition"])
 
-      [*parse_content_disposition.call("Content-Disposition: #{header}")]
+      Array(parse_content_disposition.call("Content-Disposition: #{header}"))
     end
 
     time = parsed_headers
-           .flat_map { |headers| [*headers["last-modified"]] }
+           .flat_map { |headers| Array(headers["last-modified"]) }
            .map { |t| t.match?(/^\d+$/) ? Time.at(t.to_i) : Time.parse(t) }
            .last
 
     file_size = parsed_headers
-                .flat_map { |headers| [*headers["content-length"]&.to_i] }
+                .flat_map { |headers| Array(headers["content-length"]&.to_i) }
                 .last
 
     is_redirection = url != final_url

@@ -347,8 +347,6 @@ Style/BlockDelimiters:
     - "sig"
 
 # TODO: This group of cops comes from `EnabledByDefault: true`. We should maybe enable the ones with < 100 offenses.
-Style/ArrayCoercion:
-  Enabled: false
 Style/ClassMethodsDefinitions:
   Enabled: false
 Style/ConstantVisibility:
