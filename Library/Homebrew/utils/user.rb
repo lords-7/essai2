@@ -20,7 +20,7 @@ class User < SimpleDelegator
 
     out.lines
        .map(&:split)
-       .any? { |user, type,| user == self && type == "console" }
+       .any? { |user, type| user == self && type == "console" }
   end
 
   # Return the current user.

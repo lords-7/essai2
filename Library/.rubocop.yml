@@ -387,8 +387,6 @@ Style/StringHashKeys:
   Enabled: false
 Style/TopLevelMethodDefinition:
   Enabled: false
-Style/TrailingCommaInBlockArgs:
-  Enabled: false
 Style/YodaExpression:
   Enabled: false
 

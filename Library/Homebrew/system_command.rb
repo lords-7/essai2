@@ -307,14 +307,14 @@ class SystemCommand
 
     sig { returns(String) }
     def stdout
-      @stdout ||= @output.select { |type,| type == :stdout }
+      @stdout ||= @output.select { |type| type == :stdout }
                          .map { |_, line| line }
                          .join
     end
 
     sig { returns(String) }
     def stderr
-      @stderr ||= @output.select { |type,| type == :stderr }
+      @stderr ||= @output.select { |type| type == :stderr }
                          .map { |_, line| line }
                          .join
     end
