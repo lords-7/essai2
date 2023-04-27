@@ -373,8 +373,6 @@ Style/MethodCalledOnDoEndBlock:
   Enabled: false
 Style/MissingElse:
   Enabled: false
-Style/MultilineMethodSignature:
-  Enabled: false
 Style/OptionHash:
   Enabled: false
 Style/RequireOrder:
