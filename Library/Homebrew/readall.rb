@@ -102,19 +102,19 @@ module Readall
 
     def syntax_errors_or_warnings?(filename)
       # Retrieve messages about syntax errors/warnings printed to `$stderr`.
-      _, err, status = system_command(RUBY_PATH, args: ["-c", "-w", filename], print_stderr: false)
+      result = system_command(RUBY_PATH, args: ["-c", "-w", filename], print_stderr: false)
 
       # Ignore unnecessary warning about named capture conflicts.
       # See https://bugs.ruby-lang.org/issues/12359.
-      messages = err.lines
-                    .grep_v(/named capture conflicts a local variable/)
-                    .join
+      messages = result.stderr.lines
+                       .grep_v(/named capture conflicts a local variable/)
+                       .join
 
       $stderr.print messages
 
       # Only syntax errors result in a non-zero status code. To detect syntax
       # warnings we also need to inspect the output to `$stderr`.
-      !status.success? || !messages.chomp.empty?
+      !result.status.success? || !messages.chomp.empty?
     end
   end
 end

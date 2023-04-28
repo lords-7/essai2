@@ -18,10 +18,22 @@ class SystemCommand
 
   # Helper functions for calling {SystemCommand.run}.
   module Mixin
+    sig {
+      params(
+        executable: T.any(String, Pathname),
+        options:    T.untyped,
+      ).returns(SystemCommand::Result)
+    }
     def system_command(executable, **options)
       SystemCommand.run(executable, **options)
     end
 
+    sig {
+      params(
+        command: T.any(String, Pathname),
+        options: T.untyped,
+      ).returns(SystemCommand::Result)
+    }
     def system_command!(command, **options)
       SystemCommand.run!(command, **options)
     end

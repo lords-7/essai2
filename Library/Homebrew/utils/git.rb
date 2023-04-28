@@ -14,8 +14,8 @@ module Utils
     def self.version
       return @version if defined?(@version)
 
-      stdout, _, status = system_command(git, args: ["--version"], verbose: false, print_stderr: false)
-      @version = status.success? ? stdout.chomp[/git version (\d+(?:\.\d+)*)/, 1] : nil
+      result = system_command(git, args: ["--version"], verbose: false, print_stderr: false)
+      @version = result.status.success? ? result.stdout.chomp[/git version (\d+(?:\.\d+)*)/, 1] : nil
     end
 
     def self.path

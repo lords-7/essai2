@@ -690,15 +690,15 @@ module GitHub
   def self.last_commit(user, repo, ref, version)
     return if Homebrew::EnvConfig.no_github_api?
 
-    output, _, status = curl_output(
+    result = curl_output(
       "--silent", "--head", "--location",
       "--header", "Accept: application/vnd.github.sha",
       url_to("repos", user, repo, "commits", ref).to_s
     )
 
-    return unless status.success?
+    return unless result.status.success?
 
-    commit = output[/^ETag: "(\h+)"/, 1]
+    commit = T.must(result.stdout[/^ETag: "(\h+)"/, 1])
     return if commit.blank?
 
     version.update_commit(commit)
@@ -708,16 +708,16 @@ module GitHub
   def self.multiple_short_commits_exist?(user, repo, commit)
     return if Homebrew::EnvConfig.no_github_api?
 
-    output, _, status = curl_output(
+    result = curl_output(
       "--silent", "--head", "--location",
       "--header", "Accept: application/vnd.github.sha",
       url_to("repos", user, repo, "commits", commit).to_s
     )
 
-    return true unless status.success?
-    return true if output.blank?
+    return true unless result.status.success?
+    return true if result.stdout.blank?
 
-    output[/^Status: (200)/, 1] != "200"
+    result.stdout[/^Status: (200)/, 1] != "200"
   end
 
   def self.repo_commits_for_user(nwo, user, filter, args)

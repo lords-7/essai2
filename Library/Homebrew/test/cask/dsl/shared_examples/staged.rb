@@ -18,6 +18,7 @@ shared_examples Cask::Staged do
   it "can run system commands with list-form arguments" do
     expect(fake_system_command).to receive(:run!)
       .with("echo", args: ["homebrew-cask", "rocks!"])
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.system_command("echo", args: ["homebrew-cask", "rocks!"])
   end
@@ -28,6 +29,7 @@ shared_examples Cask::Staged do
 
     expect(fake_system_command).to receive(:run!)
       .with("/bin/chmod", args: ["-R", "--", "777", fake_pathname], sudo: false)
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.set_permissions(fake_pathname.to_s, "777")
   end
@@ -38,6 +40,7 @@ shared_examples Cask::Staged do
 
     expect(fake_system_command).to receive(:run!)
       .with("/bin/chmod", args: ["-R", "--", "777", fake_pathname, fake_pathname], sudo: false)
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.set_permissions([fake_pathname.to_s, fake_pathname.to_s], "777")
   end
@@ -56,6 +59,7 @@ shared_examples Cask::Staged do
 
     expect(fake_system_command).to receive(:run!)
       .with("/usr/sbin/chown", args: ["-R", "--", "fake_user:staff", fake_pathname], sudo: true)
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.set_ownership(fake_pathname.to_s)
   end
@@ -68,6 +72,7 @@ shared_examples Cask::Staged do
 
     expect(fake_system_command).to receive(:run!)
       .with("/usr/sbin/chown", args: ["-R", "--", "fake_user:staff", fake_pathname, fake_pathname], sudo: true)
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.set_ownership([fake_pathname.to_s, fake_pathname.to_s])
   end
@@ -79,6 +84,7 @@ shared_examples Cask::Staged do
 
     expect(fake_system_command).to receive(:run!)
       .with("/usr/sbin/chown", args: ["-R", "--", "other_user:other_group", fake_pathname], sudo: true)
+      .and_return(instance_double(SystemCommand::Result))
 
     staged.set_ownership(fake_pathname.to_s, user: "other_user", group: "other_group")
   end

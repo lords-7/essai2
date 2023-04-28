@@ -16,13 +16,13 @@ module Repology
     last_package_in_response += "/" if last_package_in_response.present?
     url = "https://repology.org/api/v1/projects/#{last_package_in_response}?inrepo=#{repository}&outdated=1"
 
-    output, errors, = curl_output(url.to_s, "--silent", use_homebrew_curl: !curl_supports_tls13?)
-    JSON.parse(output)
+    result = curl_output(url.to_s, "--silent", use_homebrew_curl: !curl_supports_tls13?)
+    JSON.parse(result.stdout)
   rescue
     if Homebrew::EnvConfig.developer?
-      $stderr.puts errors
+      $stderr.puts T.must(result).stderr
     else
-      odebug errors
+      odebug T.must(result).stderr
     end
 
     raise
@@ -32,12 +32,12 @@ module Repology
     url = "https://repology.org/tools/project-by?repo=#{repository}&" \
           "name_type=srcname&target_page=api_v1_project&name=#{name}"
 
-    output, errors, = curl_output("--location", "--silent", url.to_s, use_homebrew_curl: !curl_supports_tls13?)
+    result = curl_output("--location", "--silent", url.to_s, use_homebrew_curl: !curl_supports_tls13?)
 
-    data = JSON.parse(output)
+    data = JSON.parse(result.stdout)
     { name => data }
   rescue => e
-    error_output = [errors, "#{e.class}: #{e}", e.backtrace].compact
+    error_output = [T.must(result).stderr, "#{e.class}: #{e}", e.backtrace].compact
     if Homebrew::EnvConfig.developer?
       $stderr.puts(*error_output)
     else

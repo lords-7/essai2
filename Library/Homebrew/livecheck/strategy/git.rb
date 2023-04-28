@@ -50,7 +50,7 @@ module Homebrew
         # @return [Hash]
         sig { params(url: String, regex: T.nilable(Regexp)).returns(T::Hash[Symbol, T.untyped]) }
         def self.tag_info(url, regex = nil)
-          stdout, stderr, _status = system_command(
+          result = system_command(
             "git",
             args:         ["ls-remote", "--tags", url],
             env:          { "GIT_TERMINAL_PROMPT" => "0" },
@@ -60,12 +60,12 @@ module Homebrew
             verbose:      false,
           )
 
-          tags_data = { tags: [] }
-          tags_data[:messages] = stderr.split("\n") if stderr.present?
-          return tags_data if stdout.blank?
+          tags_data = { tags: T.let([], Array) }
+          tags_data[:messages] = result.stderr.split("\n") if result.stderr.present?
+          return tags_data if result.stdout.blank?
 
           # Isolate tag strings and filter by regex
-          tags = stdout.gsub(%r{^.*\trefs/tags/|\^{}$}, "").split("\n").uniq.sort
+          tags = result.stdout.gsub(%r{^.*\trefs/tags/|\^{}$}, "").split("\n").uniq.sort
           tags.select! { |t| t =~ regex } if regex
           tags_data[:tags] = tags
 

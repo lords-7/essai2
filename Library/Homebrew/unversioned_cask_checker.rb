@@ -103,7 +103,8 @@ module Homebrew
       versions = {}
 
       parse_info_plist = proc do |info_plist_path|
-        plist = system_command!("plutil", args: ["-convert", "xml1", "-o", "-", info_plist_path]).plist
+        result = system_command!("plutil", args: ["-convert", "xml1", "-o", "-", info_plist_path])
+        plist = T.cast(result.plist, Hash)
 
         id = plist["CFBundleIdentifier"]
         version = BundleVersion.from_info_plist_content(plist)
@@ -200,10 +201,9 @@ module Homebrew
         end
 
         pkg_paths.each do |pkg_path|
-          packages =
-            system_command!("installer", args: ["-plist", "-pkginfo", "-pkg", pkg_path])
-            .plist
-            .map { |package| package.fetch("Package") }
+          result = system_command!("installer", args: ["-plist", "-pkginfo", "-pkg", pkg_path])
+          packages = T.cast(result.plist, Array)
+                      .map { |package| package.fetch("Package") }
 
           Dir.mktmpdir do |extract_dir|
             extract_dir = Pathname(extract_dir)

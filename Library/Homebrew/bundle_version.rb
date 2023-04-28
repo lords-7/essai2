@@ -14,7 +14,7 @@ module Homebrew
 
     sig { params(info_plist_path: Pathname).returns(T.nilable(T.attached_class)) }
     def self.from_info_plist(info_plist_path)
-      plist = system_command!("plutil", args: ["-convert", "xml1", "-o", "-", info_plist_path]).plist
+      plist = T.cast(system_command!("plutil", args: ["-convert", "xml1", "-o", "-", info_plist_path]).plist, Hash)
       from_info_plist_content(plist)
     end
 

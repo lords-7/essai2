@@ -34,10 +34,10 @@ module SystemConfig
     end
 
     def host_ruby_version
-      out, _, status = system_command(HOST_RUBY_PATH, args: ["-e", "puts RUBY_VERSION"], print_stderr: false)
-      return "N/A" unless status.success?
+      result = system_command(HOST_RUBY_PATH, args: ["-e", "puts RUBY_VERSION"], print_stderr: false)
+      return "N/A" unless result.status.success?
 
-      out
+      result.stdout
     end
 
     def dump_verbose_config(out = $stdout)

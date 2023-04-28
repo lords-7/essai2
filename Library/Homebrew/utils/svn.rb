@@ -20,8 +20,8 @@ module Utils
       def version
         return @version if defined?(@version)
 
-        stdout, _, status = system_command(HOMEBREW_SHIMS_PATH/"shared/svn", args: ["--version"], print_stderr: false)
-        @version = status.success? ? stdout.chomp[/svn, version (\d+(?:\.\d+)*)/, 1] : nil
+        result = system_command(HOMEBREW_SHIMS_PATH/"shared/svn", args: ["--version"], print_stderr: false)
+        @version = result.status.success? ? result.stdout.chomp[/svn, version (\d+(?:\.\d+)*)/, 1] : nil
       end
 
       sig { params(url: String).returns(T::Boolean) }
@@ -29,8 +29,8 @@ module Utils
         return true unless available?
 
         args = ["ls", url, "--depth", "empty"]
-        _, stderr, status = system_command("svn", args: args, print_stderr: false)
-        return status.success? unless stderr.include?("certificate verification failed")
+        result = system_command("svn", args: args, print_stderr: false)
+        return result.status.success? unless result.stderr.include?("certificate verification failed")
 
         # OK to unconditionally trust here because we're just checking if a URL exists.
         system_command("svn", args: args.concat(invalid_cert_flags), print_stderr: false).success?

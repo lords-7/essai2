@@ -15,12 +15,12 @@ class User < SimpleDelegator
   # Return whether the user has an active GUI session.
   sig { returns(T::Boolean) }
   def gui?
-    out, _, status = system_command "who"
-    return false unless status.success?
+    result = system_command "who"
+    return false unless result.status.success?
 
-    out.lines
-       .map(&:split)
-       .any? { |user, type,| user == self && type == "console" }
+    result.stdout.lines
+          .map(&:split)
+          .any? { |user, type,| user == T.cast(self, User) && type == "console" }
   end
 
   # Return the current user.

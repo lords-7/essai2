@@ -222,8 +222,10 @@ module GitHub
 
         args += ["--dump-header", T.must(headers_tmpfile.path)]
 
-        output, errors, status = curl_output("--location", url.to_s, *args, secrets: [token])
-        output, _, http_code = output.rpartition("\n")
+        result = curl_output("--location", url.to_s, *args, secrets: [token])
+        errors = result.stderr
+        status = result.status
+        output, _, http_code = result.stdout.rpartition("\n")
         output, _, http_code = output.rpartition("\n") if http_code == "000"
         headers = headers_tmpfile.read
       ensure

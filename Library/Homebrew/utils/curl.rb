@@ -113,6 +113,20 @@ module Utils
       args + extra_args
     end
 
+    sig {
+      params(
+        args:              T.untyped,
+        secrets:           T.nilable(T.any(String, T::Array[String])),
+        print_stdout:      T.nilable(T::Boolean),
+        print_stderr:      T.nilable(T::Boolean),
+        debug:             T.nilable(T::Boolean),
+        verbose:           T.nilable(T::Boolean),
+        env:               T::Hash[String, String],
+        timeout:           T.nilable(T.any(Integer, Float)),
+        use_homebrew_curl: T::Boolean,
+        options:           T.untyped,
+      ).returns(SystemCommand::Result)
+    }
     def curl_with_workarounds(
       *args,
       secrets: nil, print_stdout: nil, print_stderr: nil, debug: nil,
@@ -136,7 +150,7 @@ module Utils
 
       return result if result.success? || args.include?("--http1.1")
 
-      raise Timeout::Error, result.stderr.lines.last.chomp if timeout && result.status.exitstatus == 28
+      raise Timeout::Error, T.must(result.stderr.lines.last).chomp if timeout && result.status.exitstatus == 28
 
       # Error in the HTTP2 framing layer
       if result.exit_status == 16
@@ -163,12 +177,27 @@ module Utils
       result
     end
 
-    def curl(*args, print_stdout: true, **options)
-      result = curl_with_workarounds(*args, print_stdout: print_stdout, **options)
+    sig {
+      params(
+        args:    T.untyped,
+        options: T.untyped,
+      ).returns(SystemCommand::Result)
+    }
+    def curl(*args, **options)
+      options[:print_stdout] = true unless options.key?(:print_stdout)
+      result = curl_with_workarounds(*args, **options)
       result.assert_success!
       result
     end
 
+    sig {
+      params(
+        args:        T.untyped,
+        to:          T.nilable(T.any(String, Pathname)),
+        try_partial: T::Boolean,
+        options:     T.untyped,
+      ).void
+    }
     def curl_download(*args, to: nil, try_partial: false, **options)
       destination = Pathname(to)
       destination.dirname.mkpath
@@ -201,11 +230,24 @@ module Utils
       curl(*args, **options)
     end
 
+    sig {
+      params(
+        args:    T.untyped,
+        options: T.untyped,
+      ).returns(SystemCommand::Result)
+    }
     def curl_output(*args, **options)
       curl_with_workarounds(*args, print_stderr: false, show_output: true, **options)
     end
 
+    sig {
+      params(
+        args:    T.untyped,
+        options: T.untyped,
+      ).returns(T.nilable(T::Hash[Symbol, T.untyped]))
+    }
     def curl_head(*args, **options)
+      parsed_output = T.let(nil, T.nilable(Hash))
       [[], ["--request", "GET"]].each do |request_args|
         result = curl_output(
           "--fail", "--location", "--silent", "--head", *request_args, *args,
@@ -220,11 +262,12 @@ module Utils
           next if request_args.empty? &&
                   parsed_output.fetch(:responses).none? { |r| r.fetch(:headers).key?("content-disposition") }
 
-          return parsed_output if result.success?
+          break if result.success?
         end
 
         result.assert_success!
       end
+      parsed_output
     end
 
     # Check if a URL is protected by CloudFlare (e.g. badlion.net and jaxx.io).
@@ -405,7 +448,7 @@ module Utils
       end
 
       max_time = hash_needed ? 600 : 25
-      output, _, status = curl_output(
+      result = curl_output(
         *specs, "--dump-header", "-", "--output", file.path, "--location", url,
         use_homebrew_curl: use_homebrew_curl,
         connect_timeout:   15,
@@ -415,7 +458,7 @@ module Utils
         referer:           referer
       )
 
-      parsed_output = parse_curl_output(output)
+      parsed_output = parse_curl_output(result.stdout)
       responses = parsed_output[:responses]
 
       final_url = curl_response_last_location(responses)
@@ -428,7 +471,7 @@ module Utils
       etag = headers["etag"][ETAG_VALUE_REGEX, 1] if headers["etag"].present?
       content_length = headers["content-length"]
 
-      if status.success?
+      if result.status.success?
         open_args = {}
         # Try to get encoding from Content-Type header
         # TODO: add guessing encoding by <meta http-equiv="Content-Type" ...> tag

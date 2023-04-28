@@ -11,7 +11,14 @@ describe User do
     before do
       allow(SystemCommand).to receive(:run)
         .with("who", any_args)
-        .and_return([who_output, "", instance_double(Process::Status, success?: true)])
+        .and_return(
+          instance_double(
+            SystemCommand::Result,
+            stdout: who_output,
+            stderr: "",
+            status: instance_double(Process::Status, success?: true),
+          ),
+        )
     end
 
     context "when the current user is in a console session" do

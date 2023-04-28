@@ -92,11 +92,11 @@ module UnpackStrategy
 
             # For HFS, just use <mount-path>
             # For APFS, find the <physical-store> corresponding to <mount-path>
-            eject_paths = disk_info.plist
-                                   .fetch("APFSPhysicalStores", [])
-                                   .map { |store| store["APFSPhysicalStore"] }
-                                   .compact
-                                   .presence || [path]
+            eject_paths = T.cast(disk_info.plist, Hash)
+                           .fetch("APFSPhysicalStores", [])
+                           .map { |store| store["APFSPhysicalStore"] }
+                           .compact
+                           .presence || [path]
 
             eject_paths.each do |eject_path|
               system_command! "diskutil",
@@ -160,8 +160,8 @@ module UnpackStrategy
     end
 
     def self.can_extract?(path)
-      stdout, _, status = system_command("hdiutil", args: ["imageinfo", "-format", path], print_stderr: false)
-      status.success? && !stdout.empty?
+      result = system_command("hdiutil", args: ["imageinfo", "-format", path], print_stderr: false)
+      result.status.success? && !result.stdout.empty?
     end
 
     private
@@ -194,7 +194,7 @@ module UnpackStrategy
 
         # If mounting without agreeing to EULA succeeded, there is none.
         plist = if without_eula.success?
-          without_eula.plist
+          T.cast(without_eula.plist, Hash)
         else
           cdr_path = mount_dir/path.basename.sub_ext(".cdr")
 
@@ -221,7 +221,7 @@ module UnpackStrategy
             ohai "Software License Agreement for '#{path}':", eula_text
           end
 
-          with_eula.plist
+          T.cast(with_eula.plist, Hash)
         end
 
         mounts = if plist.respond_to?(:fetch)

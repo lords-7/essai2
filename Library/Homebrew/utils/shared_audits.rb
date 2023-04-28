@@ -56,8 +56,8 @@ module SharedAudits
   def gitlab_repo_data(user, repo)
     @gitlab_repo_data ||= {}
     @gitlab_repo_data["#{user}/#{repo}"] ||= begin
-      out, _, status = curl_output("https://gitlab.com/api/v4/projects/#{user}%2F#{repo}")
-      JSON.parse(out) if status.success?
+      result = curl_output("https://gitlab.com/api/v4/projects/#{user}%2F#{repo}")
+      JSON.parse(result.stdout) if result.status.success?
     end
   end
 
@@ -65,10 +65,10 @@ module SharedAudits
     id = "#{user}/#{repo}/#{tag}"
     @gitlab_release_data ||= {}
     @gitlab_release_data[id] ||= begin
-      out, _, status = curl_output(
+      result = curl_output(
         "https://gitlab.com/api/v4/projects/#{user}%2F#{repo}/releases/#{tag}", "--fail"
       )
-      JSON.parse(out) if status.success?
+      JSON.parse(result.stdout) if result.status.success?
     end
   end
 
@@ -122,10 +122,10 @@ module SharedAudits
 
   def bitbucket(user, repo)
     api_url = "https://api.bitbucket.org/2.0/repositories/#{user}/#{repo}"
-    out, _, status= curl_output("--request", "GET", api_url)
-    return unless status.success?
+    result = curl_output("--request", "GET", api_url)
+    return unless result.status.success?
 
-    metadata = JSON.parse(out)
+    metadata = JSON.parse(result.stdout)
     return if metadata.nil?
 
     return "Uses deprecated mercurial support in Bitbucket" if metadata["scm"] == "hg"
@@ -134,16 +134,16 @@ module SharedAudits
 
     return "Bitbucket repository too new (<30 days old)" if Date.parse(metadata["created_on"]) >= (Date.today - 30)
 
-    forks_out, _, forks_status= curl_output("--request", "GET", "#{api_url}/forks")
-    return unless forks_status.success?
+    forks_result = curl_output("--request", "GET", "#{api_url}/forks")
+    return unless forks_result.status.success?
 
-    watcher_out, _, watcher_status= curl_output("--request", "GET", "#{api_url}/watchers")
-    return unless watcher_status.success?
+    watcher_result = curl_output("--request", "GET", "#{api_url}/watchers")
+    return unless watcher_result.status.success?
 
-    forks_metadata = JSON.parse(forks_out)
+    forks_metadata = JSON.parse(forks_result.stdout)
     return if forks_metadata.nil?
 
-    watcher_metadata = JSON.parse(watcher_out)
+    watcher_metadata = JSON.parse(watcher_result.stdout)
     return if watcher_metadata.nil?
 
     return if forks_metadata["size"] >= 30 || watcher_metadata["size"] >= 75

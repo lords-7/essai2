@@ -29,8 +29,8 @@ module Utils
         path = Pathname.new(path)
         return unless TAR_FILE_EXTENSIONS.include? path.extname
 
-        stdout, _, status = system_command(executable, args: ["--list", "--file", path], print_stderr: false)
-        odie "#{path} is not a valid tar file!" if !status.success? || stdout.blank?
+        result = system_command(executable, args: ["--list", "--file", path], print_stderr: false)
+        odie "#{path} is not a valid tar file!" if !result.status.success? || result.stdout.blank?
       end
 
       def clear_executable_cache

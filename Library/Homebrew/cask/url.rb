@@ -102,7 +102,7 @@ module Cask
           result = curl_output("--fail", "--silent", "--location", @uri)
           result.assert_success!
 
-          page = result.stdout
+          page = T.cast(result.stdout, T.all(String, PageWithURL))
           page.extend PageWithURL
           page.url = URI(@uri)
 

@@ -528,13 +528,13 @@ module Cask
       return unless cask.livecheckable?
       return if cask.livecheck.strategy != :sparkle
 
-      out, _, status = curl_output("--fail", "--silent", "--location", cask.livecheck.url)
-      return unless status.success?
+      result = curl_output("--fail", "--silent", "--location", cask.livecheck.url)
+      return unless result.status.success?
 
       require "rexml/document"
 
       xml = begin
-        REXML::Document.new(out)
+        REXML::Document.new(result.stdout)
       rescue REXML::ParseException
         nil
       end
