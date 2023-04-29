@@ -574,7 +574,7 @@ module Homebrew
           prefix.find do |src|
             next if src == prefix
 
-            dst = HOMEBREW_PREFIX + src.relative_path_from(prefix)
+            dst = src.relative_path_from(prefix) + HOMEBREW_PREFIX
             return true if dst.symlink? && src == dst.resolved_path
           end
         end

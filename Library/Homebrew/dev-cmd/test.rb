@@ -77,11 +77,11 @@ module Homebrew
       env = ENV.to_hash
 
       begin
-        exec_args = HOMEBREW_RUBY_EXEC_ARGS + %W[
+        exec_args = %W[
           --
           #{HOMEBREW_LIBRARY_PATH}/test.rb
           #{f.path}
-        ].concat(args.options_only)
+        ].concat(args.options_only) + HOMEBREW_RUBY_EXEC_ARGS
 
         exec_args << "--HEAD" if f.head?
 

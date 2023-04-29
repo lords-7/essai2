@@ -456,9 +456,9 @@ module Homebrew
     end
 
     def rm_ds_store(dirs = nil)
-      dirs ||= Keg::MUST_EXIST_DIRECTORIES + [
+      dirs ||= [
         HOMEBREW_PREFIX/"Caskroom",
-      ]
+      ] + Keg::MUST_EXIST_DIRECTORIES
       dirs.select(&:directory?)
           .flat_map { |d| Pathname.glob("#{d}/**/.DS_Store") }
           .each do |dir|

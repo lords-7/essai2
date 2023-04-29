@@ -383,8 +383,6 @@ Style/StringHashKeys:
   Enabled: false
 Style/TopLevelMethodDefinition:
   Enabled: false
-Style/YodaExpression:
-  Enabled: false
 
 # Don't allow cops to be disabled in casks and formulae.
 Style/DisableCopsWithinSourceCodeDirective:

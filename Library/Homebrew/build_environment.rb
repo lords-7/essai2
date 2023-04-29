@@ -61,7 +61,7 @@ class BuildEnvironment
 
   sig { params(env: T::Hash[String, T.nilable(T.any(String, Pathname))]).returns(T::Array[String]) }
   def self.keys(env)
-    KEYS & env.keys
+    env.keys & KEYS
   end
 
   sig { params(env: T::Hash[String, T.nilable(T.any(String, Pathname))], out: IO).void }

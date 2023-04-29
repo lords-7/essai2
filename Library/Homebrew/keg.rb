@@ -92,9 +92,9 @@ class Keg
 
   # Keep relatively in sync with
   # {https://github.com/Homebrew/install/blob/HEAD/install.sh}
-  MUST_EXIST_DIRECTORIES = (MUST_EXIST_SUBDIRECTORIES + [
+  MUST_EXIST_DIRECTORIES = ([
     HOMEBREW_CELLAR,
-  ].sort.uniq).freeze
+  ].sort.uniq + MUST_EXIST_SUBDIRECTORIES).freeze
   MUST_BE_WRITABLE_DIRECTORIES = (
     %w[
       etc/bash_completion.d lib/pkgconfig
@@ -290,7 +290,7 @@ class Keg
                                           .select(&:exist?)
     keg_directories.each do |dir|
       dir.find do |src|
-        dst = HOMEBREW_PREFIX + src.relative_path_from(path)
+        dst = src.relative_path_from(path) + HOMEBREW_PREFIX
         dst.extend(ObserverPathnameExtension)
 
         dirs << dst if dst.directory? && !dst.symlink?
@@ -624,7 +624,7 @@ class Keg
     root.find do |src|
       next if src == root
 
-      dst = HOMEBREW_PREFIX + src.relative_path_from(path)
+      dst = src.relative_path_from(path) + HOMEBREW_PREFIX
       dst.extend ObserverPathnameExtension
 
       if src.symlink? || src.file?

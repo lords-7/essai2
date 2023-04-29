@@ -18,7 +18,7 @@ module Homebrew
 
   VALID_DAYS = %w[30 90 365].freeze
   VALID_FORMULA_CATEGORIES = %w[install install-on-request build-error].freeze
-  VALID_CATEGORIES = (VALID_FORMULA_CATEGORIES + %w[cask-install os-version]).freeze
+  VALID_CATEGORIES = (%w[cask-install os-version] + VALID_FORMULA_CATEGORIES).freeze
 
   sig { returns(CLI::Parser) }
   def info_args

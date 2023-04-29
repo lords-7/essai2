@@ -956,7 +956,7 @@ class Formula
   # The directory where the formula's installation or test logs will be written.
   # @private
   def logs
-    HOMEBREW_LOGS + name
+    name + HOMEBREW_LOGS
   end
 
   # The prefix, if any, to use in filenames for logging current activity.
