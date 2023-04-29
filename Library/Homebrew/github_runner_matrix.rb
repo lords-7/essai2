@@ -13,17 +13,24 @@ class GitHubRunnerMatrix
   RunnerSpec = T.type_alias { T.any(LinuxRunnerSpec, MacOSRunnerSpec) }
   private_constant :RunnerSpec
 
-  MacOSRunnerSpecHash = T.type_alias { { name: String, runner: String, timeout: Integer, cleanup: T::Boolean } }
+  MacOSRunnerSpecHash = T.type_alias do
+    {
+      "name"    => String,
+      "runner"  => String,
+      "timeout" => Integer,
+      "cleanup" => T::Boolean,
+    }
+  end
   private_constant :MacOSRunnerSpecHash
 
   LinuxRunnerSpecHash = T.type_alias do
     {
-      name:      String,
-      runner:    String,
-      container: T::Hash[Symbol, String],
-      workdir:   String,
-      timeout:   Integer,
-      cleanup:   T::Boolean,
+      "name"      => String,
+      "runner"    => String,
+      "container" => T::Hash[Symbol, String],
+      "workdir"   => String,
+      "timeout"   => Integer,
+      "cleanup"   => T::Boolean,
     }
   end
   private_constant :LinuxRunnerSpecHash
@@ -57,7 +64,7 @@ class GitHubRunnerMatrix
   def active_runner_specs_hash
     runners.select(&:active)
            .map(&:spec)
-           .map(&:to_h)
+           .map(&:serialize)
   end
 
   private

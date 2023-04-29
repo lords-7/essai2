@@ -6,14 +6,4 @@ class MacOSRunnerSpec < T::Struct
   const :runner, String
   const :timeout, Integer
   const :cleanup, T::Boolean
-
-  sig { returns({ name: String, runner: String, timeout: Integer, cleanup: T::Boolean }) }
-  def to_h
-    {
-      name:    name,
-      runner:  runner,
-      timeout: timeout,
-      cleanup: cleanup,
-    }
-  end
 end

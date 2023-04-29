@@ -8,25 +8,4 @@ class LinuxRunnerSpec < T::Struct
   const :workdir, String
   const :timeout, Integer
   const :cleanup, T::Boolean
-
-  sig {
-    returns({
-      name:      String,
-      runner:    String,
-      container: T::Hash[Symbol, String],
-      workdir:   String,
-      timeout:   Integer,
-      cleanup:   T::Boolean,
-    })
-  }
-  def to_h
-    {
-      name:      name,
-      runner:    runner,
-      container: container,
-      workdir:   workdir,
-      timeout:   timeout,
-      cleanup:   cleanup,
-    }
-  end
 end

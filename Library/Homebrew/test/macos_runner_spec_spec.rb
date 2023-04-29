@@ -10,10 +10,4 @@ describe MacOSRunnerSpec do
       expect(spec.respond_to?("#{attribute}=")).to be(false)
     end
   end
-
-  describe "#to_h" do
-    it "returns an object that responds to `#to_json`" do
-      expect(spec.to_h.respond_to?(:to_json)).to be(true)
-    end
-  end
 end
