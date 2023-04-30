@@ -527,7 +527,7 @@ module Kernel
 
   def redact_secrets(input, secrets)
     secrets.compact
-           .reduce(input) { |str, secret| str.gsub secret, "******" }
+           .reduce(input) { |acc, elem| acc.gsub elem, "******" }
            .freeze
   end
 end

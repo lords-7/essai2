@@ -375,8 +375,6 @@ Style/RequireOrder:
   Enabled: false
 Style/Send:
   Enabled: false
-Style/SingleLineBlockParams:
-  Enabled: false
 Style/StaticClass:
   Enabled: false
 Style/StringHashKeys:
