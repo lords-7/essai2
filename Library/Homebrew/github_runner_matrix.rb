@@ -12,31 +12,6 @@ class GitHubRunnerMatrix
 
   RunnerSpec = T.type_alias { T.any(LinuxRunnerSpec, MacOSRunnerSpec) }
   private_constant :RunnerSpec
-
-  MacOSRunnerSpecHash = T.type_alias do
-    {
-      "name"    => String,
-      "runner"  => String,
-      "timeout" => Integer,
-      "cleanup" => T::Boolean,
-    }
-  end
-  private_constant :MacOSRunnerSpecHash
-
-  LinuxRunnerSpecHash = T.type_alias do
-    {
-      "name"      => String,
-      "runner"    => String,
-      "container" => T::Hash[Symbol, String],
-      "workdir"   => String,
-      "timeout"   => Integer,
-      "cleanup"   => T::Boolean,
-    }
-  end
-  private_constant :LinuxRunnerSpecHash
-
-  RunnerSpecHash = T.type_alias { T.any(LinuxRunnerSpecHash, MacOSRunnerSpecHash) }
-  private_constant :RunnerSpecHash
   # rubocop:enable Style/MutableConstant
 
   sig { returns(T::Array[GitHubRunner]) }
@@ -60,7 +35,7 @@ class GitHubRunnerMatrix
     freeze
   end
 
-  sig { returns(T::Array[RunnerSpecHash]) }
+  sig { returns(T::Array[T::Hash[String, T.untyped]]) }
   def active_runner_specs_hash
     runners.select(&:active)
            .map(&:spec)
