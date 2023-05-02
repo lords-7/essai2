@@ -17,12 +17,12 @@ class Downloadable
   sig { returns(T.nilable(Checksum)) }
   attr_reader :checksum
 
-  sig { returns(T::Array[String]) }
+  sig { returns(T::Array[URL]) }
   attr_reader :mirrors
 
   sig { void }
   def initialize
-    @mirrors = T.let([], T::Array[String])
+    @mirrors = T.let([], T::Array[URL])
   end
 
   def initialize_dup(other)
@@ -121,9 +121,9 @@ class Downloadable
     @url
   end
 
-  sig { overridable.returns(T::Array[String]) }
+  sig { overridable.returns(T::Array[URL]) }
   def determine_url_mirrors
-    [determine_url.to_s, *mirrors].uniq
+    [*([determine_url] unless determine_url.nil?), *mirrors].uniq
   end
 
   sig { overridable.returns(Pathname) }

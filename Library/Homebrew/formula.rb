@@ -2958,8 +2958,8 @@ class Formula
     #
     # <pre>mirror "https://in.case.the.host.is.down.example.com"
     # mirror "https://in.case.the.mirror.is.down.example.com</pre>
-    def mirror(val)
-      stable.mirror(val)
+    def mirror(val, specs = {})
+      stable.mirror(val, specs)
     end
 
     # @!attribute [w] sha256

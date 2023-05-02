@@ -30,4 +30,17 @@ class URL
   def version
     @version ||= Version.detect(@url, **@specs)
   end
+
+  sig { params(other: T.untyped).returns(T.nilable(Integer)) }
+  def <=>(other)
+    other = URL.new(other) if other.is_a? String
+    return unless other.is_a? URL
+
+    return to_s <=> other.to_s if to_s != other.to_s
+
+    return specs <=> other.specs if specs != other.specs
+
+    using <=> other.using
+  end
+  alias eql? ==
 end

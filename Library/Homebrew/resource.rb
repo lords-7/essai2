@@ -202,8 +202,8 @@ class Resource < Downloadable
     end
   end
 
-  def mirror(val)
-    mirrors << val
+  def mirror(val, **specs)
+    mirrors << URL.new(val, specs)
   end
 
   def patch(strip = :p1, src = nil, &block)

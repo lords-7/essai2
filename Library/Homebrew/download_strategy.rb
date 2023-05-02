@@ -58,7 +58,7 @@ class AbstractDownloadStrategy
   private :meta, :name, :version
 
   def initialize(url, name, version, **meta)
-    @url = url
+    @url = url.to_s
     @name = name
     @version = version
     @cache = meta.fetch(:cache, HOMEBREW_CACHE)
@@ -380,12 +380,13 @@ end
 class CurlDownloadStrategy < AbstractFileDownloadStrategy
   include Utils::Curl
 
+  sig { returns(T::Array[String]) }
   attr_reader :mirrors
 
   def initialize(url, name, version, **meta)
     super
     @try_partial = true
-    @mirrors = meta.fetch(:mirrors, [])
+    @mirrors = meta.fetch(:mirrors, []).map(&:to_s)
   end
 
   # Download and cache the file at {#cached_location}.
@@ -473,7 +474,7 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
       url = url.sub(%r{^https?://#{GitHubPackages::URL_DOMAIN}/}o, "#{domain.chomp("/")}/")
     end
 
-    parsed_output = curl_head(url.to_s, timeout: timeout)
+    parsed_output = curl_head(url, timeout: timeout)
     parsed_headers = parsed_output.fetch(:responses).map { |r| r.fetch(:headers) }
 
     final_url = curl_response_follow_redirections(parsed_output.fetch(:responses), url)

@@ -28,8 +28,7 @@ class SoftwareSpec
               :uses_from_macos_elements
 
   def_delegators :@resource, :stage, :fetch, :verify_download_integrity, :source_modified_time, :download_name,
-                 :cached_download, :clear_cache, :checksum, :mirrors, :specs, :using, :version, :mirror,
-                 :downloader
+                 :cached_download, :clear_cache, :checksum, :mirrors, :specs, :using, :version, :downloader
 
   def_delegators :@resource, :sha256
 
@@ -103,6 +102,10 @@ class SoftwareSpec
 
     @resource.url(val, **specs)
     dependency_collector.add(@resource)
+  end
+
+  def mirror(val, specs = {})
+    @resource.mirror(val, **specs)
   end
 
   def bottle_defined?

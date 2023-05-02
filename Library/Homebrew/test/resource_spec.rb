@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "resource"
+require "url"
 require "livecheck"
 
 describe Resource do
@@ -126,7 +127,8 @@ describe Resource do
     it "returns an array of mirrors added with #mirror" do
       resource.mirror("foo")
       resource.mirror("bar")
-      expect(resource.mirrors).to eq(%w[foo bar])
+      resource.mirror("baz", using: "quux")
+      expect(resource.mirrors).to eq([URL.new("foo"), URL.new("bar"), URL.new("baz", { using: "quux" })])
     end
   end
 
