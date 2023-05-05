@@ -886,9 +886,7 @@ then
   fi
 fi
 
-# brew readall is currently failing with Sorbet for homebrew/core.
-# TODO: fix this and remove this HOMEBREW_COMMAND conditional.
-if [[ -n "${HOMEBREW_DEVELOPER}" && "${HOMEBREW_COMMAND}" != "readall" ]]
+if [[ -n "${HOMEBREW_DEVELOPER}" ]]
 then
   # Always run with Sorbet for Homebrew developers.
   export HOMEBREW_SORBET_RUNTIME="1"
