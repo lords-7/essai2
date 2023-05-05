@@ -204,8 +204,8 @@ check-run-command-as-root() {
   # Homebrew Services may need `sudo` for system-wide daemons.
   [[ "${HOMEBREW_COMMAND}" == "services" ]] && return
 
-  # It's fine to run this as root as it's not changing anything.
-  [[ "${HOMEBREW_COMMAND}" == "--prefix" ]] && return
+  # It's fine to run these as root as they're not changing anything.
+  [[ "${HOMEBREW_COMMAND}" =~ (--prefix|info) ]] && return
 
   odie <<EOS
 Running Homebrew as root is extremely dangerous and no longer supported.
