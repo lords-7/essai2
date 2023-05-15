@@ -1,12 +1,17 @@
 # typed: true
 # frozen_string_literal: true
 
+require "macos_version"
+
 module Homebrew
   # Helper module for simulating different system condfigurations.
   #
   # @api private
   class SimulateSystem
     class << self
+      MACOS_SYMBOLS = Set.new([:macos, *MacOSVersion::SYMBOLS.keys]).freeze
+      private_constant :MACOS_SYMBOLS
+
       attr_reader :arch, :os
 
       sig {
@@ -36,8 +41,7 @@ module Homebrew
 
       sig { params(new_os: Symbol).void }
       def os=(new_os)
-        os_options = [:macos, :linux, *MacOSVersion::SYMBOLS.keys]
-        raise "Unknown OS: #{new_os}" unless os_options.include?(new_os)
+        raise "Unknown OS: #{new_os}" if MACOS_SYMBOLS.exclude?(new_os) && new_os != :linux
 
         @os = new_os
       end
@@ -56,12 +60,12 @@ module Homebrew
 
       sig { returns(T::Boolean) }
       def simulating_or_running_on_macos?
-        [:macos, *MacOSVersion::SYMBOLS.keys].include?(os)
+        MACOS_SYMBOLS.include?(current_os)
       end
 
       sig { returns(T::Boolean) }
       def simulating_or_running_on_linux?
-        os == :linux
+        current_os == :linux
       end
 
       sig { returns(Symbol) }
