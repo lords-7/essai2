@@ -71,6 +71,23 @@ module Cask
     end
   end
 
+  # Error when a cask conflicts a formula.
+  #
+  # @api private
+  class CaskFormulaConflictError < AbstractCaskErrorWithToken
+    attr_reader :conflicting_formula
+
+    def initialize(token, conflicting_formula)
+      super(token)
+      @conflicting_formula = conflicting_formula
+    end
+
+    sig { returns(String) }
+    def to_s
+      "Cask '#{token}' conflicts with formula '#{conflicting_formula}'."
+    end
+  end
+
   # Error when a cask is not available.
   #
   # @api private

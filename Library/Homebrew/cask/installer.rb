@@ -143,6 +143,18 @@ on_request: true)
       rescue CaskUnavailableError
         next # Ignore conflicting Casks that do not exist.
       end
+
+      @cask.conflicts_with[:formula].each do |conflicting_formula|
+        if (match = conflicting_cask.match(HOMEBREW_TAP_FORMULA_REGEX))
+          conflicting_formula_tap = Tap.fetch(match[1], match[2])
+          next unless conflicting_formula_tap.installed?
+        end
+
+        f = Formulary.factory(conflicting_formula.to_s)
+        raise CaskFormulaConflictError.new(@cask, f.name) if f.linked_keg.exist? && f.opt_prefix.exist?
+      rescue FormulaUnavailableError
+        next # Ignore conflicting Formulae that do no exist.
+      end
     end
 
     def uninstall_existing_cask
