@@ -8,6 +8,10 @@ module Homebrew
   #
   # @api private
   module Search
+    ALGOLIA_API_KEY = "e3369d62b2366b374c54b2c5a2835a00"
+    ALGOLIA_APPLICATION_ID = "D9HG3G8GS4"
+    ALGOLIA_INDEX = "brew_all"
+
     def self.query_regexp(query)
       if (m = query.match(%r{^/(.*)/$}))
         Regexp.new(m[1])
@@ -20,13 +24,32 @@ module Homebrew
 
     def self.search_descriptions(string_or_regex, args, search_type: :desc)
       both = !args.formula? && !args.cask?
-      eval_all = args.eval_all? || Homebrew::EnvConfig.eval_all?
+      output, _, status = curl_output("--silent",
+                                      "--header", "Content-Type: application/json; charset=UTF-8",
+                                      "--header", "X-Algolia-API-Key:#{ALGOLIA_API_KEY}",
+                                      "--header", "X-Algolia-Application-Id:#{ALGOLIA_APPLICATION_ID}",
+                                      "--location", "https://#{ALGOLIA_APPLICATION_ID}-dsn.algolia.net/1/indexes/#{ALGOLIA_INDEX}?query=#{string_or_regex}")
+
+      return unless status.success?
+
+      data = JSON.parse(output)
+
+      results = { formula: [], cask: [] }
+      data["hits"].each do |hit|
+        match = hit["url"].match(%r{https://formulae\.brew\.sh/(?'type'[a-z]*)/(?'package'.*?)#})
+        captures = match.named_captures
+        next if captures.empty?
+
+        results[captures["type"].to_sym] << captures["package"]
+      end
+
+      odebug results
 
       if args.formula? || both
         ohai "Formulae"
         CacheStoreDatabase.use(:descriptions) do |db|
           cache_store = DescriptionCacheStore.new(db)
-          Descriptions.search(string_or_regex, search_type, cache_store, eval_all).print
+          Descriptions.search(string_or_regex, search_type, cache_store).print
         end
       end
       return if !args.cask? && !both
@@ -36,7 +59,7 @@ module Homebrew
       ohai "Casks"
       CacheStoreDatabase.use(:cask_descriptions) do |db|
         cache_store = CaskDescriptionCacheStore.new(db)
-        Descriptions.search(string_or_regex, search_type, cache_store, eval_all).print
+        Descriptions.search(string_or_regex, search_type, cache_store).print
       end
     end
 

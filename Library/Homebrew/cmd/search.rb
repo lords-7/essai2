@@ -74,9 +74,6 @@ module Homebrew
     string_or_regex = Search.query_regexp(query)
 
     if args.desc?
-      if !args.eval_all? && !Homebrew::EnvConfig.eval_all?
-        odisabled "brew search --desc", "brew search --desc --eval-all or HOMEBREW_EVAL_ALL"
-      end
       Search.search_descriptions(string_or_regex, args)
     elsif args.pull_request?
       search_pull_requests(query, args)
