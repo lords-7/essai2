@@ -34,6 +34,8 @@ class Tap
     #{HOMEBREW_TAP_PYPI_FORMULA_MAPPINGS}
   ].freeze
 
+  CASK_FILE_REGEX = %r{^Casks/([^/]+/)*[^/]+\.rb$}.freeze
+
   def self.fetch(*args)
     case args.length
     when 1
@@ -503,7 +505,7 @@ class Tap
         formula_dir.find
       else
         formula_dir.children
-      end.select(&method(:formula_file?))
+      end.select(&method(:ruby_file?))
     else
       []
     end
@@ -566,29 +568,35 @@ class Tap
     file.extname == ".rb"
   end
 
-  # returns true if given path would present a {Formula} file in this {Tap}.
-  # accepts both absolute path and relative path (relative to this {Tap}'s path)
+  # accepts the relative path of a file to this {Tap}'s path
   # @private
-  sig { params(file: T.any(String, Pathname)).returns(T::Boolean) }
+  sig { params(file: String).returns(T::Boolean) }
   def formula_file?(file)
-    file = Pathname.new(file) unless file.is_a? Pathname
-    file = file.expand_path(path)
-    return false unless ruby_file?(file)
-    return false if cask_file?(file)
-
-    file.to_s.start_with?("#{formula_dir}/")
+    file.match?(formula_file_regex)
   end
 
-  # returns true if given path would present a {Cask} file in this {Tap}.
-  # accepts both absolute path and relative path (relative to this {Tap}'s path)
+  # accepts the relative path of a file to this {Tap}'s path
   # @private
-  sig { params(file: T.any(String, Pathname)).returns(T::Boolean) }
+  sig { params(file: String).returns(T::Boolean) }
   def cask_file?(file)
-    file = Pathname.new(file) unless file.is_a? Pathname
-    file = file.expand_path(path)
-    return false unless ruby_file?(file)
+    file.match?(CASK_FILE_REGEX)
+  end
 
-    file.to_s.start_with?("#{cask_dir}/")
+  # @private
+  sig { returns(Regexp) }
+  def formula_file_regex
+    @formula_file_regex ||= case formula_dir.basename.to_s
+    when "Formula"
+      if official?
+        %r{^Formula(/[^/]+)+\.rb$}
+      else
+        %r{^Formula/[^/]+\.rb$}
+      end
+    when "HomebrewFormula"
+      %r{^HomebrewFormula/[^/]+\.rb$}
+    else
+      %r{^[^/]+\.rb$}
+    end.freeze
   end
 
   # An array of all {Formula} names of this {Tap}.
