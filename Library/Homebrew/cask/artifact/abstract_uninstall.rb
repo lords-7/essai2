@@ -18,6 +18,7 @@ module Cask
         :launchctl,
         :quit,
         :signal,
+        :system_extension,
         :login_item,
         :kext,
         :script,
@@ -309,6 +310,31 @@ module Cask
           )
 
           opoo "Removal of login item #{id} failed. #{automation_access_instructions}" unless result.success?
+
+          sleep 1
+        end
+      end
+
+      def uninstall_system_extension(*apps, command: nil, **_)
+        apps = cask.artifacts.select { |a| a.class.dsl_key == :app } if apps.empty?
+
+        apps.each do |item|
+          unless T.must(User.current).gui?
+            opoo "Not logged into a GUI; skipping removing '#{item}'."
+            next
+          end
+          ohai "Removing '#{item}'."
+
+          result = system_command(
+            "osascript",
+            args: [
+              "-e",
+              %Q(tell application "Finder" to move application file "#{item}" \
+              of folder "Applications" of startup disk to trash),
+            ],
+          )
+
+          opoo "Removal of '#{item}' failed. Move #{item} to trash manually." unless result.success?
 
           sleep 1
         end
