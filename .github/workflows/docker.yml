@@ -17,7 +17,7 @@ permissions:
   contents: read
 jobs:
   ubuntu:
-    if: startsWith(github.repository, 'Homebrew/')
+    if: github.repository_owner == 'Homebrew'
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -39,6 +39,7 @@ jobs:
           echo "Building for Homebrew ${brew_version}"
           docker build -t brew \
                --build-arg=version=${{matrix.version}} \
+               --build-arg=GIT_GC=${{github.event_name == 'release'}} \
                --label org.opencontainers.image.created="$(date --rfc-3339=seconds --utc)" \
                --label org.opencontainers.image.url="https://brew.sh" \
                --label org.opencontainers.image.documentation="https://docs.brew.sh" \

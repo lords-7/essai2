@@ -233,6 +233,7 @@ jobs:
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         run: |
           docker build -t brew --build-arg=version=22.04 \
+               --build-arg=GIT_GC=${{github.event_name == 'push'}} \
                --label org.opencontainers.image.created="$(date --rfc-3339=seconds --utc)" \
                --label org.opencontainers.image.url="https://brew.sh" \
                --label org.opencontainers.image.documentation="https://docs.brew.sh" \

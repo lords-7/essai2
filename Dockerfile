@@ -3,14 +3,14 @@ ARG version=22.04
 # shellcheck disable=SC2154
 FROM ubuntu:"${version}"
 ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 
 # We don't want to manually pin versions, happy to use whatever
 # Ubuntu thinks is best.
 # hadolint ignore=DL3008
 
 # /etc/lsb-release is checked inside the container and sets DISTRIB_RELEASE.
-# We need `[` instead of `[[` because the shell is `/bin/sh`.
-# shellcheck disable=SC1091,SC2154,SC2292
+# shellcheck disable=SC1091,SC2154
 RUN apt-get update \
   && apt-get install -y --no-install-recommends software-properties-common gnupg-agent \
   && add-apt-repository -y ppa:git-core/ppa \
@@ -38,7 +38,7 @@ RUN apt-get update \
   uuid-runtime \
   tzdata \
   jq \
-  && if [ "$(. /etc/lsb-release; echo "${DISTRIB_RELEASE}" | cut -d. -f1)" -ge 22 ]; then apt-get install -y --no-install-recommends skopeo; fi \
+  && if [[ "$(. /etc/lsb-release; echo "${DISTRIB_RELEASE}" | cut -d. -f1)" -ge 22 ]]; then apt-get install -y --no-install-recommends skopeo; fi \
   && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
   && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
   && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
@@ -56,7 +56,10 @@ USER linuxbrew
 COPY --chown=linuxbrew:linuxbrew . /home/linuxbrew/.linuxbrew/Homebrew
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 WORKDIR /home/linuxbrew
+ARG GIT_GC=false
 
+# GIT_GC is set by Docker from an `ARG` instruction.
+# shellcheck disable=SC2154
 RUN mkdir -p \
   .linuxbrew/bin \
   .linuxbrew/etc \
@@ -73,6 +76,7 @@ RUN mkdir -p \
   && HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_AUTO_UPDATE=1 brew tap homebrew/core \
   && brew install-bundler-gems \
   && brew cleanup \
+  && if [[ "${GIT_GC}" = true ]]; then git -C .linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core gc --aggressive; fi \
   && { git -C .linuxbrew/Homebrew config --unset gc.auto; true; } \
   && { git -C .linuxbrew/Homebrew config --unset homebrew.devcmdrun; true; } \
   && rm -rf .cache
