@@ -39,7 +39,7 @@ jobs:
           echo "Building for Homebrew ${brew_version}"
           docker build -t brew \
                --build-arg=version=${{matrix.version}} \
-               --build-arg=GIT_GC=${{github.event_name == 'release'}} \
+               --build-arg=GIT_GC=true \
                --label org.opencontainers.image.created="$(date --rfc-3339=seconds --utc)" \
                --label org.opencontainers.image.url="https://brew.sh" \
                --label org.opencontainers.image.documentation="https://docs.brew.sh" \

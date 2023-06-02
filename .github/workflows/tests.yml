@@ -17,10 +17,6 @@ env:
   HOMEBREW_BOOTSNAP: 1
   HOMEBREW_NO_INSTALL_CLEANUP: 1
 
-concurrency:
-  group: "${{ github.ref }}"
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
   syntax:
     if: github.repository == 'Homebrew/brew'
@@ -233,7 +229,7 @@ jobs:
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         run: |
           docker build -t brew --build-arg=version=22.04 \
-               --build-arg=GIT_GC=${{github.event_name == 'push'}} \
+               --build-arg=GIT_GC=true \
                --label org.opencontainers.image.created="$(date --rfc-3339=seconds --utc)" \
                --label org.opencontainers.image.url="https://brew.sh" \
                --label org.opencontainers.image.documentation="https://docs.brew.sh" \
