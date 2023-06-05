@@ -12,12 +12,18 @@ class Sharder
 
   attr_reader :directory, :file_limit, :file_subset
 
+  sig {
+    params(directory:   T.any(Pathname, String),
+           file_limit:  T.nilable(Integer),
+           file_subset: T.nilable(String)).void
+  }
   def initialize(directory: DEFAULT_DIRECTORY, file_limit: DEFAULT_MAX_FILES, file_subset: FILE_SUBSET)
     @directory = directory.is_a?(Pathname) ? directory : Pathname.new(directory)
     @file_limit = file_limit.to_i
     @file_subset = file_subset
   end
 
+  sig { void }
   def shard
     raise "Invalid directory: #{directory}" unless directory.directory?
 
@@ -27,7 +33,7 @@ class Sharder
     should_distribute = files.size > file_limit
 
     files.each do |file|
-      next if file_subset&.exclude?(file.basename.to_s[0].downcase)
+      next if file_subset&.exclude?(file.basename.to_s[0]&.downcase)
 
       subdir = destination_dir(file.basename.to_s, should_distribute)
       (directory/subdir).mkpath
@@ -35,21 +41,22 @@ class Sharder
     end
 
     subfolders.each do |subfolder|
-      Sharder.new(directory: subfolder, file_limit: file_limit, file_subset:
-      file_subset).shard
+      Sharder.new(directory: subfolder, file_limit: file_limit, file_subset: file_subset).shard
     end
   end
 
+  sig { params(source: Pathname, destination: Pathname).void }
   def move_file(source, destination)
-    success = system("git mv '#{source}' '#{destination}' 2>/dev/null")
-    FileUtils.mv(source, destination) unless success
+    # success = system("git mv '#{source}' '#{destination}' 2>/dev/null")
+    FileUtils.mv(source, destination) # unless success
   rescue Errno::ENOENT
     onoe "Error moving file from #{source} to #{destination}"
     raise
   end
 
+  sig { params(subfolder: Pathname).void }
   def shard_subfolder(subfolder)
-    if (subfolder.children.size - 2) > file_limit
+    if subfolder.children.size > file_limit
       self.class.new(directory: subfolder.to_s, file_limit: file_limit, file_subset: file_subset)
           .shard
       subfolder.rmtree
@@ -59,6 +66,7 @@ class Sharder
     raise
   end
 
+  sig { returns(T::Array[Pathname]) }
   def check
     lost_files = []
     Find.find(directory.to_s) do |path|
@@ -71,6 +79,7 @@ class Sharder
     lost_files
   end
 
+  sig { params(lost_files: T::Array[Pathname]).void }
   def relocate_files(lost_files)
     lost_files.each do |file|
       subdir = destination_dir(file.basename.to_s, true)
@@ -79,6 +88,7 @@ class Sharder
     end
   end
 
+  sig { params(issues: T::Array[Pathname]).void }
   def print_audit_results(issues)
     if issues.empty?
       puts "No issues found."
@@ -88,8 +98,9 @@ class Sharder
     end
   end
 
+  sig { params(file_name: String, should_distribute: T::Boolean).returns(String) }
   def destination_dir(file_name, should_distribute)
-    first_chars = file_name[0, 2].downcase.gsub(/[^a-z]/, "_")
-    should_distribute ? File.join(first_chars[0], first_chars) : first_chars[0]
+    first_chars = file_name.to_s[0, 2].to_s.downcase.gsub(/[^a-z]/, "_")
+    should_distribute ? File.join(first_chars[0], first_chars) : first_chars[0] || ""
   end
 end
