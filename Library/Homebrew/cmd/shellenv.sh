@@ -32,7 +32,16 @@ homebrew-shellenv() {
       echo "set -gx HOMEBREW_PREFIX \"${HOMEBREW_PREFIX}\";"
       echo "set -gx HOMEBREW_CELLAR \"${HOMEBREW_CELLAR}\";"
       echo "set -gx HOMEBREW_REPOSITORY \"${HOMEBREW_REPOSITORY}\";"
-      echo "set -q PATH; or set PATH ''; set -gx PATH \"${HOMEBREW_PREFIX}/bin\" \"${HOMEBREW_PREFIX}/sbin\" \$PATH;"
+      if [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "set -q PATH; or set PATH ''; set -gx PATH \"${HOMEBREW_PREFIX}/bin\" \"${HOMEBREW_PREFIX}/sbin\" \$PATH;"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]
+      then
+        echo "set -q PATH; or set PATH ''; set -gx PATH \"${HOMEBREW_PREFIX}/bin\" \$PATH;"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "set -q PATH; or set PATH ''; set -gx PATH \"${HOMEBREW_PREFIX}/sbin\" \$PATH;"
+      fi
       echo "set -q MANPATH; or set MANPATH ''; set -gx MANPATH \"${HOMEBREW_PREFIX}/share/man\" \$MANPATH;"
       echo "set -q INFOPATH; or set INFOPATH ''; set -gx INFOPATH \"${HOMEBREW_PREFIX}/share/info\" \$INFOPATH;"
       ;;
@@ -40,7 +49,16 @@ homebrew-shellenv() {
       echo "setenv HOMEBREW_PREFIX ${HOMEBREW_PREFIX};"
       echo "setenv HOMEBREW_CELLAR ${HOMEBREW_CELLAR};"
       echo "setenv HOMEBREW_REPOSITORY ${HOMEBREW_REPOSITORY};"
-      echo "setenv PATH ${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:\$PATH;"
+      if [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "setenv PATH ${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:\$PATH;"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]
+      then
+        echo "setenv PATH ${HOMEBREW_PREFIX}/bin:\$PATH;"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "setenv PATH ${HOMEBREW_PREFIX}/sbin:\$PATH;"
+      fi
       echo "setenv MANPATH ${HOMEBREW_PREFIX}/share/man\`[ \${?MANPATH} == 1 ] && echo \":\${MANPATH}\"\`:;"
       echo "setenv INFOPATH ${HOMEBREW_PREFIX}/share/info\`[ \${?INFOPATH} == 1 ] && echo \":\${INFOPATH}\"\`;"
       ;;
@@ -48,7 +66,16 @@ homebrew-shellenv() {
       echo "[System.Environment]::SetEnvironmentVariable('HOMEBREW_PREFIX','${HOMEBREW_PREFIX}',[System.EnvironmentVariableTarget]::Process)"
       echo "[System.Environment]::SetEnvironmentVariable('HOMEBREW_CELLAR','${HOMEBREW_CELLAR}',[System.EnvironmentVariableTarget]::Process)"
       echo "[System.Environment]::SetEnvironmentVariable('HOMEBREW_REPOSITORY','${HOMEBREW_REPOSITORY}',[System.EnvironmentVariableTarget]::Process)"
-      echo "[System.Environment]::SetEnvironmentVariable('PATH',\$('${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:'+\$ENV:PATH),[System.EnvironmentVariableTarget]::Process)"
+      if [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "[System.Environment]::SetEnvironmentVariable('PATH',\$('${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:'+\$ENV:PATH),[System.EnvironmentVariableTarget]::Process)"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "[System.Environment]::SetEnvironmentVariable('PATH',\$('${HOMEBREW_PREFIX}/bin:'+\$ENV:PATH),[System.EnvironmentVariableTarget]::Process)"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]
+      then
+        echo "[System.Environment]::SetEnvironmentVariable('PATH',\$('${HOMEBREW_PREFIX}/sbin:'+\$ENV:PATH),[System.EnvironmentVariableTarget]::Process)"
+      fi
       echo "[System.Environment]::SetEnvironmentVariable('MANPATH',\$('${HOMEBREW_PREFIX}/share/man'+\$(if(\${ENV:MANPATH}){':'+\${ENV:MANPATH}})+':'),[System.EnvironmentVariableTarget]::Process)"
       echo "[System.Environment]::SetEnvironmentVariable('INFOPATH',\$('${HOMEBREW_PREFIX}/share/info'+\$(if(\${ENV:INFOPATH}){':'+\${ENV:INFOPATH}})),[System.EnvironmentVariableTarget]::Process)"
       ;;
@@ -56,7 +83,16 @@ homebrew-shellenv() {
       echo "export HOMEBREW_PREFIX=\"${HOMEBREW_PREFIX}\";"
       echo "export HOMEBREW_CELLAR=\"${HOMEBREW_CELLAR}\";"
       echo "export HOMEBREW_REPOSITORY=\"${HOMEBREW_REPOSITORY}\";"
-      echo "export PATH=\"${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin\${PATH+:\$PATH}\";"
+      if [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]] && [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "export PATH=\"${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin\${PATH+:\$PATH}\";"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/sbin:"* ]]
+      then
+        echo "export PATH=\"${HOMEBREW_PREFIX}/sbin\${PATH+:\$PATH}\";"
+      elif [[ ":${PATH}:" != *":${HOMEBREW_PREFIX}/bin:"* ]]
+      then
+        echo "export PATH=\"${HOMEBREW_PREFIX}/bin\${PATH+:\$PATH}\";"
+      fi
       echo "export MANPATH=\"${HOMEBREW_PREFIX}/share/man\${MANPATH+:\$MANPATH}:\";"
       echo "export INFOPATH=\"${HOMEBREW_PREFIX}/share/info:\${INFOPATH:-}\";"
       ;;
