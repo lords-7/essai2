@@ -30,8 +30,8 @@ class Sharder
       next if file_subset&.exclude?(file.basename.to_s[0].downcase)
 
       subdir = destination_dir(file.basename.to_s, should_distribute)
-      FileUtils.mkdir_p(directory.join(subdir))
-      move_file(file, directory.join(subdir, file.basename))
+      (directory/subdir).mkpath
+      move_file(file, directory/subdir/file.basename)
     end
 
     subfolders.each do |subfolder|
@@ -44,17 +44,19 @@ class Sharder
     success = system("git mv '#{source}' '#{destination}' 2>/dev/null")
     FileUtils.mv(source, destination) unless success
   rescue Errno::ENOENT
-    raise "Error moving file from #{source} to #{destination}"
+    onoe "Error moving file from #{source} to #{destination}"
+    raise
   end
 
   def shard_subfolder(subfolder)
     if (subfolder.children.size - 2) > file_limit
       self.class.new(directory: subfolder.to_s, file_limit: file_limit, file_subset: file_subset)
           .shard
-      FileUtils.rm_rf(subfolder)
+      subfolder.rmtree
     end
   rescue Errno::ENOENT
-    raise "Error removing directory: #{subfolder}"
+    onoe "Error removing directory: #{subfolder}"
+    raise
   end
 
   def check
@@ -63,8 +65,8 @@ class Sharder
       file = Pathname.new(path)
       next unless file.file?
 
-      subdir = directory.join(destination_dir(file.basename.to_s, true))
-      lost_files << file if file.dirname.to_s != subdir.to_s
+      subdir = directory/destination_dir(file.basename.to_s, true)
+      lost_files << file if file.dirname.realpath != subdir.realpath
     end
     lost_files
   end
@@ -72,8 +74,8 @@ class Sharder
   def relocate_files(lost_files)
     lost_files.each do |file|
       subdir = destination_dir(file.basename.to_s, true)
-      FileUtils.mkdir_p(directory.join(subdir))
-      move_file(file, directory.join(subdir, file.basename))
+      (directory/subdir).mkpath
+      move_file(file, directory/subdir/file.basename)
     end
   end
 
