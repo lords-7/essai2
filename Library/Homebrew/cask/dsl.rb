@@ -224,13 +224,20 @@ module Cask
     end
 
     # @api public
-    def version(arg = nil)
-      set_unique_stanza(:version, arg.nil?) do
-        if !arg.is_a?(String) && arg != :latest
-          raise CaskInvalidError.new(cask, "invalid 'version' value: #{arg.inspect}")
-        end
+    # @api public
+    def version(arg = nil, arm: nil, intel: nil)
+      should_return = arg.nil? && arm.nil? && intel.nil?
 
-        DSL::Version.new(arg)
+      set_unique_stanza(:version, should_return) do
+        @on_system_blocks_exist = true if arm.present? || intel.present?
+
+        val = arg || on_arch_conditional(arm: arm, intel: intel)
+        case val
+        when String, :latest
+          DSL::Version.new(val)
+        else
+          raise CaskInvalidError.new(cask, "invalid 'version' value: #{val.inspect}")
+        end
       end
     end
 
