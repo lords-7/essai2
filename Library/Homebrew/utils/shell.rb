@@ -32,11 +32,23 @@ module Utils
     end
 
     # Quote values. Quoting keys is overkill.
-    sig { params(key: String, value: String, shell: T.nilable(Symbol)).returns(T.nilable(String)) }
-    def export_value(key, value, shell = preferred)
+    sig {
+      params(
+        key:       String,
+        value:     String,
+        shell:     T.nilable(Symbol),
+        clobber:   T.nilable(T::Boolean),
+        separator: T.nilable(String),
+      ).returns(T.nilable(String))
+    }
+    def export_value(key, value, shell = preferred, clobber: true, separator: ":")
       case shell
       when :bash, :ksh, :mksh, :sh, :zsh
-        "export #{key}=\"#{sh_quote(value)}\""
+        s = +"export #{key}=\"#{sh_quote(value)}"
+        s << "${#{key}:+#{separator}${#{key}}}" unless clobber
+        s << '"'
+
+        s.freeze
       when :fish
         # fish quoting is mostly Bourne compatible except that
         # a single quote can be included in a single-quoted string via \'

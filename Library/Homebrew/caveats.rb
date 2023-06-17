@@ -87,11 +87,11 @@ class Caveats
         EOS
 
         if (formula.lib/"pkgconfig").directory?
-          s << "  #{Utils::Shell.export_value("PKG_CONFIG_PATH", "#{formula.opt_lib}/pkgconfig")}\n"
+          s << "  #{Utils::Shell.export_value("PKG_CONFIG_PATH", "#{formula.opt_lib}/pkgconfig", clobber: false)}\n"
         end
 
         if (formula.share/"pkgconfig").directory?
-          s << "  #{Utils::Shell.export_value("PKG_CONFIG_PATH", "#{formula.opt_share}/pkgconfig")}\n"
+          s << "  #{Utils::Shell.export_value("PKG_CONFIG_PATH", "#{formula.opt_share}/pkgconfig", clobber: false)}\n"
         end
       end
     end
