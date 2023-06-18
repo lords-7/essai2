@@ -6,18 +6,20 @@ require "cask/download"
 require "cli/parser"
 require "utils/tar"
 
-require "extend/on_system"
-
 module Homebrew
-  include OnSystem::MacOSOnly
-  def self.on_arch(versions)
-    intel = versions[:intel]
-    arm = versions[:arm]
-    on_arch = on_arch_conditional(intel: intel, arm: arm)
-    raise (on_arch).inspect
-  end
-
   module_function
+
+  # Get versions for specific architectures
+  class NewVersion
+    attr_accessor :general, :arm, :intel
+
+    sig { params(general: T.nilable(String), arm: T.nilable(String), intel: T.nilable(String)).void }
+    def initialize(general: nil, arm: nil, intel: nil)
+      @general = general
+      @arm     = arm
+      @intel   = intel
+    end
+  end
 
   sig { returns(CLI::Parser) }
   def bump_cask_pr_args
@@ -46,24 +48,26 @@ module Homebrew
              description: "Print the pull request URL instead of opening in a browser."
       switch "--no-fork",
              description: "Don't try to fork the repository."
-      flag   "--version=",
-             description: "Specify the new <version> for the cask."
-      flag   "--message=",
-             description: "Prepend <message> to the default pull request message."
-      flag   "--url=",
-             description: "Specify the <URL> for the new download."
-      flag   "--sha256=",
-             description: "Specify the <SHA-256> checksum of the new download."
-      flag   "--fork-org=",
-             description: "Use the specified GitHub organization for forking."
-      flag   "--intel-version=",
-             description: "Specify the new <version> for the cask for Intel architecture."
-      flag  "--arm-version=",
-            description: "Specify the new <version> for the cask for ARM architecture."
+      flag "--version=",
+           description: "Specify the new <version> for the cask."
+      flag "--version-intel=",
+           description: "Specify the new cask <version> for the Intel architecture."
+      flag "--version-arm=",
+           description: "Specify the new cask <version> for the ARM architecture."
+      flag "--message=",
+           description: "Prepend <message> to the default pull request message."
+      flag "--url=",
+           description: "Specify the <URL> for the new download."
+      flag "--sha256=",
+           description: "Specify the <SHA-256> checksum of the new download."
+      flag "--fork-org=",
+           description: "Use the specified GitHub organization for forking."
       switch "-f", "--force",
              description: "Ignore duplicate open PRs."
 
       conflicts "--dry-run", "--write"
+      conflicts "--version=", "--version-intel="
+      conflicts "--version=", "--version-arm="
       conflicts "--no-audit", "--online"
 
       named_args :cask, number: 1
@@ -84,48 +88,29 @@ module Homebrew
     ENV["BROWSER"] = Homebrew::EnvConfig.browser
 
     cask = args.named.to_casks.first
-    ohai cask.to_s
-    ohai cask.version.to_s
-    ohai args.intel_version.to_s
-    ohai args.arm_version.to_s
 
     odie "This cask is not in a tap!" if cask.tap.blank?
     odie "This cask's tap is not a Git repository!" unless cask.tap.git?
 
-    # Get versions for specific architectures
-    intel_version = args.intel_version
-    arm_version = args.arm_version
+    new_version = Homebrew::NewVersion.new(
+      general: args.version,
+      arm:     args.version_arm,
+      intel:   args.version_intel,
+    )
 
-    if intel_version || arm_version
-      unless intel_version && arm_version
-        raise UsageError,
-              "Both `--intel-version` and `--arm-version` must be specified."
-      end
-
-      raise UsageError, "`--intel-version` must not be empty." if intel_version.blank?
-      raise UsageError, "`--arm-version` must not be empty." if arm_version.blank?
-
-      intel_version = :latest if ["latest", ":latest"].include?(intel_version)
-      intel_version = Cask::DSL::Version.new(intel_version)
-      ohai intel_version.to_s
-      arm_version = :latest if ["latest", ":latest"].include?(arm_version)
-      arm_version = Cask::DSL::Version.new(arm_version)
-      ohai arm_version.to_s
-      @on_system_blocks_exist = true if arm_version.present? || intel_version.present?
-      ohai @on_system_blocks_exist.to_s
-      new_version = on_arch(intel: intel_version, arm: arm_version)
-      ohai new_version.to_s
-    else
-      new_version = unless (new_version = args.version).nil?
-        new_version = :latest if ["latest", ":latest"].include?(new_version)
-        Cask::DSL::Version.new(new_version)
+    parse_new_version = lambda do |version|
+      if %w[latest :latest].include?(version)
+        "latest"
+      else
+        Cask::DSL::Version.new(version)
       end
     end
-    ohai new_version.to_s
-    new_hash = unless (new_hash = args.sha256).nil?
+
+    new_hash = args.sha256
+    if new_hash.present?
       raise UsageError, "`--sha256` must not be empty." if new_hash.blank?
 
-      ["no_check", ":no_check"].include?(new_hash) ? :no_check : new_hash
+      new_hash = :no_check if %w[no_check :no_check].include?(new_hash)
     end
 
     new_base_url = unless (new_base_url = args.url).nil?
@@ -138,91 +123,108 @@ module Homebrew
       end
     end
 
-    if new_version.nil? && new_base_url.nil? && new_hash.nil?
+    new_version = if new_version.intel && new_version.arm
+      raise UsageError, "`--intel-version` must not be empty." if new_version.intel.blank?
+      raise UsageError, "`--arm-version` must not be empty." if new_version.arm.blank?
+
+      Homebrew::NewVersion.new(
+        general: nil,
+        intel:   parse_new_version.call(new_version.intel),
+        arm:     parse_new_version.call(new_version.arm),
+      )
+    elsif new_version.general.present?
+      Homebrew::NewVersion.new(
+        general: parse_new_version.call(new_version.general),
+        arm:     nil,
+        intel:   nil,
+      )
+    else
+      Homebrew::NewVersion.new(general: nil, arm: nil, intel: nil)
+    end
+    if new_version.general.nil? && new_version.arm.nil? && new_version.intel.nil? &&
+       new_base_url.nil? && new_hash.nil?
       raise UsageError, "No `--version`, `--url` or `--sha256` argument specified!"
     end
-    old_version = cask.version
-    old_hash = cask.sha256
 
     check_pull_requests(cask, state: "open", args: args)
     # if we haven't already found open requests, try for an exact match across closed requests
-    check_pull_requests(cask, state: "closed", args: args, version: new_version) if new_version.present?
+    if new_version.general.present?
+      check_pull_requests(cask, state: "closed", args: args, version: new_version.general)
+    else
+      check_pull_requests(cask, state: "closed", args: args, version: new_version.arm)
+      check_pull_requests(cask, state: "closed", args: args, version: new_version.intel)
+    end
 
-    old_contents = File.read(cask.sourcefile_path)
-
-    replacement_pairs = []
+    replacement_pairs ||= []
     branch_name = "bump-#{cask.token}"
     commit_message = nil
-    ohai "New version: #{new_version}"
-    ohai "ARM version: #{arm_version}"
-    ohai "Intel Version: #{intel_version}"
-    ohai "Old Version: #{old_version}"
-    if new_version
-      branch_name += if !intel_version.nil? && !arm_version.nil?
-        "-#{arm_version.tr(",:", "-")}"
-      else
-        "-#{new_version.tr(",:", "-")}"
-                     end
-      commit_message_version = if new_version.before_comma == old_version.before_comma
-        new_version
-      else
-        new_version.before_comma
-      end
-      commit_message ||= "#{cask.token} #{commit_message_version}"
 
-      old_version_regex = old_version.latest? ? ":latest" : "[\"']#{Regexp.escape(old_version.to_s)}[\"']"
-      ohai "#{old_version_regex} #{commit_message}"
-      replacement_pairs << [
-        /version\s+#{old_version_regex}/m,
-        "version #{new_version.latest? ? ":latest" : "\"#{new_version}\""}",
-      ]
-      if new_version.latest? || new_hash == :no_check
-        opoo "Ignoring specified `--sha256=` argument." if new_hash.is_a?(String)
-        replacement_pairs << [/"#{old_hash}"/, ":no_check"] if old_hash != :no_check
-      elsif old_hash == :no_check && new_hash != :no_check
-        replacement_pairs << [":no_check", "\"#{new_hash}\""] if new_hash.is_a?(String)
-      elsif old_hash != :no_check
-        if new_hash.nil? || cask.languages.present?
-          if new_hash && cask.languages.present?
-            opoo "Multiple checksum replacements required; ignoring specified `--sha256` argument."
-          end
+    if new_version.general.nil? || (new_version.arm.nil? && new_version.intel.nil?)
+      # For simplicity, our naming defers to the arm version if we multiple architectures are specified
+      branch_version = new_version.arm || new_version.general
+      commit_version = if branch_version.before_comma == cask.version.before_comma
+        branch_version
+      else
+        branch_version.before_comma
+      end
+      branch_name = "bump-#{cask.token}-#{branch_version.tr(",:", "-")}"
+      commit_message ||= "#{cask.token} #{commit_version}"
+
+      OnSystem::ARCH_OPTIONS.each do |arch|
+        SimulateSystem.with arch: arch do
+          old_cask = Cask::CaskLoader.load(cask.sourcefile_path)
+          old_version  = old_cask.version
+          bump_version = new_version.send(arch) || new_version.general
+
+          old_version_regex = old_version.latest? ? ":latest" : %Q(["']#{Regexp.escape(old_version.to_s)}["'])
+          replacement_pairs << [/version\s+#{old_version_regex}/m,
+                                "version #{bump_version.latest? ? ":latest" : %Q("#{bump_version}")}"]
+
+          # We are replacing our version here so we can get the new hash
           tmp_contents = Utils::Inreplace.inreplace_pairs(cask.sourcefile_path,
                                                           replacement_pairs.uniq.compact,
                                                           read_only_run: true,
                                                           silent:        true)
 
           tmp_cask = Cask::CaskLoader.load(tmp_contents)
-          tmp_config = tmp_cask.config
-
-          OnSystem::ARCH_OPTIONS.each do |arch|
-            SimulateSystem.with arch: arch do
+          updated_version = tmp_cask.version
+          old_hash = tmp_cask.sha256
+          if updated_version.latest? || new_hash == :no_check
+            opoo "Ignoring specified `--sha256=` argument." if new_hash.is_a?(String)
+            replacement_pairs << [/"#{old_hash}"/, ":no_check"] if old_hash != :no_check
+          elsif old_hash == :no_check && new_hash != :no_check
+            replacement_pairs << %W[:no_check "#{new_hash}"] if new_hash.is_a?(String)
+          elsif old_hash != :no_check
+            if new_hash.nil? || cask.languages.present?
+              if new_hash && cask.languages.present?
+                opoo "Multiple checksum replacements required; ignoring specified `--sha256` argument."
+              end
+              # TODO: Ensure this works as expected for casks with multiple languages
               languages = cask.languages
               languages = [nil] if languages.empty?
               languages.each do |language|
-                new_hash_config = if language.blank?
-                  tmp_config
+                tmp_cask = if language.blank?
+                  tmp_cask
                 else
-                  tmp_config.merge(Cask::Config.new(explicit: { languages: [language] }))
+                  tmp_cask.merge(Cask::Config.new(explicit: { languages: [language] }))
                 end
 
-                new_hash_cask = Cask::CaskLoader.load(tmp_contents)
-                new_hash_cask.config = new_hash_config
-                old_hash = new_hash_cask.sha256.to_s
-
-                cask_download = Cask::Download.new(new_hash_cask, quarantine: true)
-                download = cask_download.fetch(verify_download_integrity: false)
+                cask_download = Cask::Download.new(tmp_cask, quarantine: true)
+                download      = cask_download.fetch(verify_download_integrity: false)
                 Utils::Tar.validate_file(download)
-
-                replacement_pairs << [new_hash_cask.sha256.to_s, download.sha256]
+                replacement_pairs << [tmp_cask.sha256.to_s, download.sha256]
               end
             end
+          elsif new_hash
+            opoo "Cask contains multiple hashes; only updating hash for current arch." if cask.on_system_blocks_exist?
+            replacement_pairs << [old_hash.to_s, new_hash]
           end
-        elsif new_hash
-          opoo "Cask contains multiple hashes; only updating hash for current arch." if cask.on_system_blocks_exist?
-          replacement_pairs << [old_hash.to_s, new_hash]
         end
       end
     end
+    # Now that we have all replacement pairs, we will replace them further down
+
+    old_contents = File.read(cask.sourcefile_path)
 
     if new_base_url
       commit_message ||= "#{cask.token}: update URL"
@@ -249,12 +251,12 @@ module Homebrew
     run_cask_style(cask, old_contents, args: args)
 
     pr_info = {
-      sourcefile_path: cask.sourcefile_path,
-      old_contents:    old_contents,
       branch_name:     branch_name,
       commit_message:  commit_message,
-      tap:             cask.tap,
+      old_contents:    old_contents,
       pr_message:      "Created with `brew bump-cask-pr`.",
+      sourcefile_path: cask.sourcefile_path,
+      tap:             cask.tap,
     }
     GitHub.create_bump_pr(pr_info, args: args)
   end
@@ -262,27 +264,14 @@ module Homebrew
   def check_pull_requests(cask, state:, args:, version: nil)
     tap_remote_repo = cask.tap.full_name || cask.tap.remote_repo
 
-    if version.is_a?(Hash)
-      version.each do |_arch, arch_version|
-        GitHub.check_for_duplicate_pull_requests(
-          cask.token,
-          tap_remote_repo,
-          state:   state,
-          version: arch_version,
-          file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
-          args:    args,
-        )
-      end
-    else
-      GitHub.check_for_duplicate_pull_requests(
-        cask.token,
-        tap_remote_repo,
-        state:   state,
-        version: version,
-        file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
-        args:    args,
-      )
-    end
+    GitHub.check_for_duplicate_pull_requests(
+      cask.token,
+      tap_remote_repo,
+      state:   state,
+      version: version,
+      file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
+      args:    args,
+    )
   end
 
   def run_cask_audit(cask, old_contents, args:)
