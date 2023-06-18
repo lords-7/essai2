@@ -62,21 +62,12 @@ module Cask
         define_divider_methods(divider)
       end
 
-      attr_reader :raw_version, :arch_versions
+      attr_reader :raw_version
 
-      sig { params(raw_version: T.nilable(T.any(String, Symbol, T::Hash[String, T.any(String, Symbol)]))).void }
+      sig { params(raw_version: T.nilable(T.any(String, Symbol))).void }
       def initialize(raw_version)
         @raw_version = raw_version
-        case raw_version
-        when String, Symbol
-          super(raw_version.to_s)
-          @arch_versions = nil
-        when Hash
-          super(raw_version.to_s)
-          @arch_versions = raw_version.transform_values(&:to_s)
-        else
-          raise TypeError, "Unsupported type for version: #{raw_version.class}"
-        end
+        super(raw_version.to_s)
 
         invalid = invalid_characters
         raise TypeError, "#{raw_version} contains invalid characters: #{invalid.uniq.join}!" if invalid.present?
@@ -177,12 +168,7 @@ module Cask
       def version
         return self if empty? || latest?
 
-        raw_version = yield
-        if @arch_versions
-          @arch_versions.transform_values! { raw_version }
-        else
-          self.class.new(raw_version)
-        end
+        self.class.new(yield)
       end
     end
   end
