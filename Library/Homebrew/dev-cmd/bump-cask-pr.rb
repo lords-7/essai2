@@ -9,15 +9,35 @@ require "utils/tar"
 module Homebrew
   module_function
 
-  # Get versions for specific architectures
-  class NewVersion
-    attr_accessor :general, :arm, :intel
+  class NewVersion < T::Struct
+    prop :general, T.nilable(String)
+    prop :arm, T.nilable(String)
+    prop :intel, T.nilable(String)
 
-    sig { params(general: T.nilable(String), arm: T.nilable(String), intel: T.nilable(String)).void }
-    def initialize(general: nil, arm: nil, intel: nil)
-      @general = general
-      @arm     = arm
-      @intel   = intel
+    def initialize(general: @general, arm: @arm, intel: @intel)
+      super
+      @general = parse_new_version(general) unless general.nil?
+      @intel = parse_new_version(intel) unless intel.nil?
+      @arm = parse_new_version(arm) unless arm.nil?
+
+      if general.nil?
+        raise UsageError, "`--version-intel` must not be empty." if intel.nil?
+        raise UsageError, "`--version-arm` must not be empty." if arm.nil?
+      elsif general && (arm || intel)
+        raise UsageError, "You cannot specify --version with --version-intel and --version-arm."
+      end
+    end
+
+    def parse_new_version(version)
+      if %w[latest :latest].include?(version)
+        "latest"
+      else
+        Cask::DSL::Version.new(version)
+      end
+    end
+
+    def empty?
+      @general.nil? && @arm.nil? && @intel.nil?
     end
   end
 
@@ -94,17 +114,9 @@ module Homebrew
 
     new_version = Homebrew::NewVersion.new(
       general: args.version,
-      arm:     args.version_arm,
       intel:   args.version_intel,
+      arm:     args.version_arm,
     )
-
-    parse_new_version = lambda do |version|
-      if %w[latest :latest].include?(version)
-        "latest"
-      else
-        Cask::DSL::Version.new(version)
-      end
-    end
 
     new_hash = args.sha256
     if new_hash.present?
@@ -123,26 +135,7 @@ module Homebrew
       end
     end
 
-    new_version = if new_version.intel && new_version.arm
-      raise UsageError, "`--intel-version` must not be empty." if new_version.intel.blank?
-      raise UsageError, "`--arm-version` must not be empty." if new_version.arm.blank?
-
-      Homebrew::NewVersion.new(
-        general: nil,
-        intel:   parse_new_version.call(new_version.intel),
-        arm:     parse_new_version.call(new_version.arm),
-      )
-    elsif new_version.general.present?
-      Homebrew::NewVersion.new(
-        general: parse_new_version.call(new_version.general),
-        arm:     nil,
-        intel:   nil,
-      )
-    else
-      Homebrew::NewVersion.new(general: nil, arm: nil, intel: nil)
-    end
-    if new_version.general.nil? && new_version.arm.nil? && new_version.intel.nil? &&
-       new_base_url.nil? && new_hash.nil?
+    if new_version.empty? && new_base_url.nil? && new_hash.nil?
       raise UsageError, "No `--version`, `--url` or `--sha256` argument specified!"
     end
 
