@@ -9,34 +9,34 @@ require "utils/tar"
 module Homebrew
   module_function
 
-  class NewVersion < T::Struct
-    prop :general, T.nilable(String)
-    prop :arm, T.nilable(String)
-    prop :intel, T.nilable(String)
+  class NewVersion
+    attr_reader :arm, :general, :intel
 
-    def initialize(general: @general, arm: @arm, intel: @intel)
-      super
+    sig { params(general: T.nilable(String), arm: T.nilable(String), intel: T.nilable(String)).void }
+    def initialize(general: nil, arm: nil, intel: nil)
       @general = parse_new_version(general) unless general.nil?
       @intel = parse_new_version(intel) unless intel.nil?
       @arm = parse_new_version(arm) unless arm.nil?
 
-      if general.nil?
+      if @general.nil?
         raise UsageError, "`--version-intel` must not be empty." if intel.nil?
         raise UsageError, "`--version-arm` must not be empty." if arm.nil?
-      elsif general && (arm || intel)
+      elsif @general && (@arm || @intel)
         raise UsageError, "You cannot specify --version with --version-intel and --version-arm."
       end
     end
 
+    sig { params(version: String).returns(T.nilable(Cask::DSL::Version)) }
     def parse_new_version(version)
       if %w[latest :latest].include?(version)
-        "latest"
+        Cask::DSL::Version.new(:latest)
       else
         Cask::DSL::Version.new(version)
       end
     end
 
-    def empty?
+    sig { returns(T::Boolean) }
+    def blank?
       @general.nil? && @arm.nil? && @intel.nil?
     end
   end
@@ -96,6 +96,7 @@ module Homebrew
 
   def bump_cask_pr
     args = bump_cask_pr_args.parse
+
     # This will be run by `brew style` later so run it first to not start
     # spamming during normal output.
     Homebrew.install_bundler_gems!
@@ -135,24 +136,25 @@ module Homebrew
       end
     end
 
-    if new_version.empty? && new_base_url.nil? && new_hash.nil?
+    if new_version.blank? && new_base_url.nil? && new_hash.nil?
       raise UsageError, "No `--version`, `--url` or `--sha256` argument specified!"
     end
 
     check_pull_requests(cask, state: "open", args: args)
-    # if we haven't already found open requests, try for an exact match across closed requests
-    if new_version.general.present?
-      check_pull_requests(cask, state: "closed", args: args, version: new_version.general)
-    else
-      check_pull_requests(cask, state: "closed", args: args, version: new_version.arm)
-      check_pull_requests(cask, state: "closed", args: args, version: new_version.intel)
+
+    new_version.instance_variables.each do |version_type|
+      version = new_version.instance_variable_get(version_type)
+      next if version.blank?
+
+      # if we haven't already found open requests, try for an exact match across closed requests
+      check_pull_requests(cask, state: "closed", args: args, version: version)
     end
 
     replacement_pairs ||= []
     branch_name = "bump-#{cask.token}"
     commit_message = nil
 
-    if new_version.general.nil? || (new_version.arm.nil? && new_version.intel.nil?)
+    if new_version.present?
       # For simplicity, our naming defers to the arm version if we multiple architectures are specified
       branch_version = new_version.arm || new_version.general
       commit_version = if branch_version.before_comma == cask.version.before_comma
