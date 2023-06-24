@@ -14,21 +14,19 @@ module Homebrew
 
     sig { params(general: T.nilable(String), arm: T.nilable(String), intel: T.nilable(String)).void }
     def initialize(general: nil, arm: nil, intel: nil)
-      @general = parse_new_version(general) unless general.nil?
-      @intel = parse_new_version(intel) unless intel.nil?
-      @arm = parse_new_version(arm) unless arm.nil?
+      @general = parse_new_version(general) if general.present?
+      @arm = parse_new_version(arm) if arm.present?
+      @intel = parse_new_version(intel) if intel.present?
 
-      if @general.nil?
-        raise UsageError, "`--version-intel` must not be empty." if intel.nil?
-        raise UsageError, "`--version-arm` must not be empty." if arm.nil?
-      elsif @general && (@arm || @intel)
-        raise UsageError, "You cannot specify --version with --version-intel and --version-arm."
-      end
+      return if @general.present?
+      raise UsageError, "`--version` must not be empty." if arm.blank? && intel.blank?
+      raise UsageError, "`--version-arm` must not be empty." if arm.blank?
+      raise UsageError, "`--version-intel` must not be empty." if intel.blank?
     end
 
     sig { params(version: String).returns(T.nilable(Cask::DSL::Version)) }
     def parse_new_version(version)
-      if %w[latest :latest].include?(version)
+      if version == "latest"
         Cask::DSL::Version.new(:latest)
       else
         Cask::DSL::Version.new(version)
@@ -37,7 +35,7 @@ module Homebrew
 
     sig { returns(T::Boolean) }
     def blank?
-      @general.nil? && @arm.nil? && @intel.nil?
+      @general.blank? && @arm.blank? && @intel.blank?
     end
   end
 
@@ -68,27 +66,27 @@ module Homebrew
              description: "Print the pull request URL instead of opening in a browser."
       switch "--no-fork",
              description: "Don't try to fork the repository."
-      flag "--version=",
-           description: "Specify the new <version> for the cask."
-      flag "--version-intel=",
-           description: "Specify the new cask <version> for the Intel architecture."
-      flag "--version-arm=",
-           description: "Specify the new cask <version> for the ARM architecture."
-      flag "--message=",
-           description: "Prepend <message> to the default pull request message."
-      flag "--url=",
-           description: "Specify the <URL> for the new download."
-      flag "--sha256=",
-           description: "Specify the <SHA-256> checksum of the new download."
-      flag "--fork-org=",
-           description: "Use the specified GitHub organization for forking."
+      flag   "--version=",
+             description: "Specify the new <version> for the cask."
+      flag   "--version-arm=",
+             description: "Specify the new cask <version> for the ARM architecture."
+      flag   "--version-intel=",
+             description: "Specify the new cask <version> for the Intel architecture."
+      flag   "--message=",
+             description: "Prepend <message> to the default pull request message."
+      flag   "--url=",
+             description: "Specify the <URL> for the new download."
+      flag   "--sha256=",
+             description: "Specify the <SHA-256> checksum of the new download."
+      flag   "--fork-org=",
+             description: "Use the specified GitHub organization for forking."
       switch "-f", "--force",
              description: "Ignore duplicate open PRs."
 
-      conflicts "--dry-run", "--write"
-      conflicts "--version=", "--version-intel="
-      conflicts "--version=", "--version-arm="
+      conflicts "--dry-run",  "--write"
       conflicts "--no-audit", "--online"
+      conflicts "--version=", "--version-arm="
+      conflicts "--version=", "--version-intel="
 
       named_args :cask, number: 1, without_api: true
     end
@@ -119,11 +117,10 @@ module Homebrew
       arm:     args.version_arm,
     )
 
-    new_hash = args.sha256
-    if new_hash.present?
+    new_hash = unless (new_hash = args.sha256).nil?
       raise UsageError, "`--sha256` must not be empty." if new_hash.blank?
 
-      new_hash = :no_check if %w[no_check :no_check].include?(new_hash)
+      ["no_check", ":no_check"].include?(new_hash) ? :no_check : new_hash
     end
 
     new_base_url = unless (new_base_url = args.url).nil?
@@ -140,15 +137,7 @@ module Homebrew
       raise UsageError, "No `--version`, `--url` or `--sha256` argument specified!"
     end
 
-    check_pull_requests(cask, state: "open", args: args)
-
-    new_version.instance_variables.each do |version_type|
-      version = new_version.instance_variable_get(version_type)
-      next if version.blank?
-
-      # if we haven't already found open requests, try for an exact match across closed requests
-      check_pull_requests(cask, state: "closed", args: args, version: version)
-    end
+    check_pull_requests(cask, args: args, new_version: new_version)
 
     replacement_pairs ||= []
     branch_name = "bump-#{cask.token}"
@@ -256,19 +245,33 @@ module Homebrew
     GitHub.create_bump_pr(pr_info, args: args)
   end
 
-  def check_pull_requests(cask, state:, args:, version: nil)
+  sig { params(cask: Cask::Cask, args: Homebrew::CLI::Args, new_version: NewVersion).void }
+  def check_pull_requests(cask, args:, new_version:)
     tap_remote_repo = cask.tap.full_name || cask.tap.remote_repo
 
-    GitHub.check_for_duplicate_pull_requests(
-      cask.token,
-      tap_remote_repo,
-      state:   state,
-      version: version,
-      file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
-      args:    args,
-    )
+    GitHub.check_for_duplicate_pull_requests(cask.token, tap_remote_repo,
+                                             state:   "open",
+                                             version: nil,
+                                             file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
+                                             args:    args)
+
+    # if we haven't already found open requests, try for an exact match across closed requests
+    new_version.instance_variables.each do |version_type|
+      version = new_version.instance_variable_get(version_type)
+      next if version.blank?
+
+      GitHub.check_for_duplicate_pull_requests(
+        cask.token,
+        tap_remote_repo,
+        state:   "closed",
+        version: version,
+        file:    cask.sourcefile_path.relative_path_from(cask.tap.path).to_s,
+        args:    args,
+      )
+    end
   end
 
+  sig { params(cask: Cask::Cask, old_contents: String, args: T.untyped).void }
   def run_cask_audit(cask, old_contents, args:)
     if args.dry_run?
       if args.no_audit?
@@ -296,6 +299,7 @@ module Homebrew
     odie "`brew audit` failed!"
   end
 
+  sig { params(cask: Cask::Cask, old_contents: String, args: T.untyped).void }
   def run_cask_style(cask, old_contents, args:)
     if args.dry_run?
       if args.no_style?
