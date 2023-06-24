@@ -41,5 +41,7 @@ module Cask
     def livecheck; end
 
     def livecheckable?; end
+
+    def on_system_blocks_exist?; end
   end
 end

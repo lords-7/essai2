@@ -12,20 +12,36 @@ module Homebrew
   class NewVersion
     attr_reader :arm, :general, :intel
 
-    sig { params(general: T.nilable(String), arm: T.nilable(String), intel: T.nilable(String)).void }
+    sig {
+      params(general: T.nilable(T.any(Version, String)),
+             arm:     T.nilable(T.any(Version, String)),
+             intel:   T.nilable(T.any(Version, String))).void
+    }
     def initialize(general: nil, arm: nil, intel: nil)
-      @general = parse_new_version(general) if general.present?
-      @arm = parse_new_version(arm) if arm.present?
-      @intel = parse_new_version(intel) if intel.present?
+      @general = parse_version(general) if general.present?
+      @arm = parse_version(arm) if arm.present?
+      @intel = parse_version(intel) if intel.present?
 
-      return if @general.present?
-      raise UsageError, "`--version` must not be empty." if arm.blank? && intel.blank?
-      raise UsageError, "`--version-arm` must not be empty." if arm.blank?
-      raise UsageError, "`--version-intel` must not be empty." if intel.blank?
+      # return if @general.present?
+      # raise UsageError, "`--version` must not be empty." if arm.blank? && intel.blank?
+      # raise UsageError, "`--version-arm` must not be empty." if arm.blank?
+      # raise UsageError, "`--version-intel` must not be empty." if intel.blank?
+    end
+
+    sig {
+      params(version: T.any(Version, String))
+        .returns(T.nilable(T.any(Version, Cask::DSL::Version)))
+    }
+    def parse_version(version)
+      if version.is_a?(Version)
+        T.cast(version, Version)
+      else
+        parse_cask_version(T.cast(version, String))
+      end
     end
 
     sig { params(version: String).returns(T.nilable(Cask::DSL::Version)) }
-    def parse_new_version(version)
+    def parse_cask_version(version)
       if version == "latest"
         Cask::DSL::Version.new(:latest)
       else
