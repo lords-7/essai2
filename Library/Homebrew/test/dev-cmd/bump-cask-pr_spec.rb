@@ -6,7 +6,7 @@ require "dev-cmd/bump-cask-pr"
 describe "brew bump-cask-pr" do
   it_behaves_like "parseable arguments"
 
-  describe Homebrew::NewVersion do
+  describe Homebrew::VersionParser do
     let(:general_version) { "1.2.3" }
     let(:intel_version) { "2.3.4" }
     let(:arm_version) { "3.4.5" }
@@ -66,7 +66,7 @@ describe "brew bump-cask-pr" do
         end
       end
 
-      context "when checking if NewVersion is blank" do
+      context "when checking if VersionParser is blank" do
         it "returns false if any version is present" do
           new_version = described_class.new(general: general_version.to_s, arm: "", intel: "")
           expect(new_version.blank?).to be(false)

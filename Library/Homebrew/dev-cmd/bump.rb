@@ -3,10 +3,67 @@
 
 require "cli/parser"
 require "livecheck/livecheck"
-require "dev-cmd/bump-cask-pr"
 
 module Homebrew
   module_function
+
+  class VersionParser
+    sig { returns(T.nilable(T.any(Version, Cask::DSL::Version))) }
+    attr_reader :arm, :general, :intel
+
+    sig {
+      params(general: T.nilable(T.any(Version, String)),
+             arm:     T.nilable(T.any(Version, String)),
+             intel:   T.nilable(T.any(Version, String))).void
+    }
+    def initialize(general: nil, arm: nil, intel: nil)
+      @general = T.let(parse_version(general), T.nilable(T.any(Version, Cask::DSL::Version))) if general.present?
+      @arm = T.let(parse_version(arm), T.nilable(T.any(Version, Cask::DSL::Version))) if arm.present?
+      @intel = T.let(parse_version(intel), T.nilable(T.any(Version, Cask::DSL::Version))) if intel.present?
+
+      return if @general.present?
+      raise UsageError, "`--version` must not be empty." if arm.blank? && intel.blank?
+      raise UsageError, "`--version-arm` must not be empty." if arm.blank?
+      raise UsageError, "`--version-intel` must not be empty." if intel.blank?
+    end
+
+    sig {
+      params(version: T.any(Version, String))
+        .returns(T.nilable(T.any(Version, Cask::DSL::Version)))
+    }
+    def parse_version(version)
+      if version.is_a?(Version)
+        version
+      elsif version.is_a?(String)
+        parse_cask_version(version)
+      end
+    end
+
+    sig { params(version: String).returns(T.nilable(Cask::DSL::Version)) }
+    def parse_cask_version(version)
+      if version == "latest"
+        Cask::DSL::Version.new(:latest)
+      else
+        Cask::DSL::Version.new(version)
+      end
+    end
+
+    sig { returns(T::Boolean) }
+    def blank?
+      @general.blank? && @arm.blank? && @intel.blank?
+    end
+  end
+
+  class BumpVersionInfo < T::Struct
+    const :type, Symbol
+    const :is_cask_with_blocks, T::Boolean
+    const :version_name, String
+    const :current_version, VersionParser
+    const :repology_latest, T.any(String, Version)
+    const :new_version, VersionParser
+    const :open_pull_requests, T::Array[T.untyped]
+    const :closed_pull_requests, T::Array[T.untyped]
+  end
 
   sig { returns(CLI::Parser) }
   def bump_args
@@ -41,6 +98,7 @@ module Homebrew
     end
   end
 
+  sig { void }
   def bump
     args = bump_args.parse
 
@@ -74,6 +132,7 @@ module Homebrew
     end
   end
 
+  sig { params(formulae_and_casks: T::Array[T.any(Formula, Cask::Cask)], args: T.untyped).void }
   def handle_formula_and_casks(formulae_and_casks, args)
     Livecheck.load_other_tap_strategies(formulae_and_casks)
 
@@ -229,7 +288,7 @@ module Homebrew
 
   sig {
     params(formula_or_cask: T.any(Formula, Cask::Cask), name: String, state: String,
-           version: T.nilable(Version)).returns T.nilable(Array)
+           version: T.nilable(String)).returns T.nilable(T::Array[T.untyped])
   }
   def retrieve_pull_requests(formula_or_cask, name, state:, version: nil)
     tap_remote_repo = formula_or_cask.tap&.remote_repo || formula_or_cask.tap&.full_name
@@ -242,8 +301,8 @@ module Homebrew
   end
 
   sig {
-    params(formula_or_cask: T.any(Formula, Cask::Cask), repositories: Array, args: T.untyped,
-           name: String).returns Hash
+    params(formula_or_cask: T.any(Formula, Cask::Cask), repositories: T::Array[T.untyped], args: T.untyped,
+           name: String).returns BumpVersionInfo
   }
   def retrieve_versions_by_arch(formula_or_cask:, repositories:, args:, name:)
     is_formula = formula_or_cask.is_a?(Formula)
@@ -299,18 +358,18 @@ module Homebrew
       end
     end
 
-    current_version = NewVersion.new(general: old_versions[:general],
-                                     arm:     old_versions[:arm],
-                                     intel:   old_versions[:intel])
+    current_version = VersionParser.new(general: old_versions[:general],
+                                        arm:     old_versions[:arm],
+                                        intel:   old_versions[:intel])
 
-    new_version = NewVersion.new(general: new_versions[:general],
-                                 arm:     new_versions[:arm],
-                                 intel:   new_versions[:intel])
+    new_version = VersionParser.new(general: new_versions[:general],
+                                    arm:     new_versions[:arm],
+                                    intel:   new_versions[:intel])
 
     pull_request_version = if is_formula
-      new_version.general.to_s unless new_version.general.blank?
-    else
-      new_version.arm.to_s unless new_version.arm.blank?
+      new_version.general.to_s if new_version.general.present?
+    elsif new_version.arm.present?
+      new_version.arm.to_s
     end
 
     open_pull_requests = if !args.no_pull_requests? && (args.named.present? || new_version.present?)
@@ -321,22 +380,22 @@ module Homebrew
       retrieve_pull_requests(formula_or_cask, name, state: "closed", version: pull_request_version)
     end.presence
 
-    {
+    BumpVersionInfo.new(
       type:                 type,
-      has_arch_blocks:      is_cask_with_blocks,
+      is_cask_with_blocks:  is_cask_with_blocks,
       version_name:         version_name,
       current_version:      current_version,
-      repology_version:     repology_latest,
+      repology_latest:      repology_latest,
       new_version:          new_version,
       open_pull_requests:   open_pull_requests,
       closed_pull_requests: closed_pull_requests,
-    }
+    )
   end
 
   sig {
     params(formula_or_cask: T.any(Formula, Cask::Cask),
            name:            String,
-           repositories:    Array,
+           repositories:    T::Array[T.untyped],
            args:            T.untyped,
            ambiguous_cask:  T::Boolean).void
   }
@@ -345,14 +404,14 @@ module Homebrew
                                              repositories:    repositories,
                                              args:            args,
                                              name:            name)
-    type = version_info[:type]
-    version_name = version_info[:version_name]
-    current_version = version_info[:current_version]
-    new_version = version_info[:new_version]
-    repology_latest = version_info[:repology_version]
+    type = version_info.type
+    version_name = version_info.version_name
+    current_version = version_info.current_version
+    new_version = version_info.new_version
+    repology_latest = version_info.repology_latest
 
-    open_pull_requests = version_info[:open_pull_requests].presence || "none"
-    closed_pull_requests = version_info[:closed_pull_requests].presence || "none"
+    open_pull_requests = version_info.open_pull_requests.presence || "none"
+    closed_pull_requests = version_info.closed_pull_requests.presence || "none"
 
     repology_relevant = ["present only in Homebrew", "not found"].exclude?(repology_latest)
 
@@ -362,20 +421,20 @@ module Homebrew
     end
 
     title_name = ambiguous_cask ? "#{name} (cask)" : name
-    title = if repology_latest == current_version || (repology_relevant == false && versions_equal)
+    title = if repology_latest == current_version.general || (repology_relevant == false && versions_equal)
       "#{title_name} #{Tty.green}is up to date!#{Tty.reset}"
     else
       title_name
     end
 
     # Conditionally format output based on type of formula_or_cask
-    current_versions = if version_info[:has_arch_blocks]
+    current_versions = if version_info.is_cask_with_blocks
       "arm: #{current_version.arm}, intel: #{current_version.intel}"
     else
       current_version.general
     end
 
-    new_versions = if version_info[:has_arch_blocks]
+    new_versions = if version_info.is_cask_with_blocks
       "arm: #{new_version.arm}, intel: #{new_version.intel}"
     else
       new_version.general
@@ -401,12 +460,12 @@ module Homebrew
       return
     end
 
-    return if new_version.none?
+    return if new_version.blank?
 
     return if open_pull_requests
     return if closed_pull_requests
 
-    version_args = if version_info[:has_arch_blocks]
+    version_args = if version_info.is_cask_with_blocks
       "--version-intel=#{new_version.arm} --version-arm=#{new_version.intel}"
     else
       "--version=#{new_version.general}"

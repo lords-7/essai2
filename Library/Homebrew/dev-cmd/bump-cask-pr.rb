@@ -5,55 +5,10 @@ require "cask"
 require "cask/download"
 require "cli/parser"
 require "utils/tar"
+require "dev-cmd/bump"
 
 module Homebrew
   module_function
-
-  class NewVersion
-    attr_reader :arm, :general, :intel
-
-    sig {
-      params(general: T.nilable(T.any(Version, String)),
-             arm:     T.nilable(T.any(Version, String)),
-             intel:   T.nilable(T.any(Version, String))).void
-    }
-    def initialize(general: nil, arm: nil, intel: nil)
-      @general = parse_version(general) if general.present?
-      @arm = parse_version(arm) if arm.present?
-      @intel = parse_version(intel) if intel.present?
-
-      # return if @general.present?
-      # raise UsageError, "`--version` must not be empty." if arm.blank? && intel.blank?
-      # raise UsageError, "`--version-arm` must not be empty." if arm.blank?
-      # raise UsageError, "`--version-intel` must not be empty." if intel.blank?
-    end
-
-    sig {
-      params(version: T.any(Version, String))
-        .returns(T.nilable(T.any(Version, Cask::DSL::Version)))
-    }
-    def parse_version(version)
-      if version.is_a?(Version)
-        T.cast(version, Version)
-      else
-        parse_cask_version(T.cast(version, String))
-      end
-    end
-
-    sig { params(version: String).returns(T.nilable(Cask::DSL::Version)) }
-    def parse_cask_version(version)
-      if version == "latest"
-        Cask::DSL::Version.new(:latest)
-      else
-        Cask::DSL::Version.new(version)
-      end
-    end
-
-    sig { returns(T::Boolean) }
-    def blank?
-      @general.blank? && @arm.blank? && @intel.blank?
-    end
-  end
 
   sig { returns(CLI::Parser) }
   def bump_cask_pr_args
@@ -108,6 +63,7 @@ module Homebrew
     end
   end
 
+  sig { void }
   def bump_cask_pr
     args = bump_cask_pr_args.parse
 
@@ -127,7 +83,7 @@ module Homebrew
     odie "This cask is not in a tap!" if cask.tap.blank?
     odie "This cask's tap is not a Git repository!" unless cask.tap.git?
 
-    new_version = Homebrew::NewVersion.new(
+    new_version = Homebrew::VersionParser.new(
       general: args.version,
       intel:   args.version_intel,
       arm:     args.version_arm,
@@ -162,14 +118,15 @@ module Homebrew
     if new_version.present?
       # For simplicity, our naming defers to the arm version if we multiple architectures are specified
       branch_version = new_version.arm || new_version.general
-      commit_version = if branch_version.before_comma == cask.version.before_comma
-        branch_version
-      else
-        branch_version.before_comma
+      if branch_version.is_a?(Cask::DSL::Version)
+        commit_version = if branch_version.before_comma == cask.version.before_comma
+          branch_version
+        else
+          branch_version.before_comma
+        end
+        branch_name = "bump-#{cask.token}-#{T.must(branch_version).tr(",:", "-")}"
+        commit_message ||= "#{cask.token} #{commit_version}"
       end
-      branch_name = "bump-#{cask.token}-#{branch_version.tr(",:", "-")}"
-      commit_message ||= "#{cask.token} #{commit_version}"
-
       OnSystem::ARCH_OPTIONS.each do |arch|
         SimulateSystem.with arch: arch do
           old_cask = Cask::CaskLoader.load(cask.sourcefile_path)
@@ -261,7 +218,7 @@ module Homebrew
     GitHub.create_bump_pr(pr_info, args: args)
   end
 
-  sig { params(cask: Cask::Cask, args: Homebrew::CLI::Args, new_version: NewVersion).void }
+  sig { params(cask: Cask::Cask, args: Homebrew::CLI::Args, new_version: VersionParser).void }
   def check_pull_requests(cask, args:, new_version:)
     tap_remote_repo = cask.tap.full_name || cask.tap.remote_repo
 
