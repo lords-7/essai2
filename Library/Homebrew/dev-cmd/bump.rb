@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require "cli/parser"
@@ -54,15 +54,15 @@ module Homebrew
     end
   end
 
-  class BumpVersionInfo < T::Struct
+  class VersionBumpInfo < T::Struct
     const :type, Symbol
-    const :is_cask_with_blocks, T::Boolean
+    const :multiple_versions, T::Boolean
     const :version_name, String
     const :current_version, VersionParser
     const :repology_latest, T.any(String, Version)
     const :new_version, VersionParser
-    const :open_pull_requests, T::Array[T.untyped]
-    const :closed_pull_requests, T::Array[T.untyped]
+    const :open_pull_requests, T::Array[T.nilable(String)]
+    const :closed_pull_requests, T::Array[T.nilable(String)]
   end
 
   sig { returns(CLI::Parser) }
@@ -101,7 +101,6 @@ module Homebrew
   sig { void }
   def bump
     args = bump_args.parse
-
     if args.limit.present? && !args.formula? && !args.cask?
       raise UsageError, "`--limit` must be used with either `--formula` or `--cask`."
     end
@@ -132,7 +131,7 @@ module Homebrew
     end
   end
 
-  sig { params(formulae_and_casks: T::Array[T.any(Formula, Cask::Cask)], args: T.untyped).void }
+  sig { params(formulae_and_casks: T::Array[T.any(Formula, Cask::Cask)], args: Homebrew::CLI::Args).void }
   def handle_formula_and_casks(formulae_and_casks, args)
     Livecheck.load_other_tap_strategies(formulae_and_casks)
 
@@ -288,7 +287,7 @@ module Homebrew
 
   sig {
     params(formula_or_cask: T.any(Formula, Cask::Cask), name: String, state: String,
-           version: T.nilable(String)).returns T.nilable(T::Array[T.untyped])
+           version: T.nilable(String)).returns T.any(T::Array[T.untyped], String)
   }
   def retrieve_pull_requests(formula_or_cask, name, state:, version: nil)
     tap_remote_repo = formula_or_cask.tap&.remote_repo || formula_or_cask.tap&.full_name
@@ -302,43 +301,31 @@ module Homebrew
 
   sig {
     params(formula_or_cask: T.any(Formula, Cask::Cask), repositories: T::Array[T.untyped], args: T.untyped,
-           name: String).returns BumpVersionInfo
+           name: String).returns VersionBumpInfo
   }
   def retrieve_versions_by_arch(formula_or_cask:, repositories:, args:, name:)
-    is_formula = formula_or_cask.is_a?(Formula)
-    is_cask_with_blocks = !is_formula && formula_or_cask.on_system_blocks_exist?
-
-    if is_formula
-      type = :formula
-      version_name ="formula version:"
-    else
-      type = :cask
-      version_name = "cask version:  "
-    end
+    is_cask_with_blocks = formula_or_cask.is_a?(Cask::Cask) && formula_or_cask.on_system_blocks_exist?
+    type, version_name = formula_or_cask.is_a?(Formula) ? [:formula, "formula version:"] : [:cask, "cask version:  "]
 
     old_versions = {}
     new_versions = {}
 
-    repology_latest = if repositories.present?
-      Repology.latest_version(repositories)
-    else
-      "not found"
-    end
+    repology_latest = repositories.present? ? Repology.latest_version(repositories) : "not found"
 
+    # When blocks are absent, arch is not relevant. For consistency, we simulate the arm architecture.
     arch_options = is_cask_with_blocks ? [:arm, :intel] : [:arm]
+
     arch_options.each do |arch|
       Homebrew::SimulateSystem.with arch: arch do
-        loaded_formula_or_cask = if is_formula
-          formula_or_cask
-        else
-          Cask::CaskLoader.load(formula_or_cask.sourcefile_path)
-        end
-
         version_key = is_cask_with_blocks ? arch : :general
-        current_version_value = if loaded_formula_or_cask.is_a?(Formula)
-          loaded_formula_or_cask.stable.version
+
+        # We reload the formula/cask here to ensure we're getting the correct version for the current arch
+        if formula_or_cask.is_a?(Formula)
+          loaded_formula_or_cask = formula_or_cask
+          current_version_value = formula_or_cask.stable.version
         else
-          Version.new(loaded_formula_or_cask.version)
+          loaded_formula_or_cask = Cask::CaskLoader.load(formula_or_cask.sourcefile_path)
+          current_version_value = Version.new(loaded_formula_or_cask.version)
         end
 
         livecheck_latest = livecheck_result(loaded_formula_or_cask)
@@ -358,6 +345,21 @@ module Homebrew
       end
     end
 
+    # If arm and intel versions are identical, as it happens with casks where only the checksums differ,
+    # we consolidate them into a single version.
+    [:arm, :intel].each do |key|
+      if old_versions[:arm] == old_versions[:intel]
+        old_versions[:general] = old_versions[key]
+        old_versions.delete(key)
+      end
+
+      if new_versions[:arm] == new_versions[:intel]
+        new_versions[:general] = new_versions[key]
+        new_versions.delete(key)
+      end
+    end
+    multiple_versions = new_versions.values_at(:arm, :intel).all?(&:present?)
+
     current_version = VersionParser.new(general: old_versions[:general],
                                         arm:     old_versions[:arm],
                                         intel:   old_versions[:intel])
@@ -366,10 +368,11 @@ module Homebrew
                                     arm:     new_versions[:arm],
                                     intel:   new_versions[:intel])
 
-    pull_request_version = if is_formula
-      new_version.general.to_s if new_version.general.present?
-    elsif new_version.arm.present?
+    # We use the arm version for the pull request title. This is consistent with the behavior of bump-cask-pr.
+    pull_request_version = if multiple_versions
       new_version.arm.to_s
+    else
+      new_version.general.to_s
     end
 
     open_pull_requests = if !args.no_pull_requests? && (args.named.present? || new_version.present?)
@@ -380,9 +383,9 @@ module Homebrew
       retrieve_pull_requests(formula_or_cask, name, state: "closed", version: pull_request_version)
     end.presence
 
-    BumpVersionInfo.new(
+    VersionBumpInfo.new(
       type:                 type,
-      is_cask_with_blocks:  is_cask_with_blocks,
+      multiple_versions:    multiple_versions,
       version_name:         version_name,
       current_version:      current_version,
       repology_latest:      repology_latest,
@@ -404,16 +407,10 @@ module Homebrew
                                              repositories:    repositories,
                                              args:            args,
                                              name:            name)
-    type = version_info.type
-    version_name = version_info.version_name
+
     current_version = version_info.current_version
     new_version = version_info.new_version
     repology_latest = version_info.repology_latest
-
-    open_pull_requests = version_info.open_pull_requests.presence || "none"
-    closed_pull_requests = version_info.closed_pull_requests.presence || "none"
-
-    repology_relevant = ["present only in Homebrew", "not found"].exclude?(repology_latest)
 
     # Check if all versions are equal
     versions_equal = [:arm, :intel, :general].all? do |key|
@@ -421,27 +418,30 @@ module Homebrew
     end
 
     title_name = ambiguous_cask ? "#{name} (cask)" : name
-    title = if repology_latest == current_version.general || (repology_relevant == false && versions_equal)
+    title = if repology_latest == current_version.general || (!repology_latest.is_a?(Version) && versions_equal)
       "#{title_name} #{Tty.green}is up to date!#{Tty.reset}"
     else
       title_name
     end
 
     # Conditionally format output based on type of formula_or_cask
-    current_versions = if version_info.is_cask_with_blocks
-      "arm: #{current_version.arm}, intel: #{current_version.intel}"
+    current_versions = if version_info.multiple_versions
+      "arm: #{current_version.arm} | intel: #{current_version.intel}"
     else
       current_version.general
     end
 
-    new_versions = if version_info.is_cask_with_blocks
-      "arm: #{new_version.arm}, intel: #{new_version.intel}"
+    new_versions = if version_info.multiple_versions
+      "arm: #{new_version.arm} | intel: #{new_version.intel}"
     else
       new_version.general
     end
 
-    ohai title
+    version_name = version_info.version_name
+    open_pull_requests = version_info.open_pull_requests.presence
+    closed_pull_requests = version_info.closed_pull_requests.presence
 
+    ohai title
     puts <<~EOS
       Current #{version_name}   #{current_versions}
       Latest livecheck version: #{new_versions}
@@ -457,21 +457,26 @@ module Homebrew
        repology_latest > new_version.general &&
        formula_or_cask.livecheckable?
       puts "#{title_name} was not bumped to the Repology version because it's livecheckable."
-      return
     end
-
     return if new_version.blank?
 
-    return if open_pull_requests
-    return if closed_pull_requests
+    return if !args.force? && (open_pull_requests.present? || closed_pull_requests.present?)
 
-    version_args = if version_info.is_cask_with_blocks
+    version_args = if version_info.multiple_versions
       "--version-intel=#{new_version.arm} --version-arm=#{new_version.intel}"
     else
       "--version=#{new_version.general}"
     end
 
-    system HOMEBREW_BREW_FILE, "bump-#{type}-pr", "--no-browse",
-           "--message=Created by `brew bump`", version_args, name
+    bump_cask_pr_args = [
+      "bump-cask-pr",
+      version_args,
+      "--no-browse",
+      "--message=Created by `brew bump`",
+      name,
+    ]
+    bump_cask_pr_args << "--force" if args.force?
+
+    system_command! HOMEBREW_BREW_FILE, args: bump_cask_pr_args
   end
 end

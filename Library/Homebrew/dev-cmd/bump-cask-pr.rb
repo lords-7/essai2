@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require "cask"
@@ -124,7 +124,7 @@ module Homebrew
         else
           branch_version.before_comma
         end
-        branch_name = "bump-#{cask.token}-#{T.must(branch_version).tr(",:", "-")}"
+        branch_name = "bump-#{cask.token}-#{branch_version.tr(",:", "-")}"
         commit_message ||= "#{cask.token} #{commit_version}"
       end
       OnSystem::ARCH_OPTIONS.each do |arch|
