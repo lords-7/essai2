@@ -76,14 +76,14 @@ module Homebrew
     ENV["PATH"] = PATH.new(ORIGINAL_PATHS).to_s
 
     # Use the user's browser, too.
-    ENV["BROWSER"] = Homebrew::EnvConfig.browser
+    ENV["BROWSER"] = EnvConfig.browser
 
     cask = args.named.to_casks.first
 
     odie "This cask is not in a tap!" if cask.tap.blank?
     odie "This cask's tap is not a Git repository!" unless cask.tap.git?
 
-    new_version = Homebrew::VersionParser.new(
+    new_version = VersionParser.new(
       general: args.version,
       intel:   args.version_intel,
       arm:     args.version_arm,

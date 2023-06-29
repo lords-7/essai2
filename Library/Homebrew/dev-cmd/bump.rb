@@ -257,7 +257,7 @@ module Homebrew
 
     # Check skip conditions for a referenced formula/cask
     if referenced_formula_or_cask
-      skip_info = Homebrew::Livecheck::SkipConditions.referenced_skip_information(
+      skip_info = Livecheck::SkipConditions.referenced_skip_information(
         referenced_formula_or_cask,
         name,
         full_name: false,
@@ -265,8 +265,8 @@ module Homebrew
       )
     end
 
-    skip_info ||= Homebrew::Livecheck::SkipConditions.skip_information(formula_or_cask, full_name: false,
-                                                                                        verbose:   false)
+    skip_info ||= Livecheck::SkipConditions.skip_information(formula_or_cask, full_name: false,
+                                                                              verbose:   false)
     if skip_info.present?
       return "#{skip_info[:status]}#{" - #{skip_info[:messages].join(", ")}" if skip_info[:messages].present?}"
     end
@@ -300,8 +300,12 @@ module Homebrew
   end
 
   sig {
-    params(formula_or_cask: T.any(Formula, Cask::Cask), repositories: T::Array[T.untyped], args: T.untyped,
-           name: String).returns VersionBumpInfo
+    params(
+      formula_or_cask: T.any(Formula, Cask::Cask),
+      repositories:    T::Array[T.untyped],
+      args:            T.untyped,
+      name:            String,
+    ).returns(VersionBumpInfo)
   }
   def retrieve_versions_by_arch(formula_or_cask:, repositories:, args:, name:)
     is_cask_with_blocks = formula_or_cask.is_a?(Cask::Cask) && formula_or_cask.on_system_blocks_exist?
@@ -316,7 +320,7 @@ module Homebrew
     arch_options = is_cask_with_blocks ? [:arm, :intel] : [:arm]
 
     arch_options.each do |arch|
-      Homebrew::SimulateSystem.with arch: arch do
+      SimulateSystem.with arch: arch do
         version_key = is_cask_with_blocks ? arch : :general
 
         # We reload the formula/cask here to ensure we're getting the correct version for the current arch
@@ -347,17 +351,13 @@ module Homebrew
 
     # If arm and intel versions are identical, as it happens with casks where only the checksums differ,
     # we consolidate them into a single version.
-    [:arm, :intel].each do |key|
-      if old_versions[:arm] == old_versions[:intel]
-        old_versions[:general] = old_versions[key]
-        old_versions.delete(key)
-      end
-
-      if new_versions[:arm] == new_versions[:intel]
-        new_versions[:general] = new_versions[key]
-        new_versions.delete(key)
-      end
+    if old_versions[:arm].present? && old_versions[:arm] == old_versions[:intel]
+      old_versions = { general: old_versions[:arm] }
     end
+    if new_versions[:arm].present? && new_versions[:arm] == new_versions[:intel]
+      new_versions = { general: new_versions[:arm] }
+    end
+
     multiple_versions = new_versions.values_at(:arm, :intel).all?(&:present?)
 
     current_version = VersionParser.new(general: old_versions[:general],
@@ -368,7 +368,7 @@ module Homebrew
                                     arm:     new_versions[:arm],
                                     intel:   new_versions[:intel])
 
-    # We use the arm version for the pull request title. This is consistent with the behavior of bump-cask-pr.
+    # We use the arm version for the pull request version. This is consistent with the behavior of bump-cask-pr.
     pull_request_version = if multiple_versions
       new_version.arm.to_s
     else
