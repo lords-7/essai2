@@ -61,13 +61,13 @@ module Homebrew
     const :current_version, VersionParser
     const :repology_latest, T.any(String, Version)
     const :new_version, VersionParser
-    const :open_pull_requests, T::Array[T.nilable(String)]
-    const :closed_pull_requests, T::Array[T.nilable(String)]
+    const :open_pull_requests, T.nilable(T.any(T::Array[String], String))
+    const :closed_pull_requests, T.nilable(T.any(T::Array[String], String))
   end
 
   sig { returns(CLI::Parser) }
   def bump_args
-    Homebrew::CLI::Parser.new do
+    CLI::Parser.new do
       description <<~EOS
         Display out-of-date brew formulae and the latest version available. If the
         returned current and livecheck versions differ or when querying specific
@@ -131,7 +131,7 @@ module Homebrew
     end
   end
 
-  sig { params(formulae_and_casks: T::Array[T.any(Formula, Cask::Cask)], args: Homebrew::CLI::Args).void }
+  sig { params(formulae_and_casks: T::Array[T.any(Formula, Cask::Cask)], args: CLI::Args).void }
   def handle_formula_and_casks(formulae_and_casks, args)
     Livecheck.load_other_tap_strategies(formulae_and_casks)
 
@@ -147,11 +147,11 @@ module Homebrew
 
     ambiguous_names = []
     unless args.full_name?
-      ambiguous_names =
-        (formulae_and_casks - ambiguous_casks).group_by { |item| Livecheck.package_or_resource_name(item) }
-                                              .values
-                                              .select { |items| items.length > 1 }
-                                              .flatten
+      ambiguous_names = (formulae_and_casks - ambiguous_casks)
+                        .group_by { |item| Livecheck.package_or_resource_name(item) }
+                        .values
+                        .select { |items| items.length > 1 }
+                        .flatten
     end
 
     formulae_and_casks.each_with_index do |formula_or_cask, i|
@@ -186,7 +186,7 @@ module Homebrew
     end
   end
 
-  sig { params(args: Homebrew::CLI::Args).void }
+  sig { params(args: CLI::Args).void }
   def handle_api_response(args)
     limit = args.limit.to_i if args.limit.present?
 
@@ -252,8 +252,11 @@ module Homebrew
   def livecheck_result(formula_or_cask)
     name = Livecheck.package_or_resource_name(formula_or_cask)
 
-    referenced_formula_or_cask, =
-      Livecheck.resolve_livecheck_reference(formula_or_cask, full_name: false, debug: false)
+    referenced_formula_or_cask, = Livecheck.resolve_livecheck_reference(
+      formula_or_cask,
+      full_name: false,
+      debug:     false,
+    )
 
     # Check skip conditions for a referenced formula/cask
     if referenced_formula_or_cask
@@ -265,8 +268,12 @@ module Homebrew
       )
     end
 
-    skip_info ||= Livecheck::SkipConditions.skip_information(formula_or_cask, full_name: false,
-                                                                              verbose:   false)
+    skip_info ||= Livecheck::SkipConditions.skip_information(
+      formula_or_cask,
+      full_name: false,
+      verbose:   false,
+    )
+
     if skip_info.present?
       return "#{skip_info[:status]}#{" - #{skip_info[:messages].join(", ")}" if skip_info[:messages].present?}"
     end
@@ -286,8 +293,12 @@ module Homebrew
   end
 
   sig {
-    params(formula_or_cask: T.any(Formula, Cask::Cask), name: String, state: String,
-           version: T.nilable(String)).returns T.any(T::Array[T.untyped], String)
+    params(
+      formula_or_cask: T.any(Formula, Cask::Cask),
+      name:            String,
+      state:           String,
+      version:         T.nilable(String),
+    ).returns T.nilable(T.any(T::Array[String], String))
   }
   def retrieve_pull_requests(formula_or_cask, name, state:, version: nil)
     tap_remote_repo = formula_or_cask.tap&.remote_repo || formula_or_cask.tap&.full_name
@@ -309,7 +320,7 @@ module Homebrew
   }
   def retrieve_versions_by_arch(formula_or_cask:, repositories:, args:, name:)
     is_cask_with_blocks = formula_or_cask.is_a?(Cask::Cask) && formula_or_cask.on_system_blocks_exist?
-    type, version_name = formula_or_cask.is_a?(Formula) ? [:formula, "formula version:"] : [:cask, "cask version:  "]
+    type, version_name = formula_or_cask.is_a?(Formula) ? [:formula, "formula version:"] : [:cask, "cask version:   "]
 
     old_versions = {}
     new_versions = {}
@@ -368,7 +379,8 @@ module Homebrew
                                     arm:     new_versions[:arm],
                                     intel:   new_versions[:intel])
 
-    # We use the arm version for the pull request version. This is consistent with the behavior of bump-cask-pr.
+    # We use the arm version for the pull request version. This is consistent
+    # with the behavior of bump-cask-pr.
     pull_request_version = if multiple_versions
       new_version.arm.to_s
     else
@@ -396,11 +408,13 @@ module Homebrew
   end
 
   sig {
-    params(formula_or_cask: T.any(Formula, Cask::Cask),
-           name:            String,
-           repositories:    T::Array[T.untyped],
-           args:            T.untyped,
-           ambiguous_cask:  T::Boolean).void
+    params(
+      formula_or_cask: T.any(Formula, Cask::Cask),
+      name:            String,
+      repositories:    T::Array[T.untyped],
+      args:            T.untyped,
+      ambiguous_cask:  T::Boolean,
+    ).void
   }
   def retrieve_and_display_info_and_open_pr(formula_or_cask, name, repositories, args:, ambiguous_cask: false)
     version_info = retrieve_versions_by_arch(formula_or_cask: formula_or_cask,
@@ -437,13 +451,13 @@ module Homebrew
       new_version.general
     end
 
-    version_name = version_info.version_name
+    version_label = version_info.version_name
     open_pull_requests = version_info.open_pull_requests.presence
     closed_pull_requests = version_info.closed_pull_requests.presence
 
     ohai title
     puts <<~EOS
-      Current #{version_name}   #{current_versions}
+      Current #{version_label}  #{current_versions}
       Latest livecheck version: #{new_versions}
       Latest Repology version:  #{repology_latest}
       Open pull requests:       #{open_pull_requests || "none"}
@@ -458,7 +472,7 @@ module Homebrew
        formula_or_cask.livecheckable?
       puts "#{title_name} was not bumped to the Repology version because it's livecheckable."
     end
-    return if new_version.blank?
+    return if new_version.blank? || versions_equal
 
     return if !args.force? && (open_pull_requests.present? || closed_pull_requests.present?)
 
@@ -469,7 +483,7 @@ module Homebrew
     end
 
     bump_cask_pr_args = [
-      "bump-cask-pr",
+      "bump-#{version_info.type}-pr",
       version_args,
       "--no-browse",
       "--message=Created by `brew bump`",
