@@ -183,6 +183,8 @@ module Homebrew
         args:           args,
         ambiguous_cask: ambiguous_casks.include?(formula_or_cask),
       )
+    rescue
+      next
     end
   end
 
@@ -242,6 +244,8 @@ module Homebrew
           args:           args,
           ambiguous_cask: ambiguous_cask,
         )
+      rescue
+        next
       end
     end
   end
@@ -345,7 +349,8 @@ module Homebrew
 
         livecheck_latest = livecheck_result(loaded_formula_or_cask)
 
-        new_version_value = if livecheck_latest.is_a?(Version) && livecheck_latest >= current_version_value
+        new_version_value = if (livecheck_latest.is_a?(Version) && livecheck_latest >= current_version_value) ||
+                               current_version_value == "latest"
           livecheck_latest
         elsif repology_latest.is_a?(Version) &&
               repology_latest > current_version_value &&
@@ -375,9 +380,15 @@ module Homebrew
                                         arm:     old_versions[:arm],
                                         intel:   old_versions[:intel])
 
-    new_version = VersionParser.new(general: new_versions[:general],
-                                    arm:     new_versions[:arm],
-                                    intel:   new_versions[:intel])
+    begin
+      new_version = VersionParser.new(general: new_versions[:general],
+                                      arm:     new_versions[:arm],
+                                      intel:   new_versions[:intel])
+    rescue
+      # When livecheck fails, we fail gracefully. Otherwise VersionParser will
+      # raise a usage error
+      new_version = VersionParser.new(general: "unable to get versions")
+    end
 
     # We use the arm version for the pull request version. This is consistent
     # with the behavior of bump-cask-pr.
@@ -432,7 +443,7 @@ module Homebrew
     end
 
     title_name = ambiguous_cask ? "#{name} (cask)" : name
-    title = if repology_latest == current_version.general || (!repology_latest.is_a?(Version) && versions_equal)
+    title = if (repology_latest == current_version.general || !repology_latest.is_a?(Version)) && versions_equal
       "#{title_name} #{Tty.green}is up to date!#{Tty.reset}"
     else
       title_name
@@ -472,7 +483,7 @@ module Homebrew
        formula_or_cask.livecheckable?
       puts "#{title_name} was not bumped to the Repology version because it's livecheckable."
     end
-    return if new_version.blank? || versions_equal
+    return if new_version.blank? || !new_version.general.is_a?(Version) || versions_equal
 
     return if !args.force? && (open_pull_requests.present? || closed_pull_requests.present?)
 
