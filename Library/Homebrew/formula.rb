@@ -1615,9 +1615,11 @@ class Formula
   end
 
   # Standard parameters for meson builds.
-  sig { returns(T::Array[String]) }
-  def std_meson_args
-    ["--prefix=#{prefix}", "--libdir=#{lib}", "--buildtype=release", "--wrap-mode=nofallback"]
+  sig { params(unity: T.nilable(String)).returns(T::Array[String]) }
+  def std_meson_args(unity: "on")
+    odebug "Unity build enabled. If your build fails, try using `std_meson_args(unity: \"off\")`." if unity != "off"
+
+    ["--prefix=#{prefix}", "--libdir=#{lib}", "--unity=#{unity}", "--buildtype=release", "--wrap-mode=nofallback"]
   end
 
   # Shared library names according to platform conventions.
