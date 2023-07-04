@@ -101,6 +101,7 @@ module Homebrew
   sig { void }
   def bump
     args = bump_args.parse
+
     if args.limit.present? && !args.formula? && !args.cask?
       raise UsageError, "`--limit` must be used with either `--formula` or `--cask`."
     end
@@ -183,8 +184,6 @@ module Homebrew
         args:           args,
         ambiguous_cask: ambiguous_casks.include?(formula_or_cask),
       )
-    rescue
-      next
     end
   end
 
@@ -244,8 +243,6 @@ module Homebrew
           args:           args,
           ambiguous_cask: ambiguous_cask,
         )
-      rescue
-        next
       end
     end
   end
@@ -374,7 +371,8 @@ module Homebrew
       new_versions = { general: new_versions[:arm] }
     end
 
-    multiple_versions = new_versions.values_at(:arm, :intel).all?(&:present?)
+    multiple_versions = old_versions.values_at(:arm, :intel).all?(&:present?) ||
+                        new_versions.values_at(:arm, :intel).all?(&:present?)
 
     current_version = VersionParser.new(general: old_versions[:general],
                                         arm:     old_versions[:arm],
@@ -392,7 +390,7 @@ module Homebrew
 
     # We use the arm version for the pull request version. This is consistent
     # with the behavior of bump-cask-pr.
-    pull_request_version = if multiple_versions
+    pull_request_version = if multiple_versions && new_version.general != "unable to get versions"
       new_version.arm.to_s
     else
       new_version.general.to_s
@@ -456,7 +454,7 @@ module Homebrew
       current_version.general
     end
 
-    new_versions = if version_info.multiple_versions
+    new_versions = if version_info.multiple_versions && new_version.arm && new_version.intel
       "arm: #{new_version.arm} | intel: #{new_version.intel}"
     else
       new_version.general
@@ -502,6 +500,6 @@ module Homebrew
     ]
     bump_cask_pr_args << "--force" if args.force?
 
-    system_command! HOMEBREW_BREW_FILE, args: bump_cask_pr_args
+    system HOMEBREW_BREW_FILE, *bump_cask_pr_args
   end
 end
