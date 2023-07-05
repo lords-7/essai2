@@ -169,7 +169,9 @@ module Homebrew
                 cask_download = Cask::Download.new(tmp_cask, quarantine: true)
                 download      = cask_download.fetch(verify_download_integrity: false)
                 Utils::Tar.validate_file(download)
-                replacement_pairs << [tmp_cask.sha256.to_s, download.sha256]
+
+                new_pair = [tmp_cask.sha256.to_s, download.sha256]
+                replacement_pairs << new_pair if new_pair[0] != new_pair[1]
               end
             end
           elsif new_hash
@@ -199,8 +201,10 @@ module Homebrew
 
     commit_message ||= "#{cask.token}: update checksum" if new_hash
 
+    # Remove nested arrays where elements are identical
+    replacement_pairs = replacement_pairs.reject { |pair| pair[0] == pair[1] }.uniq.compact
     Utils::Inreplace.inreplace_pairs(cask.sourcefile_path,
-                                     replacement_pairs.uniq.compact,
+                                     replacement_pairs,
                                      read_only_run: args.dry_run?,
                                      silent:        args.quiet?)
 
