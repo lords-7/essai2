@@ -7,6 +7,9 @@ require "livecheck/livecheck"
 module Homebrew
   module_function
 
+  # Class handling architecture-specific version information.
+  #
+  # @api private
   class VersionParser
     sig { returns(T.nilable(T.any(Version, Cask::DSL::Version))) }
     attr_reader :arm, :general, :intel
@@ -329,7 +332,7 @@ module Homebrew
     repology_latest = repositories.present? ? Repology.latest_version(repositories) : "not found"
 
     # When blocks are absent, arch is not relevant. For consistency, we simulate the arm architecture.
-    arch_options = is_cask_with_blocks ? [:arm, :intel] : [:arm]
+    arch_options = is_cask_with_blocks ? OnSystem::ARCH_OPTIONS : [:arm]
 
     arch_options.each do |arch|
       SimulateSystem.with arch: arch do
@@ -481,22 +484,25 @@ module Homebrew
        formula_or_cask.livecheckable?
       puts "#{title_name} was not bumped to the Repology version because it's livecheckable."
     end
-    return if new_version.blank? || !new_version.general.is_a?(Version) || versions_equal
+    if new_version.blank? || versions_equal ||
+       (!new_version.general.is_a?(Version) && !version_info.multiple_versions)
+      return
+    end
 
     return if !args.force? && (open_pull_requests.present? || closed_pull_requests.present?)
 
     version_args = if version_info.multiple_versions
-      "--version-intel=#{new_version.arm} --version-arm=#{new_version.intel}"
+      %W[--version-arm=#{new_version.arm} --version-intel=#{new_version.intel}]
     else
       "--version=#{new_version.general}"
     end
 
     bump_cask_pr_args = [
       "bump-#{version_info.type}-pr",
-      version_args,
+      name,
+      *version_args,
       "--no-browse",
       "--message=Created by `brew bump`",
-      name,
     ]
     bump_cask_pr_args << "--force" if args.force?
 
