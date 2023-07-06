@@ -150,7 +150,7 @@ on_request: true)
 
       # Always force uninstallation, ignore method parameter
       cask_installer = Installer.new(@cask, verbose: verbose?, force: true, upgrade: upgrade?, reinstall: true)
-      zap? ? cask_installer.zap : cask_installer.uninstall(successor: @cask)
+      zap? ? cask_installer.zap? : cask_installer.uninstall(successor: @cask)
     end
 
     sig { returns(String) }
@@ -398,7 +398,11 @@ on_request: true)
     def uninstall(successor: nil)
       load_installed_caskfile!
       oh1 "Uninstalling Cask #{Formatter.identifier(@cask)}"
-      uninstall_artifacts(clear: true, successor: successor)
+      if zap?
+        uninstall_artifacts(clear: true, successor: successor, zap: true)
+      else
+        uninstall_artifacts(clear: true, successor: successor)
+      end
       if !reinstall? && !upgrade?
         remove_download_sha
         remove_config_file
@@ -453,14 +457,18 @@ on_request: true)
       puts summary
     end
 
-    sig { params(clear: T::Boolean, successor: T.nilable(Cask)).void }
-    def uninstall_artifacts(clear: false, successor: nil)
+    sig { params(clear: T::Boolean, successor: T.nilable(Cask), zap: T::Boolean).void }
+    def uninstall_artifacts(clear: false, successor: nil, zap: false)
       artifacts = @cask.artifacts
+
+      opoo "No zap stanza present for Cask '#{@cask}'" if zap && artifacts.none?(Artifact::Zap)
 
       odebug "Uninstalling artifacts"
       odebug "#{::Utils.pluralize("artifact", artifacts.length, include_count: true)} defined", artifacts
 
-      artifacts.each do |artifact|
+      included_artifacts = zap ? artifacts : artifacts.reject { |a| a.is_a?(Artifact::Zap) }
+
+      included_artifacts.each do |artifact|
         if artifact.respond_to?(:uninstall_phase)
           odebug "Uninstalling artifact of class #{artifact.class}"
           artifact.uninstall_phase(
@@ -483,22 +491,6 @@ on_request: true)
           successor: successor,
         )
       end
-    end
-
-    def zap
-      load_installed_caskfile!
-      ohai "Implied `brew uninstall --cask #{@cask}`"
-      uninstall_artifacts
-      if (zap_stanzas = @cask.artifacts.select { |a| a.is_a?(Artifact::Zap) }).empty?
-        opoo "No zap stanza present for Cask '#{@cask}'"
-      else
-        ohai "Dispatching zap stanza"
-        zap_stanzas.each do |stanza|
-          stanza.zap_phase(command: @command, verbose: verbose?, force: force?)
-        end
-      end
-      ohai "Removing all staged versions of Cask '#{@cask}'"
-      purge_caskroom_path
     end
 
     def backup_path

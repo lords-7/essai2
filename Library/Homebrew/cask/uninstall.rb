@@ -4,7 +4,7 @@
 module Cask
   # @api private
   class Uninstall
-    def self.uninstall_casks(*casks, binaries: nil, force: false, verbose: false)
+    def self.uninstall_casks(*casks, binaries: nil, force: false, verbose: false, zap: false)
       require "cask/installer"
 
       casks.each do |cask|
@@ -12,7 +12,7 @@ module Cask
 
         raise CaskNotInstalledError, cask if !cask.installed? && !force
 
-        Installer.new(cask, binaries: binaries, force: force, verbose: verbose).uninstall
+        Installer.new(cask, binaries: binaries, force: force, verbose: verbose, zap: zap).uninstall
       end
     end
   end

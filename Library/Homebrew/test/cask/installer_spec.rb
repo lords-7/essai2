@@ -257,7 +257,7 @@ describe Cask::Installer, :cask do
 
       expect(caffeine).to be_installed
 
-      described_class.new(caffeine).zap
+      described_class.new(caffeine, zap: true).uninstall
 
       expect(caffeine).not_to be_installed
       expect(caffeine.config.appdir.join("Caffeine.app")).not_to be_a_symlink

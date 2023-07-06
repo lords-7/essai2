@@ -65,21 +65,12 @@ module Homebrew
       named_args:          args.named,
     )
 
-    if args.zap?
-      casks.each do |cask|
-        odebug "Zapping Cask #{cask}"
-
-        raise Cask::CaskNotInstalledError, cask if !cask.installed? && !args.force?
-
-        Cask::Installer.new(cask, verbose: args.verbose?, force: args.force?).zap
-      end
-    else
-      Cask::Uninstall.uninstall_casks(
-        *casks,
-        verbose: args.verbose?,
-        force:   args.force?,
-      )
-    end
+    Cask::Uninstall.uninstall_casks(
+      *casks,
+      verbose: args.verbose?,
+      force:   args.force?,
+      zap:     args.zap?,
+    )
 
     Cleanup.autoremove if Homebrew::EnvConfig.autoremove?
   end
