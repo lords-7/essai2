@@ -127,59 +127,7 @@ module Homebrew
         branch_name = "bump-#{cask.token}-#{branch_version.tr(",:", "-")}"
         commit_message ||= "#{cask.token} #{commit_version}"
       end
-      OnSystem::ARCH_OPTIONS.each do |arch|
-        SimulateSystem.with arch: arch do
-          old_cask = Cask::CaskLoader.load(cask.sourcefile_path)
-          old_version  = old_cask.version
-          bump_version = new_version.send(arch) || new_version.general
-
-          old_version_regex = old_version.latest? ? ":latest" : %Q(["']#{Regexp.escape(old_version.to_s)}["'])
-          replacement_pairs << [/version\s+#{old_version_regex}/m,
-                                "version #{bump_version.latest? ? ":latest" : %Q("#{bump_version}")}"]
-
-          # We are replacing our version here so we can get the new hash
-          tmp_contents = Utils::Inreplace.inreplace_pairs(cask.sourcefile_path,
-                                                          replacement_pairs.uniq.compact,
-                                                          read_only_run: true,
-                                                          silent:        true)
-
-          tmp_cask = Cask::CaskLoader.load(tmp_contents)
-          updated_version = tmp_cask.version
-          old_hash = tmp_cask.sha256
-          if updated_version.latest? || new_hash == :no_check
-            opoo "Ignoring specified `--sha256=` argument." if new_hash.is_a?(String)
-            replacement_pairs << [/"#{old_hash}"/, ":no_check"] if old_hash != :no_check
-          elsif old_hash == :no_check && new_hash != :no_check
-            replacement_pairs << %W[:no_check "#{new_hash}"] if new_hash.is_a?(String)
-          elsif old_hash != :no_check
-            if new_hash.nil? || cask.languages.present?
-              if new_hash && cask.languages.present?
-                opoo "Multiple checksum replacements required; ignoring specified `--sha256` argument."
-              end
-              # TODO: Ensure this works as expected for casks with multiple languages
-              languages = cask.languages
-              languages = [nil] if languages.empty?
-              languages.each do |language|
-                tmp_cask = if language.blank?
-                  tmp_cask
-                else
-                  tmp_cask.merge(Cask::Config.new(explicit: { languages: [language] }))
-                end
-
-                cask_download = Cask::Download.new(tmp_cask, quarantine: true)
-                download      = cask_download.fetch(verify_download_integrity: false)
-                Utils::Tar.validate_file(download)
-
-                new_pair = [tmp_cask.sha256.to_s, download.sha256]
-                replacement_pairs << new_pair if new_pair[0] != new_pair[1]
-              end
-            end
-          elsif new_hash
-            opoo "Cask contains multiple hashes; only updating hash for current arch." if cask.on_system_blocks_exist?
-            replacement_pairs << [old_hash.to_s, new_hash]
-          end
-        end
-      end
+      replacement_pairs = replace_version_and_checksum(cask, new_hash, new_version, replacement_pairs)
     end
     # Now that we have all replacement pairs, we will replace them further down
 
@@ -220,6 +168,73 @@ module Homebrew
       tap:             cask.tap,
     }
     GitHub.create_bump_pr(pr_info, args: args)
+  end
+
+  sig {
+    params(
+      cask:              Cask::Cask,
+      new_hash:          T.nilable(String),
+      new_version:       VersionParser,
+      replacement_pairs: T::Array[[T.any(Regexp, String), T.any(Regexp, String)]],
+    ).returns(T::Array[[T.any(Regexp, String), T.any(Regexp, String)]])
+  }
+  def replace_version_and_checksum(cask, new_hash, new_version, replacement_pairs)
+    # When blocks are absent, arch is not relevant. For consistency, we simulate the arm architecture.
+    arch_options = cask.on_system_blocks_exist? ? OnSystem::ARCH_OPTIONS : [:arm]
+    arch_options.each do |arch|
+      SimulateSystem.with arch: arch do
+        old_cask     = Cask::CaskLoader.load(cask.sourcefile_path)
+        old_version  = old_cask.version
+        bump_version = new_version.send(arch) || new_version.general
+
+        old_version_regex = old_version.latest? ? ":latest" : %Q(["']#{Regexp.escape(old_version.to_s)}["'])
+        replacement_pairs << [/version\s+#{old_version_regex}/m,
+                              "version #{bump_version.latest? ? ":latest" : %Q("#{bump_version}")}"]
+
+        # We are replacing our version here so we can get the new hash
+        tmp_contents = Utils::Inreplace.inreplace_pairs(cask.sourcefile_path,
+                                                        replacement_pairs.uniq.compact,
+                                                        read_only_run: true,
+                                                        silent:        true)
+
+        tmp_cask = Cask::CaskLoader.load(tmp_contents)
+        old_hash = tmp_cask.sha256
+        if tmp_cask.version.latest? || new_hash == :no_check
+          opoo "Ignoring specified `--sha256=` argument." if new_hash.is_a?(String)
+          replacement_pairs << [/"#{old_hash}"/, ":no_check"] if old_hash != :no_check
+        elsif old_hash == :no_check && new_hash != :no_check
+          replacement_pairs << [":no_check", "\"#{new_hash}\""] if new_hash.is_a?(String)
+        elsif old_hash != :no_check
+          if new_hash && cask.languages.present?
+            opoo "Multiple checksum replacements required; ignoring specified `--sha256` argument."
+          end
+          languages = if cask.languages.empty?
+            [nil]
+          else
+            cask.languages
+          end
+          languages.each do |language|
+            new_cask        = Cask::CaskLoader.load(tmp_contents)
+            new_cask.config = if language.blank?
+              tmp_cask.config
+            else
+              tmp_cask.config.merge(Cask::Config.new(explicit: { languages: [language] }))
+            end
+            download = Cask::Download.new(new_cask, quarantine: true).fetch(verify_download_integrity: false)
+            Utils::Tar.validate_file(download)
+
+            if new_cask.sha256.to_s != download.sha256
+              replacement_pairs << [new_cask.sha256.to_s,
+                                    download.sha256]
+            end
+          end
+        elsif new_hash
+          opoo "Cask contains multiple hashes; only updating hash for current arch." if cask.on_system_blocks_exist?
+          replacement_pairs << [old_hash.to_s, new_hash]
+        end
+      end
+    end
+    replacement_pairs
   end
 
   sig { params(cask: Cask::Cask, args: Homebrew::CLI::Args, new_version: VersionParser).void }
