@@ -4,10 +4,10 @@ Homebrew gathers anonymous analytics using InfluxDB. You will be notified the fi
 
 ## Why?
 
-Homebrew is provided free of charge and run entirely by volunteers in their spare time. As a result, we do not have the resources to do detailed user studies of Homebrew users to decide on how best to design future features and prioritise current work. Anonymous analytics allow us to prioritise fixes and features based on how, where and when people use Homebrew. For example:
+Homebrew is provided free of charge and run entirely by volunteers in their spare time. As a result, we do not have the resources to do detailed user studies of Homebrew users to decide on how best to design future features and prioritize current work. Anonymous analytics allow us to prioritize fixes and features based on how, where and when people use Homebrew. For example:
 
-- If a formula is widely used and is failing often it will enable us to prioritise fixing that formula over others.
-- Collecting the OS version allows us to decide which versions of macOS to prioritise for support and identify build failures that occur only on single versions.
+- If a formula is widely used and is failing often it will enable us to prioritize fixing that formula over others.
+- Collecting the OS version allows us to decide which versions of macOS to prioritize for support and identify build failures that occur only on single versions.
 
 ## How Long?
 
@@ -29,9 +29,9 @@ All analytics data previously sent to Google Analytics has been destroyed.
 
 Homebrew's analytics records the following different events:
 
-- The `install` event category and the Homebrew formula from a non-private GitHub tap you install plus any used options (e.g. `wget --HEAD`) as the action. This allows us to identify which formulae where work should be prioritised, as well as how to handle possible deprecation or removal of any.
+- The `install` event category and the Homebrew formula from a non-private GitHub tap you install plus any used options (e.g. `wget --HEAD`) as the action. This allows us to identify which formulae where work should be prioritized, as well as how to handle possible deprecation or removal of any.
 - The `install_on_request` event category and the Homebrew formula from a non-private GitHub tap you have requested to install (e.g. when explicitly named with a `brew install`) plus options. This allows us to differentiate the formulae that users intend to install from those pulled in as dependencies.
-- The `cask_install` event category and the Homebrew cask from a non-private GitHub tap you install as the action. This allows us to identify which casks where work should be prioritised, as well as how to handle possible deprecation or removal of any.
+- The `cask_install` event category and the Homebrew cask from a non-private GitHub tap you install as the action. This allows us to identify which casks where work should be prioritized, as well as how to handle possible deprecation or removal of any.
 - The `build_error` event category and the Homebrew formula plus options that failed to install as the action, e.g. `wget --HEAD`. This allows us to identify formulae that may need fixing. The details or logs of the build error are not sent.
 
 You can also view all the information that is sent by Homebrew's analytics by setting `HOMEBREW_ANALYTICS_DEBUG=1` in your environment. Please note this will also stop any analytics from being sent.
