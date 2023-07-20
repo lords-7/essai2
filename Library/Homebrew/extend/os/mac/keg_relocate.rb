@@ -73,6 +73,12 @@ class Keg
             end
           end
         end
+
+        next if HOMEBREW_PREFIX.to_s == "/usr/local"
+        next if file.rpaths.include?("#{HOMEBREW_PREFIX}/lib")
+
+        loader_name = loader_name_for(file, "#{HOMEBREW_PREFIX}/lib")
+        add_rpath(loader_name, file)
       end
     end
 
