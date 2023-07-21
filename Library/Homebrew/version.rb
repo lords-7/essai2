@@ -538,7 +538,7 @@ class Version
     version.nil?
   end
 
-  sig { params(comparator: String, other: Version).returns(T::Boolean) }
+  sig { params(comparator: String, other: T.any(String, Integer, Token, Version, NilClass)).returns(T::Boolean) }
   def compare(comparator, other)
     case comparator
     when ">=" then self >= other
@@ -551,7 +551,7 @@ class Version
     end
   end
 
-  sig { params(other: T.untyped).returns(T.nilable(Integer)) }
+  sig { params(other: T.any(String, Integer, Token, Version, NilClass)).returns(T.nilable(Integer)) }
   def <=>(other)
     other = case other
     when String
@@ -628,7 +628,7 @@ class Version
     0
   end
 
-  sig { override.params(other: T.untyped).returns(T::Boolean) }
+  sig { override.params(other: T.any(String, Integer, Token, Version, NilClass)).returns(T::Boolean) }
   def ==(other)
     # Makes sure that the same instance of Version::NULL
     # will never equal itself; normally Comparable#==
