@@ -1,5 +1,5 @@
 # Documentation
-
+https://github.com/Homebrew/brew/blob/3db1acf3e38e270af4e1c3f214622bbfb18f830e/Library/Homebrew/utils/analytics.rb#L62
 ## Users
 
 - [`brew` manual page (command documentation)](Manpage.md)
