@@ -25,6 +25,9 @@ module Homebrew
              description: "Check only casks."
       switch "--open-pr",
              description: "Open a pull request for the new version if none have been opened yet."
+      switch "--automerge",
+             env:         :bump_automerge,
+             description: "Open pull requests with automerge and branch cleanup enabled."
       flag   "--limit=",
              description: "Limit number of package results returned."
       flag   "--start-with=",
@@ -288,7 +291,9 @@ module Homebrew
     return if open_pull_requests
     return if closed_pull_requests
 
-    system HOMEBREW_BREW_FILE, "bump-#{type}-pr", "--no-browse",
-           "--message=Created by `brew bump`", "--version=#{new_version}", name
+    bump_args = ["--no-browse", "--message=Created by `brew bump`", "--version=#{new_version}"]
+    bump_args << "--automerge" if args.automerge?
+
+    system HOMEBREW_BREW_FILE, "bump-#{type}-pr", *bump_args, name
   end
 end

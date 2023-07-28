@@ -1450,6 +1450,10 @@ Check only casks\.
 Open a pull request for the new version if none have been opened yet\.
 .
 .TP
+\fB\-\-automerge\fR
+Open pull requests with automerge and branch cleanup enabled\.
+.
+.TP
 \fB\-\-limit\fR
 Limit number of package results returned\.
 .
@@ -1494,6 +1498,10 @@ Print the pull request URL instead of opening in a browser\.
 .TP
 \fB\-\-no\-fork\fR
 Don\'t try to fork the repository\.
+.
+.TP
+\fB\-\-automerge\fR
+Open pull requests with automerge and branch cleanup enabled\.
 .
 .TP
 \fB\-\-version\fR
@@ -1573,6 +1581,10 @@ Print the pull request URL instead of opening in a browser\.
 .TP
 \fB\-\-no\-fork\fR
 Don\'t try to fork the repository\.
+.
+.TP
+\fB\-\-automerge\fR
+Open pull requests with automerge and branch cleanup enabled\.
 .
 .TP
 \fB\-\-mirror\fR
@@ -3039,6 +3051,12 @@ Use this as the browser when opening project homepages\.
 .
 .IP
 \fIDefault:\fR \fB$BROWSER\fR or the OS\'s default browser\.
+.
+.TP
+\fBHOMEBREW_BUMP_AUTOMERGE\fR
+.
+.br
+If set, \fBbrew bump*\fR commands will attempt to enable automerge and branch cleanup\. This will only work if you have \fBgh\fR installed and write access on the relevant repository\.
 .
 .TP
 \fBHOMEBREW_CACHE\fR

@@ -682,16 +682,20 @@ module GitHub
           EOS
         end
 
-        begin
-          url = create_pull_request(tap_remote_repo, commit_message,
-                                    "#{username}:#{branch}", remote_branch, pr_message)["html_url"]
-          if args.no_browse?
-            puts url
-          else
-            exec_browser url
-          end
+        url = begin
+          create_pull_request(tap_remote_repo, commit_message,
+                              "#{username}:#{branch}", remote_branch, pr_message)["html_url"]
         rescue *API::ERRORS => e
           odie "Unable to open pull request: #{e.message}!"
+        end
+
+        # Attempt to enable automerge on the created PR if requested.
+        GitHub::API.run_gh_cli(args: ["pr", "merge", "--auto", "--merge", "--delete-branch", url]) if args.automerge?
+
+        if args.no_browse?
+          puts url
+        else
+          exec_browser url
         end
       end
     end

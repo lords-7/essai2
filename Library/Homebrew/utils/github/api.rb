@@ -123,18 +123,25 @@ module GitHub
       JSON::ParserError,
     ].freeze
 
+    sig {
+      params(args: T::Array[String], print_stdout: T::Boolean,
+             print_stderr: T::Boolean).returns(SystemCommand::Result)
+    }
+    def self.run_gh_cli(args:, print_stdout: true, print_stderr: true)
+      # Avoid `Formula["gh"].opt_bin` so this method works even with `HOMEBREW_DISABLE_LOAD_FORMULA`.
+      env = { "PATH" => PATH.new(HOMEBREW_PREFIX/"opt/gh/bin", ENV.fetch("PATH")) }
+      system_command "gh", args: args, env: env, print_stdout: print_stdout, print_stderr: print_stderr
+    end
+
     # Gets the token from the GitHub CLI for github.com.
     sig { returns(T.nilable(String)) }
     def self.github_cli_token
-      # Avoid `Formula["gh"].opt_bin` so this method works even with `HOMEBREW_DISABLE_LOAD_FORMULA`.
-      env = { "PATH" => PATH.new(HOMEBREW_PREFIX/"opt/gh/bin", ENV.fetch("PATH")) }
-      gh_out, _, result = system_command "gh",
-                                         args:         ["auth", "token", "--hostname", "github.com"],
-                                         env:          env,
-                                         print_stderr: false
+      result = run_gh_cli args:         ["auth", "token", "--hostname", "github.com"],
+                          print_stdout: false,
+                          print_stderr: false
       return unless result.success?
 
-      gh_out.chomp
+      result.stdout.chomp
     end
 
     # Gets the password field from `git-credential-osxkeychain` for github.com,

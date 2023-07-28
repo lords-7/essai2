@@ -1018,6 +1018,8 @@ formulae, also displays whether a pull request has been opened with the URL.
   Check only casks.
 * `--open-pr`:
   Open a pull request for the new version if none have been opened yet.
+* `--automerge`:
+  Open pull requests with automerge and branch cleanup enabled.
 * `--limit`:
   Limit number of package results returned.
 * `--start-with`:
@@ -1046,6 +1048,8 @@ supplied by the user.
   Print the pull request URL instead of opening in a browser.
 * `--no-fork`:
   Don't try to fork the repository.
+* `--automerge`:
+  Open pull requests with automerge and branch cleanup enabled.
 * `--version`:
   Specify the new *`version`* for the cask.
 * `--version-arm`:
@@ -1098,6 +1102,8 @@ nor vice versa. It must use whichever style specification the formula already us
   Print the pull request URL instead of opening in a browser.
 * `--no-fork`:
   Don't try to fork the repository.
+* `--automerge`:
+  Open pull requests with automerge and branch cleanup enabled.
 * `--mirror`:
   Use the specified *`URL`* as a mirror URL. If *`URL`* is a comma-separated list of URLs, multiple mirrors will be added.
 * `--fork-org`:
@@ -2115,6 +2121,9 @@ example, run `export HOMEBREW_NO_INSECURE_REDIRECT=1` rather than just
   <br>Use this as the browser when opening project homepages.
 
   *Default:* `$BROWSER` or the OS's default browser.
+
+- `HOMEBREW_BUMP_AUTOMERGE`
+  <br>If set, `brew bump*` commands will attempt to enable automerge and branch cleanup. This will only work if you have `gh` installed and write access on the relevant repository.
 
 - `HOMEBREW_CACHE`
   <br>Use this directory as the download cache.

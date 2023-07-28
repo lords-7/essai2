@@ -88,6 +88,11 @@ module Homebrew
         description:  "Use this as the browser when opening project homepages.",
         default_text: "`$BROWSER` or the OS's default browser.",
       },
+      HOMEBREW_BUMP_AUTOMERGE:                   {
+        description: "If set, `brew bump*` commands will attempt to enable automerge and branch cleanup. " \
+                     "This will only work if you have `gh` installed and write access on the relevant repository.",
+        boolean:     true,
+      },
       HOMEBREW_CACHE:                            {
         description:  "Use this directory as the download cache.",
         default_text: "macOS: `$HOME/Library/Caches/Homebrew`, " \

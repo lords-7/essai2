@@ -48,6 +48,9 @@ module Homebrew
              description: "Print the pull request URL instead of opening in a browser."
       switch "--no-fork",
              description: "Don't try to fork the repository."
+      switch "--automerge",
+             env:         :bump_automerge,
+             description: "Open pull requests with automerge and branch cleanup enabled."
       comma_array "--mirror",
                   description: "Use the specified <URL> as a mirror URL. If <URL> is a comma-separated list " \
                                "of URLs, multiple mirrors will be added."

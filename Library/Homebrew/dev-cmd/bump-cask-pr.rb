@@ -37,6 +37,9 @@ module Homebrew
              description: "Print the pull request URL instead of opening in a browser."
       switch "--no-fork",
              description: "Don't try to fork the repository."
+      switch "--automerge",
+             env:         :bump_automerge,
+             description: "Open pull requests with automerge and branch cleanup enabled."
       flag   "--version=",
              description: "Specify the new <version> for the cask."
       flag   "--version-arm=",
@@ -58,6 +61,7 @@ module Homebrew
       conflicts "--no-audit", "--online"
       conflicts "--version=", "--version-arm="
       conflicts "--version=", "--version-intel="
+      conflicts "--"
 
       named_args :cask, number: 1, without_api: true
     end

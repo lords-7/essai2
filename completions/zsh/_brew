@@ -492,6 +492,7 @@ _brew_bottle() {
 # brew bump
 _brew_bump() {
   _arguments \
+    '--automerge[Open pull requests with automerge and branch cleanup enabled]' \
     '--debug[Display any debugging information]' \
     '--full-name[Print formulae/casks with fully-qualified names]' \
     '--help[Show this message]' \
@@ -512,6 +513,7 @@ _brew_bump() {
 # brew bump-cask-pr
 _brew_bump_cask_pr() {
   _arguments \
+    '--automerge[Open pull requests with automerge and branch cleanup enabled]' \
     '--commit[When passed with `--write-only`, generate a new commit after writing changes to the cask file]' \
     '--debug[Display any debugging information]' \
     '(--write)--dry-run[Print what would be done rather than doing it]' \
@@ -539,6 +541,7 @@ _brew_bump_cask_pr() {
 # brew bump-formula-pr
 _brew_bump_formula_pr() {
   _arguments \
+    '--automerge[Open pull requests with automerge and branch cleanup enabled]' \
     '--commit[When passed with `--write-only`, generate a new commit after writing changes to the formula file]' \
     '--debug[Display any debugging information]' \
     '(--write-only)--dry-run[Print what would be done rather than doing it]' \

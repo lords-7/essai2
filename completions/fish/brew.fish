@@ -379,6 +379,7 @@ __fish_brew_complete_arg 'bottle' -a '(__fish_brew_suggest_formulae_installed)'
 
 
 __fish_brew_complete_cmd 'bump' 'Display out-of-date brew formulae and the latest version available'
+__fish_brew_complete_arg 'bump' -l automerge -d 'Open pull requests with automerge and branch cleanup enabled'
 __fish_brew_complete_arg 'bump' -l cask -d 'Check only casks'
 __fish_brew_complete_arg 'bump' -l debug -d 'Display any debugging information'
 __fish_brew_complete_arg 'bump' -l formula -d 'Check only formulae'
@@ -395,6 +396,7 @@ __fish_brew_complete_arg 'bump; and not __fish_seen_argument -l formula -l formu
 
 
 __fish_brew_complete_cmd 'bump-cask-pr' 'Create a pull request to update cask with a new version'
+__fish_brew_complete_arg 'bump-cask-pr' -l automerge -d 'Open pull requests with automerge and branch cleanup enabled'
 __fish_brew_complete_arg 'bump-cask-pr' -l commit -d 'When passed with `--write-only`, generate a new commit after writing changes to the cask file'
 __fish_brew_complete_arg 'bump-cask-pr' -l debug -d 'Display any debugging information'
 __fish_brew_complete_arg 'bump-cask-pr' -l dry-run -d 'Print what would be done rather than doing it'
@@ -419,6 +421,7 @@ __fish_brew_complete_arg 'bump-cask-pr' -a '(__fish_brew_suggest_casks_all)'
 
 
 __fish_brew_complete_cmd 'bump-formula-pr' 'Create a pull request to update formula with a new URL or a new tag'
+__fish_brew_complete_arg 'bump-formula-pr' -l automerge -d 'Open pull requests with automerge and branch cleanup enabled'
 __fish_brew_complete_arg 'bump-formula-pr' -l commit -d 'When passed with `--write-only`, generate a new commit after writing changes to the formula file'
 __fish_brew_complete_arg 'bump-formula-pr' -l debug -d 'Display any debugging information'
 __fish_brew_complete_arg 'bump-formula-pr' -l dry-run -d 'Print what would be done rather than doing it'
