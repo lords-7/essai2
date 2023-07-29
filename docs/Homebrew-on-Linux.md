@@ -70,7 +70,7 @@ To install build tools, paste at a terminal prompt:
 - **Arch Linux**
 
   ```sh
-  sudo pacman -Syu base-devel procps-ng curl file git
+  sudo pacman -Syu base-devel procps-ng curl file git openssh
   ```
 
 ### ARM (unsupported)
