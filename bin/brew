@@ -110,22 +110,11 @@ then
 elif [[ -n "${HOME-}" ]]
 then
   HOMEBREW_USER_CONFIG_HOME="${HOME}/.homebrew"
-elif [[ -n "${USER-}" ]]
+elif [[ -n "${USER-}" ]] || [[ -n "${LOGNAME-}" ]]
 then
-  if [[ "${OSTYPE}" == "darwin"* ]]
-  then
-    HOMEBREW_USER_CONFIG_HOME="/Users/${USER}/.homebrew"
-  else
-    HOMEBREW_USER_CONFIG_HOME="/home/${USER}/.homebrew"
-  fi
-elif [[ -n "${LOGNAME-}" ]]
-then
-  if [[ "${OSTYPE}" == "darwin"* ]]
-  then
-    HOMEBREW_USER_CONFIG_HOME="/Users/${LOGNAME}/.homebrew"
-  else
-    HOMEBREW_USER_CONFIG_HOME="/home/${LOGNAME}/.homebrew"
-  fi
+  # https://superuser.com/a/1613980
+  HOME="$(/bin/bash -c "cd ~$(printf %q "${USER:-${LOGNAME}}") && pwd")"
+  HOMEBREW_USER_CONFIG_HOME="${HOME}/.homebrew"
 else
   echo "Error: \$HOME or \$USER or \$LOGNAME must be set to run brew." >&2
   exit 1
