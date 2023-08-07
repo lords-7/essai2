@@ -20,6 +20,8 @@ module Patch
         DATAPatch.new(strip)
       when String
         StringPatch.new(strip, src)
+      when :TAP_FILE
+        TapFilePatch.new(strip, src)
       else
         ExternalPatch.new(strip, &block)
       end
@@ -163,5 +165,20 @@ class ExternalPatch
   sig { returns(String) }
   def inspect
     "#<#{self.class.name}: #{strip.inspect} #{url.inspect}>"
+  end
+end
+
+
+# An abstract class representing a patch living alongside the formula.
+#
+# @api private
+class TapFilePatch < EmbeddedPatch
+  def initialize(strip, tap_file)
+    super(strip)
+    @str = File.open(tap_file).read
+  end
+
+  def contents
+    @str
   end
 end

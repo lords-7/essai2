@@ -40,6 +40,19 @@ describe Patch do
       its(:strip) { is_expected.to eq(:p1) }
     end
 
+    context "with a tap file patch" do
+      subject { described_class.create(:p0, :TAP_FILE "patch.diff") }
+      it { is_expected.to be_a TapFilePatch }
+      its(:strip) { is_expected.to eq(:p0) }
+    end
+
+    context "with a tap file patch without strip" do
+      subject { described_class.create(:p0, :TAP_FILE "patch.diff") }
+
+      it { is_expected.to be_a TapFilePatch }
+      its(:strip) { is_expected.to eq(:p1) }
+    end
+
     it "raises an error for unknown values" do
       expect do
         described_class.create(Object.new)
