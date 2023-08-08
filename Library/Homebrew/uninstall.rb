@@ -8,7 +8,12 @@ module Homebrew
   #
   # @api private
   module Uninstall
-    def self.uninstall_kegs(kegs_by_rack, casks: [], force: false, ignore_dependencies: false, named_args: [])
+    def self.uninstall_kegs(kegs_by_rack,
+                            casks: [],
+                            force: false,
+                            ignore_dependencies: false,
+                            named_args: [],
+                            dry_run: false)
       handle_unsatisfied_dependents(kegs_by_rack,
                                     casks:               casks,
                                     ignore_dependencies: ignore_dependencies,
@@ -39,7 +44,10 @@ module Homebrew
             rescue
               nil
             end
-
+            if dry_run
+              ohai "Would uninstall #{keg} (#{keg.abv})"
+              return true
+            end
             keg.lock do
               puts "Uninstalling #{keg}... (#{keg.abv})"
               keg.unlink

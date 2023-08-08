@@ -389,9 +389,13 @@ on_request: true)
       @cask.download_sha_path.atomic_write(@cask.new_download_sha) if @cask.checksumable?
     end
 
-    sig { params(successor: T.nilable(Cask)).void }
-    def uninstall(successor: nil)
+    sig { params(successor: T.nilable(Cask), dry_run: T::Boolean).void }
+    def uninstall(successor: nil, dry_run: false)
       load_installed_caskfile!
+      if dry_run
+        oh1 "Would uninstall Cask #{Formatter.identifier(@cask)}"
+        return true
+      end
       oh1 "Uninstalling Cask #{Formatter.identifier(@cask)}"
       uninstall_artifacts(clear: true, successor: successor)
       if !reinstall? && !upgrade?

@@ -34,9 +34,12 @@ module Homebrew
              description: "Treat all named arguments as formulae."
       switch "--cask", "--casks",
              description: "Treat all named arguments as casks."
+      switch "-n", "--dry-run",
+             description: "Show what would be installed, but do not actually install anything."
 
       conflicts "--formula", "--cask"
       conflicts "--formula", "--zap"
+      conflicts "--force", "--dry-run"
 
       named_args [:installed_formula, :installed_cask], min: 1
     end
@@ -63,6 +66,7 @@ module Homebrew
       force:               args.force?,
       ignore_dependencies: args.ignore_dependencies?,
       named_args:          args.named,
+      dry_run:             args.dry_run?,
     )
 
     if args.zap?
@@ -78,6 +82,7 @@ module Homebrew
         *casks,
         verbose: args.verbose?,
         force:   args.force?,
+        dry_run: args.dry_run?,
       )
     end
 
