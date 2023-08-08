@@ -20,8 +20,6 @@ module Patch
         DATAPatch.new(strip)
       when String
         StringPatch.new(strip, src)
-      when :TAP_FILE
-        TapFilePatch.new(strip, src)
       else
         ExternalPatch.new(strip, &block)
       end
@@ -168,17 +166,15 @@ class ExternalPatch
   end
 end
 
-
 # An abstract class representing a patch living alongside the formula.
 #
 # @api private
 class TapFilePatch < EmbeddedPatch
+  attr_reader :contents
+
+  sig { params(strip: T.any(Symbol, String), tap_file: T.any(String, Pathname)).void }
   def initialize(strip, tap_file)
     super(strip)
-    @str = File.open(tap_file).read
-  end
-
-  def contents
-    @str
+    @contents = File.read(tap_file)
   end
 end

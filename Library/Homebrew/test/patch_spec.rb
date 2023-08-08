@@ -40,19 +40,6 @@ describe Patch do
       its(:strip) { is_expected.to eq(:p1) }
     end
 
-    context "with a tap file patch" do
-      subject { described_class.create(:p0, :TAP_FILE "patch.diff") }
-      it { is_expected.to be_a TapFilePatch }
-      its(:strip) { is_expected.to eq(:p0) }
-    end
-
-    context "with a tap file patch without strip" do
-      subject { described_class.create(:p0, :TAP_FILE "patch.diff") }
-
-      it { is_expected.to be_a TapFilePatch }
-      its(:strip) { is_expected.to eq(:p1) }
-    end
-
     it "raises an error for unknown values" do
       expect do
         described_class.create(Object.new)
@@ -93,6 +80,14 @@ describe Patch do
       subject { described_class.new(:p1) }
 
       its(:inspect) { is_expected.to eq("#<EmbeddedPatch: :p1>") }
+    end
+  end
+
+  describe TapFilePatch do
+    subject(:patch) { described_class.new(:p1, "file:///my.patch") }
+
+    describe "#str" do
+      its(:contents) { is_expected.to eq("asd") }
     end
   end
 
