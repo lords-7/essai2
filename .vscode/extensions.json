@@ -24,6 +24,8 @@
     "sdras.vue-vscode-extensionpack",
     "marp-team.marp-vscode",
     "kreativ-software.csharpextensions",
-    "idered.npm"
+    "idered.npm",
+    "webhint.vscode-webhint",
+    "shinydataanalysis.totvs-coverage-analysis"
   ]
 }
