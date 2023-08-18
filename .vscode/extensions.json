@@ -17,6 +17,7 @@
     "hanwang.android-adb-wlan",
     "mikael.angular-beastcode",
     "johnpapa.angular2",
-    "ms-vscode-remote.remote-wsl"
+    "ms-vscode-remote.remote-wsl",
+    "tcaron.stripe-theme-vscode"
   ]
 }
