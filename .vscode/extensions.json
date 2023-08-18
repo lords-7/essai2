@@ -18,6 +18,12 @@
     "mikael.angular-beastcode",
     "johnpapa.angular2",
     "ms-vscode-remote.remote-wsl",
-    "tcaron.stripe-theme-vscode"
+    "tcaron.stripe-theme-vscode",
+    "df.solar-stripe",
+    "uctakeoff.vscode-counter",
+    "sdras.vue-vscode-extensionpack",
+    "marp-team.marp-vscode",
+    "kreativ-software.csharpextensions",
+    "idered.npm"
   ]
 }
