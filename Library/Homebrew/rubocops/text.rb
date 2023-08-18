@@ -60,13 +60,16 @@ module RuboCop
 
           find_method_with_args(body_node, :system, "dep", "ensure") do |d|
             next if parameters_passed?(d, [/vendor-only/])
-            next if @formula_name == "goose" # needed in 2.3.0
 
             problem "use \"dep\", \"ensure\", \"-vendor-only\""
           end
 
           find_method_with_args(body_node, :system, "cargo", "build") do |m|
             next if parameters_passed?(m, [/--lib/])
+
+            # Otherwise false positive for:
+            # system "cargo", "auditable", "build", "--release"
+            next if parameters_passed?(m, [/auditable/])
 
             problem "use \"cargo\", \"install\", *std_cargo_args"
           end
