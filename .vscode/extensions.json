@@ -8,6 +8,7 @@
     "timonwong.shellcheck",
     "foxundermoon.shell-format",
     "davidanson.vscode-markdownlint",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "danibram.theme-flatui"
   ]
 }
