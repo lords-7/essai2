@@ -9,6 +9,14 @@
     "foxundermoon.shell-format",
     "davidanson.vscode-markdownlint",
     "editorconfig.editorconfig",
-    "danibram.theme-flatui"
+    "danibram.theme-flatui",
+    "adrianwilczynski.add-reference",
+    "adrianwilczynski.asp-net-core-snippet-pack",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "coderfin.logical-properties",
+    "hanwang.android-adb-wlan",
+    "mikael.angular-beastcode",
+    "johnpapa.angular2",
+    "ms-vscode-remote.remote-wsl"
   ]
 }
