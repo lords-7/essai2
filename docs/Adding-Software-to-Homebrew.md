@@ -186,7 +186,7 @@ Additional [`artifact` stanzas](Cask-Cookbook.md#at-least-one-artifact-stanza-is
 
 #### Cask token details
 
-If a token conflicts with an already-existing cask, authors should manually make the new token unique by prepending the vendor name. Example: [unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/unison.rb) and [panic-unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/panic-unison.rb).
+If a token conflicts with an already-existing cask, authors should manually make the new token unique by prepending the vendor name. Example: [unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/u/unison.rb) and [panic-unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/p/panic-unison.rb).
 
 If possible, avoid creating tokens that differ only by the placement of hyphens.
 
@@ -255,7 +255,7 @@ $ git status
 # Untracked files:
 #   (use "git add <file>..." to include in what will be committed)
 #
-#       Casks/my-new-cask.rb
+#       Casks/m/my-new-cask.rb
 ```
 
 So far, so good. Now make a feature branch `my-new-cask-branch` that you’ll use in your pull request:
@@ -268,7 +268,7 @@ Switched to a new branch 'my-new-cask-branch'
 Stage your cask with:
 
 ```bash
-git add Casks/my-new-cask.rb
+git add Casks/m/my-new-cask.rb
 ```
 
 You can view the changes that are to be committed with:
