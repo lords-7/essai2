@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"ruby.useLanguageServer": true,
+		"ruby.rubocop.executePath": "Library/Homebrew/shims/gems/",
+		"shellformat.effectLanguages": [
+			"shellscript"
+		],
+		"shellformat.path": "${workspaceFolder}/Library/Homebrew/utils/shfmt.sh",
+		"shellformat.flag": "-i 2 -ci -ln bash"
+	}
+}
