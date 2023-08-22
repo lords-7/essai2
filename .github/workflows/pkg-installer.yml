@@ -8,6 +8,12 @@ on:
     paths:
       - .github/workflows/pkg-installer.yml
       - package/**/*
+      - package/*
+  pull_request:
+    paths:
+      - .github/workflows/build-pkg.yml
+      - package/**/*
+      - package/*
   release:
     types:
       - published
@@ -217,3 +223,82 @@ jobs:
         run: gh release upload --repo Homebrew/brew
                                 "${GITHUB_REF//refs\/tags\//}"
                                 "${{ needs.build.outputs.installer_path }}"
+  build-rpm:
+    # if: github.repository_owner == 'Homebrew'
+    runs-on: ubuntu-latest
+    container:
+      image: almalinux:8
+    permissions:
+      # To write assets to GitHub release
+      contents: write
+    env:
+      HOMEBREW_NO_ANALYTICS_THIS_RUN: 1
+      HOMEBREW_NO_ANALYTICS_MESSAGE_OUTPUT: 1
+    steps:
+      - name: Install build dependencies
+        run: dnf install -y git rpm-build
+
+      - name: Checkout Homebrew
+        uses: actions/checkout@v3
+        with:
+          path: brew
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Get Homebrew version from Git
+        id: print-version
+        run: |
+          TAG="$(git -C brew describe --tags --abbrev=0)"
+          echo "version=${TAG}" >> "${GITHUB_OUTPUT}"
+          echo "commits=$(git -C brew rev-list $TAG..HEAD --count)" >> "${GITHUB_OUTPUT}"
+
+      - name: Setup build environment
+        run: |
+          echo "%_topdir  ${{ github.workspace }}/rpmbuild" > "$HOME/.rpmmacros"
+          mkdir -p "${{ github.workspace }}/rpmbuild/"{SOURCES,SPECS,BUILD,BUILDROOT,RPMS,SRPMS}
+          cp brew/package/homebrew.spec "${{ github.workspace }}/rpmbuild/SPECS/"
+
+      - name: Create source tar
+        run: |
+          tar czvf ${{ github.workspace }}/rpmbuild/SOURCES/brew.tar.gz brew/.
+
+      - name: Build Homebrew package
+        run: |
+          rpmbuild -ba ${{ github.workspace }}/rpmbuild/SPECS/homebrew.spec \
+              --define='git_version ${{ steps.print-version.outputs.version }}' \
+              --define='git_rev ${{ steps.print-version.outputs.commits }}'
+
+      - name: Install package
+        run: |
+          dnf module reset ruby -y
+          dnf module enable ruby:2.6 -y
+          dnf install -y ${{ github.workspace }}/rpmbuild/RPMS/*/homebrew-*.rpm
+
+      - run: ls -al /home/linuxbrew/.linuxbrew/
+      - run: |
+          git config --global --add safe.directory /home/linuxbrew/.linuxbrew
+          git -C "/home/linuxbrew/.linuxbrew/" status
+
+      - name: Create test user
+        run: useradd --shell /sbin/nologin test-user
+
+      - name: Evaluate install
+        run: |
+          sudo -u "test-user" sh -c "eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv) && brew config && brew doctor"
+
+      - name: Upload installer to GitHub Actions
+        uses: actions/upload-artifact@v3
+        with:
+          name: Homebrew ${{ steps.print-version.outputs.version }} rpms
+          path: "${{ github.workspace }}/rpmbuild/*RPMS/*/homebrew-${{ steps.print-version.outputs.version }}*.rpm"
+
+      # - name: Install gh
+      #   run: brew install gh
+
+      # - name: Upload installer to GitHub release
+      #   if: startsWith(github.ref, 'refs/tags/')
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: gh release upload --repo Homebrew/brew
+      #                          "${GITHUB_REF//refs\/tags\//}"
+      #                          Homebrew-${{ steps.print-version.outputs.version }}.pkg
