@@ -1,0 +1,39 @@
+Please note that these warnings are just used to help the Homebrew maintainers
+with debugging if you file an issue. If everything you use Homebrew for is
+working fine: please don't worry or file an issue; just ignore this. Thanks!
+
+Warning: Putting non-prefixed coreutils in your path can cause GMP builds to fail.
+
+Warning: Homebrew's "sbin" was not found in your PATH but you have installed
+formulae that put executables in /opt/homebrew/sbin.
+Consider setting your PATH for example like so:
+  echo 'export PATH="/opt/homebrew/sbin:$PATH"' >> /Users/51195/.bash_profile
+HOMEBREW_VERSION: 4.1.13
+ORIGIN: https://github.com/Homebrew/brew
+HEAD: a8519f78fb63f2f2266950bdd8141037da69f8bd
+Last commit: 6 hours ago
+Core tap JSON: 25 Sep 18:03 UTC
+HOMEBREW_PREFIX: /opt/homebrew
+HOMEBREW_CASK_OPTS: []
+HOMEBREW_EDITOR: nvim
+HOMEBREW_MAKE_JOBS: 10
+Homebrew Ruby: 2.6.10 => /System/Library/Frameworks/Ruby.framework/Versions/2.6/usr/bin/ruby
+CPU: 10-core 64-bit arm_firestorm_icestorm
+Clang: 14.0.3 build 1403
+Git: 2.42.0 => /opt/homebrew/bin/git
+Curl: 8.1.2 => /usr/bin/curl
+macOS: 13.5.2-arm64
+CLT: 14.3.1.0.1.1683849156
+Xcode: N/A
+Rosetta 2: false
+
+tmux
+├── libevent
+│   └── openssl@3
+│       └── ca-certificates
+├── ncurses
+└── utf8proc
+brew install tmux tmuxp
+brew deps --installed tmux
+brew deps --tree --installed tmux
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"https://formulae.brew.sh/api/formula.json
