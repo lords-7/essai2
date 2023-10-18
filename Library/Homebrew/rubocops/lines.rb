@@ -379,11 +379,21 @@ module RuboCop
 
           python_version = string_content(parameters(python_formula_node).first).split("@").last
 
+          other_python_deps = find_every_method_call_by_name(body_node, :depends_on).map do |method|
+            next unless parameters(method).first.instance_of?(RuboCop::AST::HashNode)
+
+            dep = parameters(method).first.keys.first
+            next unless string_content(dep).start_with? "python@"
+
+            dep
+          end.compact
+
           find_strings(body_node).each do |str|
             content = string_content(str)
 
             next unless (match = content.match(/^python(@)?(\d\.\d+)$/))
             next if python_version == match[2]
+            next if other_python_deps.any? { |dep| dep.equal?(str) }
 
             fix = if match[1]
               "python@#{python_version}"

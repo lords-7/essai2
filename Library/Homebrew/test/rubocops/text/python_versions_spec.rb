@@ -179,5 +179,81 @@ describe RuboCop::Cop::FormulaAudit::PythonVersions do
         end
       RUBY
     end
+
+    it "reports no offenses when multiple Python deps and a Python reference matches its runtime dependency" do
+      expect_no_offenses(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.8" => [:build, :test]
+          depends_on "python@3.9"
+
+          def install
+            puts "python@3.9"
+          end
+        end
+      RUBY
+    end
+
+    it "reports no offenses when multiple Python deps and a Python reference matches its runtime dep without `@`" do
+      expect_no_offenses(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.10" => [:build, :test]
+          depends_on "python@3.11"
+
+          def install
+            puts "python3.11"
+          end
+        end
+      RUBY
+    end
+
+    it "reports and corrects Python references with mismatched versions when multiple Python deps" do
+      expect_offense(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.8" => [:build, :test]
+          depends_on "python@3.9"
+
+          def install
+            puts "python@3.8"
+                 ^^^^^^^^^^^^ FormulaAudit/PythonVersions: References to `python@3.8` should match the specified python dependency (`python@3.9`)
+          end
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.8" => [:build, :test]
+          depends_on "python@3.9"
+
+          def install
+            puts "python@3.9"
+          end
+        end
+      RUBY
+    end
+
+    it "reports and corrects Python references with mismatched versions without `@` when multiple Pythons deps" do
+      expect_offense(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.10" => [:build, :test]
+          depends_on "python@3.11"
+
+          def install
+            puts "python3.10"
+                 ^^^^^^^^^^^^ FormulaAudit/PythonVersions: References to `python3.10` should match the specified python dependency (`python3.11`)
+          end
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class Foo < Formula
+          depends_on "python@3.10" => [:build, :test]
+          depends_on "python@3.11"
+
+          def install
+            puts "python3.11"
+          end
+        end
+      RUBY
+    end
   end
 end
