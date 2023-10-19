@@ -112,11 +112,11 @@ module Homebrew
 
       def please_create_pull_requests(what = "unsupported configuration")
         <<~EOS
-          It is expected behaviour that some formulae will fail to build in this #{what}.
-          It is expected behaviour that Homebrew will be buggy and slow.
+          It is expected behavior that some formulae will fail to build in this #{what}.
+          It is expected behavior that Homebrew will be buggy and slow.
           Do not create any issues about this on Homebrew's GitHub repositories.
           Do not create any issues even if you think this message is unrelated.
-          Any opened issues will be immediately closed without response.
+          Any opened issues will be immediately closed without a response.
           Do not ask for help from Homebrew or its maintainers on social media.
           You may ask for help in Homebrew's discussions but are unlikely to receive a response.
           Try to figure out the problem yourself and submit a fix as a pull request.
@@ -219,7 +219,7 @@ module Homebrew
 
         __check_stray_files "/usr/local/lib", "*.dylib", allow_list, <<~EOS
           Unbrewed dylibs were found in /usr/local/lib.
-          If you didn't put them there on purpose they could cause problems when
+          If you didn't put them there on purpose, they could cause problems when
           building Homebrew formulae, and may need to be deleted.
 
           Unexpected dylibs:
@@ -369,7 +369,7 @@ module Homebrew
           You should change the ownership of these directories to your user.
             sudo chown -R #{current_user} #{not_writable_dirs.join(" ")}
 
-          And make sure that your user has write permission.
+          And also make sure that your user has write permission.
             chmod u+w #{not_writable_dirs.join(" ")}
         EOS
       end
