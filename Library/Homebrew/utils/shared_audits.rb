@@ -92,6 +92,48 @@ module SharedAudits
     "#{tag} is a GitLab pre-release."
   end
 
+  def codeberg_repo_data(user, repo)
+    @codeberg_repo_data ||= {}
+    @codeberg_repo_data["#{user}/#{repo}"] ||= begin
+      out, _, status = Utils::Curl.curl_output("https://codeberg.org/api/v1/repos/#{user}/#{repo}")
+      json = JSON.parse(out) if status.success?
+      json = nil if json&.dig("message")&.include?("404 Project Not Found")
+      json
+    end
+  end
+
+  def codeberg_release_data(user, repo, tag)
+    id = "#{user}/#{repo}/#{tag}"
+    @codeberg_release_data ||= {}
+    @codeberg_release_data[id] ||= begin
+      out, _, status = Utils::Curl.curl_output(
+        "https://codeberg.org/api/v1/repos/#{user}/#{repo}/releases/tags/#{tag}", "--fail"
+      )
+      JSON.parse(out) if status.success?
+    end
+  end
+
+  def codeberg_release(user, repo, tag, formula: nil, cask: nil)
+    release = codeberg_release_data(user, repo, tag)
+    return unless release
+
+    return if DateTime.parse(release["released_at"]) <= DateTime.now
+
+    exception, name, version = if formula
+      [formula.tap&.audit_exception(:codeberg_prerelease_allowlist, formula.name), formula.name, formula.version]
+    elsif cask
+      [cask.tap&.audit_exception(:codeberg_prerelease_allowlist, cask.token), cask.token, cask.version]
+    end
+
+    return "#{tag} is a Codeberg pre-release." if release["prerelease"] && [version, "all"].exclude?(exception)
+
+    if !release["prerelease"] && exception
+      return "#{tag} is not a Codeberg pre-release but '#{name}' is in the Codeberg prerelease allowlist."
+    end
+
+    return "#{tag} is a Codeberg draft." if release["draft"]
+  end
+
   def github(user, repo)
     metadata = github_repo_data(user, repo)
 
@@ -122,6 +164,21 @@ module SharedAudits
     return if Date.parse(metadata["created_at"]) <= (Date.today - 30)
 
     "GitLab repository too new (<30 days old)"
+  end
+
+  def codeberg(user, repo)
+    metadata = codeberg_repo_data(user, repo)
+
+    return if metadata.nil?
+
+    return "Codeberg fork (not canonical repository)" if metadata["fork"]
+    if (metadata["forks_count"] < 30) && (metadata["stars_count"] < 75)
+      return "Codeberg repository not notable enough (<30 forks and <75 stars)"
+    end
+
+    return if Date.parse(metadata["created_at"]) <= (Date.today - 30)
+
+    "Codeberg repository too new (<30 days old)"
   end
 
   def bitbucket(user, repo)
@@ -169,6 +226,13 @@ module SharedAudits
   def gitlab_tag_from_url(url)
     url = url.to_s
     url.match(%r{^https://gitlab\.com/[\w-]+/[\w-]+/-/archive/([^/]+)/})
+       .to_a
+       .second
+  end
+
+  def codeberg_tag_from_url(url)
+    url = url.to_s
+    url.match(%r{^https://codeberg\.org/[\w-]+/[\w-]+/-/archive/([^/]+)/})
        .to_a
        .second
   end
