@@ -172,8 +172,9 @@ module SharedAudits
     return if metadata.nil?
 
     return "Codeberg fork (not canonical repository)" if metadata["fork"]
-    if (metadata["forks_count"] < 30) && (metadata["stars_count"] < 75)
-      return "Codeberg repository not notable enough (<30 forks and <75 stars)"
+    if (metadata["forks_count"] < 3) && (metadata["watchers_count"] < 3) &&
+       (metadata["stars_count "] < 3)
+      return "Codeberg repository not notable enough (<3 forks, <3 watchers and <3 stars)"
     end
 
     return if Date.parse(metadata["created_at"]) <= (Date.today - 30)
