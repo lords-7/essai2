@@ -49,12 +49,18 @@ cp -r . "$RPM_BUILD_ROOT%{homebrew_directory}"
 pushd "$RPM_BUILD_ROOT%{homebrew_directory}"
 mkdir -vp Cellar Frameworks etc include lib opt sbin share var/homebrew/linked
 
+# Create the linuxbrew user for the purpose of testing
+# Maybe the build user could be used here instead
+getent passwd %{homebrew_user} >/dev/null || \
+    useradd -r -d %{homebrew_directory} -s /sbin/nologin \
+    -c "The Homebrew default user" %{homebrew_user}
+chown -R "%{homebrew_user}:%{homebrew_user}" $RPM_BUILD_ROOT%{homebrew_directory}
 
 %check
 export HOMEBREW_NO_ANALYTICS_THIS_RUN=1
 export HOMEBREW_NO_ANALYTICS_MESSAGE_OUTPUT=1
-sudo -u "%{homebrew_user}" %{homebrew_directory}/bin/brew config
-sudo -u "%{homebrew_user}" %{homebrew_directory}/bin/brew doctor
+sudo -u "%{homebrew_user}" $RPM_BUILD_ROOT%{homebrew_directory}/bin/brew config
+sudo -u "%{homebrew_user}" $RPM_BUILD_ROOT%{homebrew_directory}/bin/brew doctor
 
 
 %pre
