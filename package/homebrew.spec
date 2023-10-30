@@ -1,21 +1,22 @@
-%{!?git_version: %global git_version 0.0.1}
-%{!?git_rev: %global git_rev 0}
+%global forgeurl https://github.com/Homebrew/brew
+
 %define homebrew_user linuxbrew
 %define homebrew_directory /home/%{homebrew_user}/.%{homebrew_user}
-%define brew_repo https://github.com/Homebrew/brew
+
+%forgemeta
 
 Summary:   Homebrew package manager
 Name:      homebrew
-Version:   %{git_version}
-Release:   %{git_rev}
+Version:   0.0.0
+Release:   %autorelease
 License:   BSD-2-clause
 Group:     Development/Tools
-Source:    %{brew_repo}/archive/refs/tags/%{git_version}.tar.gz#/brew.tar.gz
+URL:       https://brew.sh
+Source:    %forgesource
 
 # See: https://github.com/Homebrew/install/blob/master/install.sh#L211-L214
 BuildRequires: git
 
-Autoreq:  no
 Requires: procps-ng
 Requires: file
 Requires: gcc
@@ -31,10 +32,10 @@ The Missing Package Manager for macOS (or Linux)
 %global __brp_mangle_shebangs /usr/bin/true
 
 %prep
-%autosetup -n brew
+%autosetup -n brew-%{version}
 
 %build
-git remote set-url origin %{brew_repo} || git remote add origin %{brew_repo}
+git remote set-url origin %{forgeurl} || git remote add origin %{forgeurl}
 
 %install
 install -d "$RPM_BUILD_ROOT%{homebrew_directory}"
@@ -88,3 +89,4 @@ fi
 %doc %{homebrew_directory}/README.md
 
 %changelog
+%autochangelog
