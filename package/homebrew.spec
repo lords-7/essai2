@@ -1,9 +1,6 @@
-%global forgeurl https://github.com/Homebrew/brew
-
 %define homebrew_user linuxbrew
 %define homebrew_directory /home/%{homebrew_user}/.%{homebrew_user}
-
-%forgemeta
+%define brew_repo https://github.com/Homebrew/brew
 
 Summary:   Homebrew package manager
 Name:      homebrew
@@ -12,7 +9,7 @@ Release:   %autorelease
 License:   BSD-2-clause
 Group:     Development/Tools
 URL:       https://brew.sh
-Source:    %forgesource
+Source:    %{brew_repo}/archive/refs/tags/%{git_version}.tar.gz#/brew.tar.gz
 
 # See: https://github.com/Homebrew/install/blob/master/install.sh#L211-L214
 BuildRequires: git
@@ -35,7 +32,7 @@ The Missing Package Manager for macOS (or Linux)
 %autosetup -n brew-%{version}
 
 %build
-git remote set-url origin %{forgeurl} || git remote add origin %{forgeurl}
+git remote set-url origin %{brew_repo} || git remote add origin %{brew_repo}
 
 %install
 install -d "$RPM_BUILD_ROOT%{homebrew_directory}"
