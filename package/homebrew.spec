@@ -38,25 +38,7 @@ git remote set-url origin %{brew_repo} || git remote add origin %{brew_repo}
 
 %install
 install -d "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r bin "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r completions "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r manpages "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r docs "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r package "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .git "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .github "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .gitignore "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .shellcheckrc "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .sublime "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .vscode "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .devcontainer "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .dockerignore "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .editorconfig "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r .vale.ini "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r Dockerfile "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r *.md "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -r *.txt "$RPM_BUILD_ROOT%{homebrew_directory}"
-cp -rd Library "$RPM_BUILD_ROOT%{homebrew_directory}"
+cp -r . "$RPM_BUILD_ROOT%{homebrew_directory}"
 
 pushd "$RPM_BUILD_ROOT%{homebrew_directory}"
 mkdir -vp Cellar Frameworks etc include lib opt sbin share var/homebrew/linked
