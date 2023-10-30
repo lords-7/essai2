@@ -13,6 +13,7 @@ Source:    %{brew_repo}/archive/refs/tags/%{git_version}.tar.gz#/brew.tar.gz
 
 # See: https://github.com/Homebrew/install/blob/master/install.sh#L211-L214
 BuildRequires: git
+BuildRequires: sudo
 
 Requires: procps-ng
 Requires: file
@@ -32,6 +33,7 @@ The Missing Package Manager for macOS (or Linux)
 %autosetup -n brew-%{version}
 
 %build
+git init
 git remote set-url origin %{brew_repo} || git remote add origin %{brew_repo}
 
 %install
