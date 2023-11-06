@@ -11,7 +11,7 @@ describe "RuboCop" do
           HOMEBREW_USE_RUBY_FROM_PATH
           HOMEBREW_RUBY3
         ]
-        ENV.delete(key) if key.start_with?("HOMEBREW_") && allowlist.exclude?(key)
+        ENV.delete(key) if key.start_with?("HOMEBREW_") && !allowlist.include?(key)
       end
 
       ENV["XDG_CACHE_HOME"] = (HOMEBREW_CACHE.realpath/"style").to_s

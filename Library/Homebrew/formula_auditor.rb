@@ -925,7 +925,7 @@ module Homebrew
 
       methods.map(&:to_s).grep(/^audit_/).each do |audit_method_name|
         name = audit_method_name.delete_prefix("audit_")
-        next if only_audits&.exclude?(name)
+        next if only_audits && !only_audits.include?(name)
         next if except_audits&.include?(name)
 
         send(audit_method_name)
@@ -948,7 +948,7 @@ module Homebrew
 
     def linux_only_gcc_dep?(formula)
       odie "`#linux_only_gcc_dep?` works only on Linux!" if Homebrew::SimulateSystem.simulating_or_running_on_macos?
-      return false if formula.deps.map(&:name).exclude?("gcc")
+      return false if !formula.deps.map(&:name).include?("gcc")
 
       variations = formula.to_hash_with_variations["variations"]
       # The formula has no variations, so all OS-version-arch triples depend on GCC.

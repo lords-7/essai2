@@ -34,7 +34,7 @@ module Homebrew
 
       methods.map(&:to_s).grep(/^audit_/).each do |audit_method_name|
         name = audit_method_name.delete_prefix("audit_")
-        next if only_audits&.exclude?(name)
+        next if only_audits && !only_audits.include?(name)
         next if except_audits&.include?(name)
 
         send(audit_method_name)

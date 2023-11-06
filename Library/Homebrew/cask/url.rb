@@ -251,7 +251,7 @@ module Cask
 
       interpolated_url = interpolated_url.gsub(/\#{\s*version\s*\.major\s*}/, "") if ignore_major_version
 
-      interpolated_url.exclude?('#{')
+      !interpolated_url.include?('#{')
     end
 
     sig { returns(T::Boolean) }

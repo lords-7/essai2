@@ -196,7 +196,7 @@ module Homebrew
                             .partition { |formula_or_cask| formula_or_cask.is_a?(Formula) }
     rescue FormulaOrCaskUnavailableError, Cask::CaskUnavailableError
       cask_tap = CoreCaskTap.instance
-      if !cask_tap.installed? && (args.cask? || Tap.untapped_official_taps.exclude?(cask_tap.name))
+      if !cask_tap.installed? && (args.cask? || !Tap.untapped_official_taps.include?(cask_tap.name))
         cask_tap.ensure_installed!
         retry if cask_tap.installed?
       end

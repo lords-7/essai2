@@ -81,12 +81,12 @@ module Homebrew
     args = info_args.parse
 
     if args.analytics?
-      if args.days.present? && VALID_DAYS.exclude?(args.days)
+      if args.days.present? && !VALID_DAYS.include?(args.days)
         raise UsageError, "`--days` must be one of #{VALID_DAYS.join(", ")}."
       end
 
       if args.category.present?
-        if args.named.present? && VALID_FORMULA_CATEGORIES.exclude?(args.category)
+        if args.named.present? && !VALID_FORMULA_CATEGORIES.include?(args.category)
           raise UsageError,
                 "`--category` must be one of #{VALID_FORMULA_CATEGORIES.join(", ")} when querying formulae."
         end

@@ -192,7 +192,7 @@ class FormulaInstaller
   def install_bottle_for?(dep, build)
     return pour_bottle? if dep == formula
 
-    @build_from_source_formulae.exclude?(dep.full_name) &&
+    !@build_from_source_formulae.include?(dep.full_name) &&
       dep.bottle.present? &&
       dep.pour_bottle? &&
       build.used_options.empty? &&

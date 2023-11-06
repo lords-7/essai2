@@ -720,7 +720,7 @@ module Homebrew
           if livecheck_url.blank? && strategy.method(:find_versions).parameters.include?([:keyreq, :url])
             odebug "#{strategy_name} strategy requires a URL"
             next
-          elsif livecheck_strategy != :page_match && strategies.exclude?(strategy)
+          elsif livecheck_strategy != :page_match && !strategies.include?(strategy)
             odebug "#{strategy_name} strategy does not apply to this URL"
             next
           end
@@ -914,7 +914,7 @@ module Homebrew
           if livecheck_url.blank? && strategy.method(:find_versions).parameters.include?([:keyreq, :url])
             odebug "#{strategy_name} strategy requires a URL"
             next
-          elsif livecheck_strategy != :page_match && strategies.exclude?(strategy)
+          elsif livecheck_strategy != :page_match && !strategies.include?(strategy)
             odebug "#{strategy_name} strategy does not apply to this URL"
             next
           end

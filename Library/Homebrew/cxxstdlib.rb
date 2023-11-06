@@ -6,7 +6,7 @@ require "compilers"
 # Combination of C++ standard library and compiler.
 class CxxStdlib
   def self.create(type, compiler)
-    raise ArgumentError, "Invalid C++ stdlib type: #{type}" if type && [:libstdcxx, :libcxx].exclude?(type)
+    raise ArgumentError, "Invalid C++ stdlib type: #{type}" if type && ![:libstdcxx, :libcxx].include?(type)
 
     CxxStdlib.new(type, compiler)
   end

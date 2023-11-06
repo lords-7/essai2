@@ -162,7 +162,7 @@ module Formulary
     requirements = {}
     json_formula["requirements"].map do |req|
       req_name = req["name"].to_sym
-      next if API_SUPPORTED_REQUIREMENTS.exclude?(req_name)
+      next if !API_SUPPORTED_REQUIREMENTS.include?(req_name)
 
       req_version = case req_name
       when :arch

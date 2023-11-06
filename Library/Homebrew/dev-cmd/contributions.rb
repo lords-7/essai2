@@ -143,7 +143,7 @@ module Homebrew
     data = {}
 
     repos.each do |repo|
-      if SUPPORTED_REPOS.exclude?(repo)
+      if !SUPPORTED_REPOS.include?(repo)
         return ofail "Unsupported repository: #{repo}. Try one of #{SUPPORTED_REPOS.join(", ")}."
       end
 

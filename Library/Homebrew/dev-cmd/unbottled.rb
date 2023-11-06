@@ -284,7 +284,7 @@ module Homebrew
           case line
           when /^commit [0-9a-f]{40}$/
             # Example match: `commit 7289b409b96a752540befef1a56b8a818baf1db7`
-            if commit && formula && lost_bottles.positive? && processed_formulae.exclude?(formula)
+            if commit && formula && lost_bottles.positive? && !processed_formulae.include?(formula)
               puts "#{commit}: bottle lost for #{formula}"
             end
             processed_formulae << formula

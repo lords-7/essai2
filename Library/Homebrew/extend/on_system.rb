@@ -11,7 +11,7 @@ module OnSystem
 
   sig { params(arch: Symbol).returns(T::Boolean) }
   def self.arch_condition_met?(arch)
-    raise ArgumentError, "Invalid arch condition: #{arch.inspect}" if ARCH_OPTIONS.exclude?(arch)
+    raise ArgumentError, "Invalid arch condition: #{arch.inspect}" if !ARCH_OPTIONS.include?(arch)
 
     arch == Homebrew::SimulateSystem.current_arch
   end
@@ -22,7 +22,7 @@ module OnSystem
 
     raise ArgumentError, "Invalid OS condition: #{os_name.inspect}" unless MacOSVersion::SYMBOLS.key?(os_name)
 
-    if or_condition.present? && [:or_newer, :or_older].exclude?(or_condition)
+    if or_condition.present? && ![:or_newer, :or_older].include?(or_condition)
       raise ArgumentError, "Invalid OS `or_*` condition: #{or_condition.inspect}"
     end
 

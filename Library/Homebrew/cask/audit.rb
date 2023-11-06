@@ -55,7 +55,7 @@ module Cask
 
       private_methods.map(&:to_s).grep(/^audit_/).each do |audit_method_name|
         name = audit_method_name.delete_prefix("audit_")
-        next if !only_audits.empty? && only_audits&.exclude?(name)
+        next if !only_audits.empty? && !only_audits.include?(name)
         next if except_audits&.include?(name)
 
         send(audit_method_name)
@@ -209,7 +209,7 @@ module Cask
       return if cask.version.latest?
 
       raw_version = cask.version.raw_version
-      return if raw_version.exclude?(":") && raw_version.exclude?("/")
+      return if !raw_version.include?(":") && !raw_version.include?("/")
 
       add_error "version should not contain colons or slashes"
     end

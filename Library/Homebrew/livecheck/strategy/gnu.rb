@@ -32,11 +32,11 @@ module Homebrew
         NICE_NAME = "GNU"
 
         # The `Regexp` used to determine if the strategy applies to the URL.
-        URL_MATCH_REGEX = %r{
+        URL_MATCH_REGEX = T.let(%r{
           ^https?://
           (?:(?:[^/]+?\.)*gnu\.org/(?:gnu|software)/(?<project_name>[^/]+)/
           |(?<project_name>[^/]+)\.gnu\.org/?$)
-        }ix.freeze
+        }ix.freeze, Regexp)
 
         # Whether the strategy can be applied to the provided URL.
         #
@@ -44,7 +44,7 @@ module Homebrew
         # @return [Boolean]
         sig { params(url: String).returns(T::Boolean) }
         def self.match?(url)
-          URL_MATCH_REGEX.match?(url) && url.exclude?("savannah.")
+          URL_MATCH_REGEX.match?(url) && !url.include?("savannah.")
         end
 
         # Extracts information from a provided URL and uses it to generate

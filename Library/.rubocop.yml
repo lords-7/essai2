@@ -224,8 +224,6 @@ Rails/ExpandedDateRange:
   Enabled: true
 Rails/Inquiry:
   Enabled: true
-Rails/NegateInclude:
-  Enabled: true
 Rails/PluralizationGrammar:
   Enabled: true
 Rails/Presence:

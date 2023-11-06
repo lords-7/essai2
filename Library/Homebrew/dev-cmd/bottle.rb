@@ -14,8 +14,8 @@ require "api"
 
 BOTTLE_ERB = <<-EOS
   bottle do
-    <% if [HOMEBREW_BOTTLE_DEFAULT_DOMAIN.to_s,
-           "#{HOMEBREW_BOTTLE_DEFAULT_DOMAIN}/bottles"].exclude?(root_url) %>
+    <% if ![HOMEBREW_BOTTLE_DEFAULT_DOMAIN.to_s,
+           "#{HOMEBREW_BOTTLE_DEFAULT_DOMAIN}/bottles"].include?(root_url) %>
     root_url "<%= root_url %>"<% if root_url_using.present? %>,
       using: <%= root_url_using %>
     <% end %>
@@ -179,7 +179,7 @@ module Homebrew
       Homebrew::DEFAULT_MACOS_ARM_CELLAR,
       Homebrew::DEFAULT_LINUX_CELLAR,
     ]
-    cellar.present? && default_cellars.exclude?(cellar)
+    cellar.present? && !default_cellars.include?(cellar)
   end
 
   def self.generate_sha256_line(tag, digest, cellar, tag_column, digest_column)
@@ -792,7 +792,7 @@ module Homebrew
       mismatches << "#{key}: old: #{old_value.inspect}, new: #{new_value.inspect}"
     end
 
-    return [mismatches, checksums] if old_keys.exclude? :sha256
+    return [mismatches, checksums] if !old_keys.include? :sha256
 
     old_bottle_spec.collector.each_tag do |tag|
       old_tag_spec = old_bottle_spec.collector.specification_for(tag)

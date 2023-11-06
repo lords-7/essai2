@@ -516,9 +516,9 @@ module Kernel
 
   def tap_and_name_comparison
     proc do |a, b|
-      if a.include?("/") && b.exclude?("/")
+      if a.include?("/") && !b.include?("/")
         1
-      elsif a.exclude?("/") && b.include?("/")
+      elsif !a.include?("/") && b.include?("/")
         -1
       else
         a <=> b

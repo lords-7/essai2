@@ -41,7 +41,7 @@ module Homebrew
                               display_cop_names: false,
                               reset_cache: false,
                               debug: false, verbose: false)
-      raise ArgumentError, "Invalid output type: #{output_type.inspect}" if [:print, :json].exclude?(output_type)
+      raise ArgumentError, "Invalid output type: #{output_type.inspect}" if ![:print,  :json].include?(output_type)
 
       shell_files, ruby_files =
         Array(files).map(&method(:Pathname))

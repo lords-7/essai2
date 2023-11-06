@@ -282,7 +282,7 @@ module PyPI
     ohai "Retrieving PyPI dependencies for \"#{input_packages.join(" ")}\"..." if !print_only && !silent
     found_packages = pip_report(input_packages)
     # Resolve the dependency tree of excluded packages to prune the above
-    exclude_packages.delete_if { |package| found_packages.exclude? package }
+    exclude_packages.delete_if { |package| !found_packages.include? package }
     ohai "Retrieving PyPI dependencies for excluded \"#{exclude_packages.join(" ")}\"..." if !print_only && !silent
     exclude_packages = pip_report(exclude_packages) + [Package.new(main_package.name)]
 

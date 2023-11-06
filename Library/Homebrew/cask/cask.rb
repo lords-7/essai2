@@ -25,7 +25,7 @@ module Cask
 
     def self.all
       # TODO: ideally avoid using ARGV by moving to e.g. CLI::Parser
-      if ARGV.exclude?("--eval-all") && !Homebrew::EnvConfig.eval_all?
+      if !ARGV.include?("--eval-all") && !Homebrew::EnvConfig.eval_all?
         odisabled "Cask::Cask#all without --eval-all or HOMEBREW_EVAL_ALL"
       end
 

@@ -294,9 +294,9 @@ class LinkageChecker
 
   def sort_by_formula_full_name!(arr)
     arr.sort! do |a, b|
-      if a.include?("/") && b.exclude?("/")
+      if a.include?("/") && !b.include?("/")
         1
-      elsif a.exclude?("/") && b.include?("/")
+      elsif !a.include?("/") && b.include?("/")
         -1
       else
         a <=> b

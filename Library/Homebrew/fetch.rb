@@ -29,7 +29,7 @@ module Homebrew
 
       bottle.present? &&
         formula.pour_bottle? &&
-        build_from_source_formulae.exclude?(formula.full_name) &&
+        !build_from_source_formulae.include?(formula.full_name) &&
         bottle.compatible_locations?
     end
   end

@@ -145,7 +145,7 @@ module Homebrew
       end
     end
 
-    print_missing_formula_help(query, count.positive?) if all_casks.exclude?(query)
+    print_missing_formula_help(query, count.positive?) if !all_casks.include?(query)
 
     odie "No formulae or casks found for #{query.inspect}." if count.zero?
   end

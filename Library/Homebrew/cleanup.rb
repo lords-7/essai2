@@ -605,7 +605,7 @@ module Homebrew
                 path.unlink
               end
             end
-          elsif path.directory? && Keg::MUST_EXIST_SUBDIRECTORIES.exclude?(path)
+          elsif path.directory? && !Keg::MUST_EXIST_SUBDIRECTORIES.include?(path)
             dirs << path
           end
         end

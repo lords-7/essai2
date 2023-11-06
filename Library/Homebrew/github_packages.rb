@@ -283,7 +283,7 @@ class GitHubPackages
     source_org_repo = "#{org}/#{repo}"
     source = "https://github.com/#{source_org_repo}/blob/#{git_revision.presence || "HEAD"}/#{git_path}"
 
-    formula_core_tap = formula_full_name.exclude?("/")
+    formula_core_tap = !formula_full_name.include?("/")
     documentation = if formula_core_tap
       "https://formulae.brew.sh/formula/#{formula_name}"
     elsif (remote = bottle_hash["formula"]["tap_git_remote"]) && remote.start_with?("https://github.com/")
