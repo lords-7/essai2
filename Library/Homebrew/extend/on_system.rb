@@ -11,7 +11,7 @@ module OnSystem
 
   sig { params(arch: Symbol).returns(T::Boolean) }
   def self.arch_condition_met?(arch)
-    raise ArgumentError, "Invalid arch condition: #{arch.inspect}" if !ARCH_OPTIONS.include?(arch)
+    raise ArgumentError, "Invalid arch condition: #{arch.inspect}" unless ARCH_OPTIONS.include?(arch)
 
     arch == Homebrew::SimulateSystem.current_arch
   end

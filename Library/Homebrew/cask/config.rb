@@ -104,8 +104,8 @@ module Cask
       @explicit = self.class.canonicalize(explicit)
 
       if ignore_invalid_keys
-        @env&.delete_if { |key, _| !self.class.defaults.keys.include?(key) }
-        @explicit.delete_if { |key, _| !self.class.defaults.keys.include?(key) }
+        @env&.delete_if { |key, _| !self.class.defaults.key?(key) }
+        @explicit.delete_if { |key, _| !self.class.defaults.key?(key) }
         return
       end
 

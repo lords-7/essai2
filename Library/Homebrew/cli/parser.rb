@@ -124,8 +124,8 @@ module Homebrew
         @args = Homebrew::CLI::Args.new
 
         # Filter out Sorbet runtime type checking method calls.
-        cmd_location = T.must(caller_locations).select do |location|
-          !T.must(location.path).include?("/gems/sorbet-runtime-")
+        cmd_location = T.must(caller_locations).reject do |location|
+          T.must(location.path).include?("/gems/sorbet-runtime-")
         end.second
         @command_name = cmd_location.label.chomp("_args").tr("_", "-")
         @is_dev_cmd = cmd_location.absolute_path.start_with?(Commands::HOMEBREW_DEV_CMD_PATH)

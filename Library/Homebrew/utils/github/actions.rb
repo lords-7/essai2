@@ -61,7 +61,7 @@ module GitHub
         ).void
       }
       def initialize(type, message, file:, title: nil, line: nil, end_line: nil, column: nil, end_column: nil)
-        raise ArgumentError, "Unsupported type: #{type.inspect}" if !ANNOTATION_TYPES.include?(type)
+        raise ArgumentError, "Unsupported type: #{type.inspect}" unless ANNOTATION_TYPES.include?(type)
 
         @type = type
         @message = Tty.strip_ansi(message)

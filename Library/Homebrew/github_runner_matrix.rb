@@ -94,8 +94,8 @@ class GitHubRunnerMatrix
     ).returns(GitHubRunner)
   }
   def create_runner(platform, arch, spec, macos_version = nil)
-    raise "Unexpected platform: #{platform}" if !VALID_PLATFORMS.include?(platform)
-    raise "Unexpected arch: #{arch}" if !VALID_ARCHES.include?(arch)
+    raise "Unexpected platform: #{platform}" unless VALID_PLATFORMS.include?(platform)
+    raise "Unexpected arch: #{arch}" unless VALID_ARCHES.include?(arch)
 
     runner = GitHubRunner.new(platform: platform, arch: arch, spec: spec, macos_version: macos_version)
     runner.active = active_runner?(runner)

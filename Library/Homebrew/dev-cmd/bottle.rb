@@ -792,7 +792,7 @@ module Homebrew
       mismatches << "#{key}: old: #{old_value.inspect}, new: #{new_value.inspect}"
     end
 
-    return [mismatches, checksums] if !old_keys.include? :sha256
+    return [mismatches, checksums] unless old_keys.include? :sha256
 
     old_bottle_spec.collector.each_tag do |tag|
       old_tag_spec = old_bottle_spec.collector.specification_for(tag)
