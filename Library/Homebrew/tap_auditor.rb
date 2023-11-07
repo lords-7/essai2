@@ -70,10 +70,10 @@ module Homebrew
       end
 
       list = list.keys if list.is_a? Hash
-      invalid_formulae_casks = list.select do |formula_or_cask_name|
-        !formula_names.include?(formula_or_cask_name) &&
-          !formula_aliases.include?(formula_or_cask_name) &&
-          !cask_tokens.include?("#{@name}/#{formula_or_cask_name}")
+      invalid_formulae_casks = list.reject do |formula_or_cask_name|
+        formula_names.include?(formula_or_cask_name) ||
+          formula_aliases.include?(formula_or_cask_name) ||
+          cask_tokens.include?("#{@name}/#{formula_or_cask_name}")
       end
 
       return if invalid_formulae_casks.empty?
