@@ -926,7 +926,7 @@ module Formulary
   def self.tap_loader_for(tapped_name, warn:)
     name, path, tap = Formulary.tap_formula_name_path(tapped_name, warn: warn)
 
-    if name.exclude?("/") && !Homebrew::EnvConfig.no_install_from_api? &&
+    if tap.core_tap? && !Homebrew::EnvConfig.no_install_from_api? &&
        Homebrew::API::Formula.all_formulae.key?(name)
       FormulaAPILoader.new(name)
     else
