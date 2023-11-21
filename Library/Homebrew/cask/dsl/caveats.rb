@@ -164,7 +164,7 @@ module Cask
       caveat :requires_rosetta_unsigned do
         next unless Hardware::CPU.arm?
 
-        requires_rosetta
+        # This should only be used immediately after caveat "requires_rosetta"
         <<~EOS
           The Apple Silicon build for this cask is unsigned so the Intel build is required
           instead.
