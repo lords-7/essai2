@@ -483,6 +483,7 @@ describe Cask::Audit, :cask do
               version '1.0'
               url "https://brew.sh/index.html"
               artifact "example.pdf", target: "/Library/Application Support/example"
+              # NOTE: cask should pass when using caveat "unsigned_artifact"
             end
           RUBY
         end

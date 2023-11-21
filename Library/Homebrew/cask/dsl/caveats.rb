@@ -93,6 +93,17 @@ module Cask
         EOS
       end
 
+      caveat :unsigned_artifact do
+        <<~EOS
+          #{@cask} has an unsigned binary which may prevent it from running on Apple
+          Silicon devices under standard macOS security policy. If you're sure you want
+          to trust the app, you can reinstall without quarantine attributes:
+            brew reinstall --cask --no-quarantine #{@cask}
+          For more information, refer to:
+            #{Formatter.url("https://developer.apple.com/documentation/macos-release-notes/macos-big-sur-11_0_1-universal-apps-release-notes/#Code-Signing")}
+        EOS
+      end
+
       caveat :path_environment_variable do |path|
         <<~EOS
           To use #{@cask}, you may need to add the #{path} directory

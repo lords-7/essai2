@@ -474,6 +474,10 @@ module Cask
     def audit_signing
       return if !signing? || download.blank? || cask.url.blank?
 
+      # Allow casks with caveat "unsigned_artifact"
+      # TODO: unless it is an arm build with no signature whatsoever
+      return if cask.caveats.to_s.include?("brew reinstall --cask --no-quarantine")
+
       odebug "Auditing signing"
 
       extract_artifacts do |artifacts, tmpdir|
@@ -487,11 +491,14 @@ module Cask
 
           next if result.success?
 
-          add_error <<~EOS, location: cask.url.location, strict_only: true
+          add_error <<~EOS, location: cask.url.location
             Signature verification failed:
             #{result.merged_output}
             macOS on ARM requires software to be signed.
             Please contact the upstream developer to let them know they should sign and notarize their software.
+            Alternatively, under some criteria this can be bypassed by adding caveat "unsigned_artifact".
+            For more information, refer to:
+              #{Formatter.url("https://developer.apple.com/documentation/macos-release-notes/macos-big-sur-11_0_1-universal-apps-release-notes/#Code-Signing")}
           EOS
         end
       end
