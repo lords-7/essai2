@@ -161,6 +161,16 @@ module Cask
         EOS
       end
 
+      caveat :requires_rosetta_unsigned do
+        next unless Hardware::CPU.arm?
+
+        requires_rosetta
+        <<~EOS
+          The Apple Silicon build for this cask is unsigned so the Intel build is required
+          instead.
+        EOS
+      end
+
       caveat :logout do
         <<~EOS
           You must log out and log back in for the installation of #{@cask} to take effect.
