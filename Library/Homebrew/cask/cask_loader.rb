@@ -65,7 +65,7 @@ module Cask
         content.match?(@regex)
       end
 
-      def initialize(content, tap: nil)
+      def initialize(content, warn: false, tap: nil)
         super()
 
         @content = content.force_encoding("UTF-8")
@@ -88,7 +88,7 @@ module Cask
 
       attr_reader :token, :path
 
-      def initialize(path, token: nil)
+      def initialize(path, warn: false, token: nil)
         super()
 
         path = Pathname(path).expand_path
@@ -150,10 +150,10 @@ module Cask
 
       attr_reader :url
 
-      sig { params(url: T.any(URI::Generic, String)).void }
-      def initialize(url)
+      sig { params(url: T.any(URI::Generic, String), warn: T::Boolean).void }
+      def initialize(url, warn: false)
         @url = URI(url)
-        super Cache.path/File.basename(T.must(@url.path))
+        super Cache.path/File.basename(T.must(@url.path)), warn: warn
       end
 
       def load(config:)
@@ -176,8 +176,8 @@ module Cask
         super && !Tap.from_path(ref).nil?
       end
 
-      def initialize(path)
-        super(path)
+      def initialize(path, warn: false)
+        super(path, warn: warn)
         @tap = Tap.from_path(path)
       end
     end
@@ -188,11 +188,25 @@ module Cask
         ref.to_s.match?(HOMEBREW_TAP_CASK_REGEX)
       end
 
-      def initialize(tapped_name)
+      def initialize(tapped_name, warn: false)
         user, repo, token = tapped_name.split("/", 3)
         tap = Tap.fetch(user, repo)
         cask = CaskLoader.find_cask_in_tap(token, tap)
-        super cask
+        unless cask.file?
+          new_token = tap.cask_renames[token].presence
+          if new_token.nil? && (new_tap_name = tap.tap_migrations[token].presence)
+            new_tap_user, new_tap_repo, new_token = new_tap_name.split("/")
+            tap = Tap.fetch("#{new_tap_user}/#{new_tap_repo}")
+            tap.ensure_installed!
+            new_token ||= token
+          end
+
+          unless new_token.nil?
+            cask = CaskLoader.find_cask_in_tap(new_token, tap)
+            opoo "Cask #{tapped_name} was renamed to #{tap.name}/#{new_token}." if warn && cask.file?
+          end
+        end
+        super cask, warn: warn
       end
 
       def load(config:)
@@ -208,8 +222,8 @@ module Cask
         super CaskLoader.default_path(ref)
       end
 
-      def initialize(ref)
-        super CaskLoader.default_path(ref)
+      def initialize(ref, warn: false)
+        super CaskLoader.default_path(ref), warn: warn
       end
     end
 
@@ -220,7 +234,7 @@ module Cask
         ref.is_a?(Cask)
       end
 
-      def initialize(cask)
+      def initialize(cask, warn: false)
         @cask = cask
       end
 
@@ -243,7 +257,7 @@ module Cask
         Homebrew::API::Cask.all_casks.key?(token)
       end
 
-      def initialize(token, from_json: nil)
+      def initialize(token, warn: false, from_json: nil)
         @token = token.sub(%r{^homebrew/(?:homebrew-)?cask/}i, "")
         @path = CaskLoader.default_path(@token)
         @from_json = from_json
@@ -426,13 +440,13 @@ module Cask
       ].each do |loader_class|
         if loader_class.can_load?(ref)
           $stderr.puts "#{$PROGRAM_NAME} (#{loader_class}): loading #{ref}" if debug?
-          return loader_class.new(ref)
+          return loader_class.new(ref, warn: warn)
         end
       end
 
       case (possible_tap_casks = tap_paths(ref, warn: warn)).count
       when 1
-        return FromTapPathLoader.new(possible_tap_casks.first)
+        return FromTapPathLoader.new(possible_tap_casks.first, warn: warn)
       when 2..Float::INFINITY
         loaders = possible_tap_casks.map(&FromTapPathLoader.method(:new))
 
@@ -440,7 +454,9 @@ module Cask
       end
 
       possible_installed_cask = Cask.new(ref)
-      return FromPathLoader.new(possible_installed_cask.installed_caskfile) if possible_installed_cask.installed?
+      if possible_installed_cask.installed?
+        return FromPathLoader.new(possible_installed_cask.installed_caskfile, warn: warn)
+      end
 
       NullLoader.new(ref)
     end

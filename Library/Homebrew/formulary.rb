@@ -907,11 +907,11 @@ module Formulary
         name = new_name
         new_name = tap.core_tap? ? name : "#{tap}/#{name}"
       elsif (new_tap_name = tap.tap_migrations[name].presence)
-        new_tap_user, new_tap_repo, = new_tap_name.split("/")
+        new_tap_user, new_tap_repo, new_name = new_tap_name.split("/")
         new_tap_name = "#{new_tap_user}/#{new_tap_repo}"
         new_tap = Tap.fetch new_tap_name
         new_tap.ensure_installed!
-        new_tapped_name = "#{new_tap_name}/#{name}"
+        new_tapped_name = "#{new_tap_name}/#{new_name || name}"
         name, path, tap = Formulary.tap_formula_name_path(new_tapped_name, warn: false)
         old_name = tapped_name
         new_name = new_tap.core_tap? ? name : new_tapped_name

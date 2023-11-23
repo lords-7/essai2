@@ -601,37 +601,66 @@ class Reporter
       next if new_tap_name.nil? # skip if not in tap_migrations list.
 
       new_tap_user, new_tap_repo, new_tap_new_name = new_tap_name.split("/")
-      new_name = if new_tap_new_name
-        new_full_name = new_tap_new_name
-        new_tap_name = "#{new_tap_user}/#{new_tap_repo}"
-        new_tap_new_name
+      new_tap_name = "#{new_tap_user}/#{new_tap_repo}"
+      new_name = new_tap_new_name || name
+      new_tap = Tap.fetch(new_tap_name)
+      new_full_name = if new_tap.core_tap? || new_tap.core_cask_tap?
+        new_name
       else
-        new_full_name = "#{new_tap_name}/#{name}"
-        name
+        "#{new_tap_name}/#{new_name}"
       end
+
+      new_package = begin
+        Formulary.factory(new_full_name, warn: false)
+      rescue FormulaUnreadableError, FormulaSpecificationError, FormulaValidationError
+        begin
+          Cask::CaskLoader.load(new_full_name)
+        rescue Cask::CaskUnreadableError, Cask::CaskInvalidError
+          nil
+        end
+      end
+      next if new_package.nil?
 
       # This means it is a cask
       if report[:DC].include? full_name
-        next unless (HOMEBREW_PREFIX/"Caskroom"/new_name).exist?
+        next unless (HOMEBREW_PREFIX/"Caskroom"/name).exist?
 
-        new_tap = Tap.fetch(new_tap_name)
         new_tap.ensure_installed!
-        ohai "#{name} has been moved to Homebrew.", <<~EOS
-          To uninstall the cask, run:
-            brew uninstall --cask --force #{name}
-        EOS
-        next if (HOMEBREW_CELLAR/new_name.split("/").last).directory?
 
-        ohai "Installing #{new_name}..."
-        system HOMEBREW_BREW_FILE, "install", new_full_name
-        begin
-          unless Formulary.factory(new_full_name).keg_only?
-            system HOMEBREW_BREW_FILE, "link", new_full_name, "--overwrite"
+        if new_package.is_a?(Formula)
+          ohai "#{name} has been moved to #{new_tap.name}.", <<~EOS
+            To uninstall the cask, run:
+              brew uninstall --cask --force #{name}
+          EOS
+          next if (HOMEBREW_CELLAR/new_name.split("/").last).directory?
+
+          ohai "Installing #{new_full_name}..."
+          system HOMEBREW_BREW_FILE, "install", "--formula", new_full_name
+          begin
+            unless Formulary.factory(new_full_name).keg_only?
+              system HOMEBREW_BREW_FILE, "link", new_full_name, "--overwrite"
+            end
+          rescue Exception => e # rubocop:disable Lint/RescueException
+            onoe "#{e.message}\n#{Utils::Backtrace.clean(e)&.join("\n")}" if Homebrew::EnvConfig.developer?
           end
-        rescue Exception => e # rubocop:disable Lint/RescueException
-          onoe "#{e.message}\n#{Utils::Backtrace.clean(e)&.join("\n")}" if Homebrew::EnvConfig.developer?
+          next
+        else
+          installed_caskfile = new_package.installed_caskfile
+          if installed_caskfile&.extname == ".json"
+            json = JSON.parse(installed_caskfile)
+            json["tap"] = new_tap.name
+            installed_caskfile.atomic_write(json.to_json)
+          end
+
+          if new_name != name
+            old_cask = Cask::Cask.new(name, tap: tap)
+            begin
+              Cask::Migrator.new(old_cask, new_package).migrate
+            rescue => e
+              onoe e
+            end
+          end
         end
-        next
       end
 
       next unless (dir = HOMEBREW_CELLAR/name).exist? # skip if formula is not installed.
@@ -639,17 +668,17 @@ class Reporter
       tabs = dir.subdirs.map { |d| Tab.for_keg(Keg.new(d)) }
       next if tabs.first.tap != tap # skip if installed formula is not from this tap.
 
-      new_tap = Tap.fetch(new_tap_name)
       # For formulae migrated to cask: Auto-install cask or provide install instructions.
-      if new_tap_name.start_with?("homebrew/cask")
-        if new_tap.installed? && (HOMEBREW_PREFIX/"Caskroom").directory?
+      if new_package.is_a?(Cask::Cask)
+        if ((new_tap.core_cask_tap? && !Homebrew::EnvConfig.no_install_from_api?) || new_tap.installed?) &&
+           (HOMEBREW_PREFIX/"Caskroom").directory?
           ohai "#{name} has been moved to Homebrew Cask."
           ohai "brew unlink #{name}"
           system HOMEBREW_BREW_FILE, "unlink", name
           ohai "brew cleanup"
           system HOMEBREW_BREW_FILE, "cleanup"
-          ohai "brew install --cask #{new_name}"
-          system HOMEBREW_BREW_FILE, "install", "--cask", new_name
+          ohai "brew install --cask #{new_full_name}"
+          system HOMEBREW_BREW_FILE, "install", "--cask", new_full_name
           ohai <<~EOS
             #{name} has been moved to Homebrew Cask.
             The existing keg has been unlinked.
@@ -657,11 +686,10 @@ class Reporter
               brew uninstall --force #{name}
           EOS
         else
-          ohai "#{name} has been moved to Homebrew Cask.", <<~EOS
+          ohai "#{name} has been moved to #{new_tap.nane}.", <<~EOS
             To uninstall the formula and install the cask, run:
               brew uninstall --force #{name}
-              brew tap #{new_tap_name}
-              brew install --cask #{new_name}
+              brew install --cask #{new_full_name}
           EOS
         end
       else
@@ -669,6 +697,14 @@ class Reporter
         # update tap for each Tab
         tabs.each { |tab| tab.tap = new_tap }
         tabs.each(&:write)
+        if new_name != name
+          ohai "Migrating #{name} to #{new_full_name}..."
+          begin
+            Migrator.new(new_package, name).migrate
+          rescue => e
+            onoe e
+          end
+        end
       end
     end
   end
