@@ -142,7 +142,7 @@ To make changes on a new branch and submit it for review, create a GitHub pull r
 
    b) **Use GitHub's Website Suggestion**: Navigate to the relevant Homebrew repository (e.g. <https://github.com/Homebrew/brew>, <https://github.com/Homebrew/homebrew-core>, <https://github.com/Homebrew/homebrew-cask>, etc.) GitHub often displays your new branch with a button to `Compare & pull request`.
 
-   c) **Manually Create a Pull Request on GitHub**: If there’s no prompt, click `Contribute > Open pull request` on the repository's main page. Choose to `compare across forks`. Set the base fork to `Homebrew/homebrew-repository-name @ master`, and the head fork to `my-github-username/homebrew-repository-name @ my-new-branch`. You can also add further comments to your pull request here.
+   c) **Manually Create a pull request on GitHub**: If there’s no prompt, click `Contribute > Open pull request` on the repository's main page. Choose to `compare across forks`. Set the base fork to `Homebrew/homebrew-repository-name @ master`, and the head fork to `my-github-username/homebrew-repository-name @ my-new-branch`. You can also add further comments to your pull request here.
 
    In your pull request, clearly explain why the change is necessary, and if it fixes a bug, describe how to reproduce the issue. Ensure that you have completed each step in the checklist that appears in your new PR.
 

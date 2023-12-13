@@ -10,7 +10,7 @@ Next, you will want to go through the [Acceptable Formulae](Acceptable-Formulae.
 
 If everything checks out, you're ready to get started on a new formula / cask!
 
-**Note:** For updating the version of an existing formula or cask, refer to the [Updating Software in Homebrew](Updating-Software-in-Homebrew.md) guidelines, as well as 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' in 'How To Open A Homebrew Pull Request'.
+**Note:** For updating the version of an existing formula or cask, refer to the [Updating Software in Homebrew](Updating-Software-in-Homebrew.md) guidelines, as well as 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' in 'How To Open a Homebrew pull request'.
 
 ## Formulae
 
