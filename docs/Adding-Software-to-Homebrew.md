@@ -10,6 +10,8 @@ Next, you will want to go through the [Acceptable Formulae](Acceptable-Formulae.
 
 If everything checks out, you're ready to get started on a new formula!
 
+**Note:** For updating an existing formula or cask, refer to the guidelines on 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' respectively.
+
 ## Formulae
 
 ### Writing the formula
