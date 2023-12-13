@@ -10,46 +10,137 @@ Next, you will want to go through the [Acceptable Formulae](Acceptable-Formulae.
 
 If everything checks out, you're ready to get started on a new formula / cask!
 
-**Note:** For updating an existing formula or cask, refer to the guidelines on 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' respectively.
+**Note:** For updating the version of an existing formula or cask, refer to the [Updating Software in Homebrew](Updating-Software-in-Homebrew.md) guidelines, as well as 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' in 'How To Open A Homebrew Pull Request'.
 
 ## Formulae
 
+**Note:** Before taking the time to craft a new formula:
+
+* make sure it can be accepted by checking [Acceptable Formulae](Acceptable-Formulae.md).
+* check that the formula was not [already refused](https://github.com/Homebrew/homebrew-core/search?q=is%3Aclosed&type=Issues).
+* if you are just updating the version of an existing formula, see the streamlined method in ['submit a new version of an existing formula'](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula).
+
 ### Writing the formula
 
-1. It's a good idea to find existing formulae in Homebrew that have similarities to the software you want to add. This will help you to understand how specific languages, build methods, etc. are typically handled. Start by tapping `homebrew/core`: first set `HOMEBREW_NO_INSTALL_FROM_API=1` in your shell environment, then run `brew tap homebrew/core` to clone the `homebrew/core` tap to the path returned by `brew --repository homebrew/core`.
+Making a new formula is easy, and the [Formula Cookbook](Formula-Cookbook.md) is an essential resource to guide you through the process. The Cookbook provides detailed instructions, best practices, and solutions to common problems you may encounter when creating a formula. Familiarizing yourself with its contents before you start is advisable.
 
-1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python`.
+1. Begin by researching existing formulae in Homebrew that are similar to the software you plan to add. This will help you grasp how specific languages, build methods, and other typical conventions are handled in formulae. Start by setting `HOMEBREW_NO_INSTALL_FROM_API=1` in your shell environment. Then, run `brew tap homebrew/core` to clone the `homebrew/core` tap to the directory indicated by `brew --repository homebrew/core`.
 
-1. You will now have to develop the boilerplate code from `brew create` into a full-fledged formula. Your main references will be the [Formula Cookbook](Formula-Cookbook.md), similar formulae in Homebrew, and the upstream documentation for your chosen software. Be sure to also take note of the Homebrew documentation for writing [Python](Python-for-Formula-Authors.md) and [Node](Node-for-Formula-Authors.md) formulae, if applicable.
+1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python` / `--go`.
 
-1. Make sure you write a good test as part of your formula. Refer to the [Add a test to the formula](Formula-Cookbook.md#add-a-test-to-the-formula) section of the Cookbook for help with this.
+1. You will now have to develop the boilerplate code from `brew create` into a complete formula. Your main references will be the [Formula Cookbook](Formula-Cookbook.md), similar existing formulae, and the official documentation of the software you're packaging. Be sure to also take note of the Homebrew documentation for writing [Python](Python-for-Formula-Authors.md) and [Node](Node-for-Formula-Authors.md) formulae, if applicable.
 
-1. Try installing your formula using `brew install --build-from-source <formula>`, where *\<formula>* is the name of your formula. If any errors occur, correct your formula and attempt to install it again. The formula installation should finish without errors by the end of this step.
+1. Make sure you write a good test as part of your formula. Refer to the [Add a test to the formula](Formula-Cookbook.md#add-a-test-to-the-formula) section of the Formula Cookbook for help with this.
 
 If you're stuck, ask for help on GitHub or the [Homebrew discussion forum](https://github.com/orgs/Homebrew/discussions). The maintainers are very happy to help but we also like to see that you've put effort into trying to find a solution first.
 
 ### Testing and auditing the formula
 
+1. Test your formula installation using `brew install --formula --build-from-source $(brew --repository homebrew/core)/Formula/<prefix>/<formula>.rb`, where `<prefix>` is the first letter of your formula's name and `<formula>` is the name of your formula. Correct any errors that occur and repeat the installation until it completes without errors.
+
+1. Additionally, verify the proper uninstallation of the formula by using the command `brew uninstall --formula <formula>`, ensuring it removes the software without issues.
+
 1. Run `brew audit --formula --new <formula>` with your formula. If any errors occur, correct your formula and run the audit again. The audit should finish without any errors by the end of this step.
+
+1. Run `brew style --formula --fix <formula>` to automatically check and correct your formula's conformity to Homebrew's style guidelines.
 
 1. Run your formula's test using `brew test <formula>`. The test should finish without any errors.
 
+Keep in mind that these checks will happen automatically when you submit your pull request. Completing them beforehand not only saves time but also makes the whole process smoother for everyone.
+
+If your application and Homebrew do not work well together, feel free to [file an issue](https://github.com/Homebrew/homebrew-core/issues/new/choose) after checking out open issues.
+
 ### Submitting the formula
 
-You're finally ready to submit your formula to the [homebrew-core](https://github.com/Homebrew/homebrew-core) repository. If you haven't done this before, you can refer to the [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#formulae-related-pull-request) documentation for help. Maintainers will review the pull request and provide feedback about any areas that need to be addressed before the formula can be added to Homebrew.
+You're now ready to contribute your formula to the [homebrew-core](https://github.com/Homebrew/homebrew-core) repository. If this is your first time making a submission, consult the [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#formulae-related-pull-request) guide for detailed instructions. Your pull request will be reviewed by the maintainers, who may suggest improvements or changes before your formula can be added to Homebrew.
 
-If you've made it this far, congratulations on submitting a Homebrew formula! We appreciate the hard work you put into this and you can take satisfaction in knowing that your work may benefit other Homebrew users as well.
+If you've made it this far, congratulations on successfully submitting a Homebrew formula! Your dedication and hard work are highly valued. Take satisfaction in knowing that your contribution provides a valuable addition that will benefit many Homebrew users.
 
 ## Casks
 
 **Note:** Before taking the time to craft a new cask:
 
-* make sure it can be accepted by checking the [Rejected Casks FAQ](Acceptable-Casks.md#rejected-casks), and
+* make sure it can be accepted by checking [Acceptable Casks](Acceptable-Casks.md).
 * check that the cask was not [already refused](https://github.com/Homebrew/homebrew-cask/search?q=is%3Aclosed&type=Issues).
+* if you are just updating the version of an existing cask, see the streamlined method in ['submit a new version of an existing cask'](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask).
 
 ### Writing the cask
 
-Making a new cask is easy. Follow the directions in [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#cask-related-pull-request) to begin.
+Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essential resource to guide you through the process. The Cookbook provides detailed instructions, best practices, and solutions to common problems you may encounter when creating a cask. Familiarizing yourself with its contents before you start is advisable.
+
+1. Begin by researching existing casks in Homebrew that are similar to the software you plan to add. This will help you understand the typical structure and conventions used in casks. Start by tapping `homebrew/cask`: run `brew tap homebrew/cask` to clone the `homebrew/cask` tap to the path returned by `brew --repository homebrew/cask`.
+
+1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url) to produce a basic version of your cask.
+
+  After executing the `create` command, `EDITOR` will open with a cask template at `$(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb` (where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask). The template will appear as follows:
+
+  ```ruby
+  cask "my-new-cask" do
+    version ""
+    sha256 ""
+  
+    url "download-url"
+    name ""
+    desc ""
+    homepage ""
+  
+    app ""
+  end
+  ```
+
+1. You will now have to develop the boilerplate code from `brew create --cask` into a complete cask. Your main references will be the [Cask Cookbook](Cask-Cookbook.md), similar existing casks, and the official documentation of the software you're packaging.
+
+   For further specifics and additional insights, refer to ['Additional Cask Details and Examples'](#additional-cask-details-and-examples).
+
+1. It's important to include a good test in your cask. Since the Cask Cookbook doesn't provide specific guidance on this, you can refer to the [Add a test to the formula](Formula-Cookbook.md#add-a-test-to-the-formula) section in the Formula Cookbook for assistance.
+
+### Testing and auditing the Cask
+
+1. Test your cask installation using `brew install --cask $(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb`, where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask. Correct any errors that occur and repeat the installation until it completes without errors.
+
+1. Additionally, verify the proper uninstallation of the cask by using the command `brew uninstall --cask <cask>`, ensuring it removes the software without issues.
+
+1. Run `brew audit --cask --new <cask>` with your cask. If any errors occur, correct your cask and run the audit again. The audit should finish without any errors by the end of this step.
+
+1. Run `brew style --cask --fix <cask>` to automatically check and correct your cask's conformity to Homebrew's style guidelines.
+
+1. Run your cask's test using `brew test <cask>`. The test should finish without any errors.
+
+Keep in mind that these checks will happen automatically when you submit your pull request. Completing them beforehand not only saves time but also makes the whole process smoother for everyone.
+
+If your application and Homebrew Cask do not work well together, feel free to [file an issue](https://github.com/Homebrew/homebrew-cask#reporting-bugs) after checking out open issues.
+
+### Submitting the Cask
+
+You're now ready to contribute your cask to the [homebrew-cask](https://github.com/Homebrew/homebrew-cask) repository. If this is your first time making a submission, consult the [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#cask-related-pull-request) guide for detailed instructions. Your pull request will be reviewed by the maintainers, who may suggest improvements or changes before your cask can be added to Homebrew.
+
+If you've made it this far, congratulations on successfully submitting a Homebrew cask! Your dedication and hard work are highly valued. Take satisfaction in knowing that your contribution provides a valuable addition that will benefit many Homebrew users.
+
+#### Commit Messages for Homebrew Cask
+
+In the [homebrew-cask](https://github.com/Homebrew/homebrew-cask) repository, commit messages have a specific format that helps in quickly understanding and managing changes across numerous applications. When crafting a commit message, ensure it includes:
+
+* The application name,
+* The version number, if applicable,
+* The specific purpose or nature of the changes.
+
+This format is tailored to the unique needs of the [homebrew-cask](https://github.com/Homebrew/homebrew-cask) repository and might differ from standard practices in other projects, including [homebrew-core](https://github.com/Homebrew/homebrew-core). By adhering to this style, you contribute to the project's clarity and efficiency.
+
+Examples of clear and effective Homebrew Cask commit summaries:
+
+* `Add Transmission.app v1.0`
+* `Upgrade Transmission.app to v2.82`
+* `Fix checksum in Transmission.app cask`
+* `Add CodeBox Latest`
+
+Examples to avoid due to their ambiguity or lack of specific details:
+
+* `Upgrade to v2.82`
+* `Checksum was bad`
+
+Remember, the first line of your commit message serves as the title of a GitHub pull request and is crucial for a quick and effective review process. For a more comprehensive understanding of crafting effective commit messages, see [A Note About Git Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+
+### Additional Cask Details and Examples
 
 #### Examples
 
@@ -120,48 +211,6 @@ cask "airdisplay" do
 end
 ```
 
-#### Generating a token for the cask
-
-The cask **token** is the mnemonic string people will use to interact with the cask via `brew install`, etc. The name of the cask **file** is simply the token with the extension `.rb` appended.
-
-The easiest way to generate a token for a cask is to run `generate_cask_token`:
-
-```bash
-$(brew --repository homebrew/cask)/developer/bin/generate_cask_token "/full/path/to/new/software.app"
-```
-
-If the software you wish to create a cask for is not installed, or does not have an associated App bundle, just give the full proper name of the software instead of a pathname:
-
-```bash
-$(brew --repository homebrew/cask)/developer/bin/generate_cask_token "Google Chrome"
-```
-
-If the `generate_cask_token` script does not work for you, see [Cask Token Details](#cask-token-details).
-
-#### Creating the cask file
-
-Once you know the token, create your cask with the handy-dandy `brew create --cask` command:
-
-```bash
-brew create --cask download-url --set-name my-new-cask
-```
-
-This will open `EDITOR` with a template for your new cask, to be stored in the file `my-new-cask.rb`. Running the `create` command above will get you a template that looks like this:
-
-```ruby
-cask "my-new-cask" do
-  version ""
-  sha256 ""
-
-  url "download-url"
-  name ""
-  desc ""
-  homepage ""
-
-  app ""
-end
-```
-
 #### Cask stanzas
 
 Fill in the following stanzas for your cask:
@@ -188,6 +237,24 @@ Other commonly used stanzas are:
 
 Additional [`artifact` stanzas](Cask-Cookbook.md#at-least-one-artifact-stanza-is-also-required) may be needed for special use cases. Even more special-use stanzas are listed at [Optional Stanzas](Cask-Cookbook.md#optional-stanzas).
 
+#### Generating a token for the cask
+
+The cask **token** is the mnemonic string people will use to interact with the cask via `brew install`, etc. The name of the cask **file** is simply the token with the extension `.rb` appended.
+
+The easiest way to generate a token for a cask is to run `generate_cask_token`:
+
+```bash
+$(brew --repository homebrew/cask)/developer/bin/generate_cask_token "/full/path/to/new/software.app"
+```
+
+If the software you wish to create a cask for is not installed, or does not have an associated App bundle, just give the full proper name of the software instead of a pathname:
+
+```bash
+$(brew --repository homebrew/cask)/developer/bin/generate_cask_token "Google Chrome"
+```
+
+If the `generate_cask_token` script does not work for you, see [Cask Token Details](#cask-token-details).
+
 #### Cask token details
 
 If a token conflicts with an already-existing cask, authors should manually make the new token unique by prepending the vendor name. Example: [unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/u/unison.rb) and [panic-unison.rb](https://github.com/Homebrew/homebrew-cask/blob/HEAD/Casks/p/panic-unison.rb).
@@ -210,150 +277,3 @@ Example:
    ```ruby
    app "Simple Floating Clock/SimpleFloatingClock.app"
    ```
-
-### Testing and auditing the cask
-
-Give it a shot with:
-
-```bash
-export HOMEBREW_NO_AUTO_UPDATE=1
-brew install my-new-cask
-```
-
-Did it install? If something went wrong, edit your cask with `brew edit my-new-cask` to fix it.
-
-Test also if the uninstall works successfully:
-
-```bash
-brew uninstall my-new-cask
-```
-
-If everything looks good, you’ll also want to make sure your cask passes audit with:
-
-```bash
-brew audit --cask --new my-new-cask
-```
-
-You should also check stylistic details with `brew style`:
-
-```bash
-brew style --fix my-new-cask
-```
-
-Keep in mind that all these checks will be made when you submit your PR, so by doing them in advance you’re saving everyone a lot of time and trouble.
-
-If your application and Homebrew Cask do not work well together, feel free to [file an issue](https://github.com/Homebrew/homebrew-cask#reporting-bugs) after checking out open issues.
-
-### Submitting the cask
-
-#### Finding a home for your cask
-
-See the [Acceptable Casks documentation](Acceptable-Casks.md#finding-a-home-for-your-cask).
-
-Hop into your tap and check to make sure your new cask is there:
-
-```console
-$ cd "$(brew --repository)"/Library/Taps/homebrew/homebrew-cask
-$ git status
-On branch master
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-        Casks/m/my-new-cask.rb
-```
-
-So far, so good. Now make a feature branch `my-new-cask-branch` that you’ll use in your pull request:
-
-```console
-$ git checkout -b my-new-cask-branch
-Switched to a new branch 'my-new-cask-branch'
-```
-
-Stage your cask with:
-
-```bash
-git add Casks/m/my-new-cask.rb
-```
-
-You can view the changes that are to be committed with:
-
-```bash
-git diff --cached
-```
-
-Commit your changes with:
-
-```bash
-git commit -v
-```
-
-#### Commit messages
-
-For any Git project, some good rules for commit messages are:
-
-* The first line is the commit summary, 50 characters or less,
-* Followed by an empty line,
-* Followed by an explanation of the commit, wrapped to 72 characters.
-
-See [A Note About Git Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html) for more.
-
-The first line of a commit message becomes the **title** of a pull request on GitHub, like the subject line of an email. Including the key info in the first line will help us respond faster to your pull request.
-
-For cask commits in the Homebrew Cask project, we like to include the application name, version number, and purpose of the commit in the first line.
-
-Examples of good, clear commit summaries:
-
-* `Add Transmission.app v1.0`
-* `Upgrade Transmission.app to v2.82`
-* `Fix checksum in Transmission.app cask`
-* `Add CodeBox Latest`
-
-Examples of difficult, unclear commit summaries:
-
-* `Upgrade to v2.82`
-* `Checksum was bad`
-
-#### Pushing
-
-Push your changes on the branch `my-new-cask-branch` to your GitHub account:
-
-```bash
-git push {{my-github-username}} my-new-cask-branch
-```
-
-If you are using [GitHub two-factor authentication](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa) and have set your remote repository as HTTPS you will need to [set up a personal access token](https://docs.github.com/en/repositories/creating-and-managing-repositories/troubleshooting-cloning-errors#provide-an-access-token) and use that instead of your password.
-
-#### Filing a pull request on GitHub
-
-##### a) use suggestion from `git push`
-
-The `git push` command prints a suggestion for how to create a pull request:
-
-    remote: Create a pull request for 'new-cask-cask' on GitHub by visiting:
-    remote:      https://github.com/{{my-github-username}}/homebrew-cask/pull/new/my-new-cask-branch
-
-##### b) use suggestion from GitHub's website
-
-Now go to the [`homebrew-cask` GitHub repository](https://github.com/Homebrew/homebrew-cask). GitHub will often show your `my-new-cask-branch` branch with a handy button to `Compare & pull request`.
-
-##### c) manually create a pull request on GitHub
-
-Otherwise, click the `Contribute > Open pull request` button and choose to `compare across forks`. The base fork should be `Homebrew/homebrew-cask @ master`, and the head fork should be `my-github-username/homebrew-cask @ my-new-cask-branch`. You can also add any further comments to your pull request at this stage.
-
-##### Congratulations!
-
-You are done now, and your cask should be pulled in or otherwise noticed in a while. If a maintainer suggests some changes, just make them on the `my-new-cask-branch` branch locally and [push](#pushing).
-
-### Cleaning up
-
-After your pull request is submitted, you should get yourself back onto `master`, so that `brew update` will pull down new casks properly:
-
-```bash
-cd "$(brew --repository)"/Library/Taps/homebrew/homebrew-cask
-git checkout master
-```
-
-If earlier you set the variable `HOMEBREW_NO_AUTO_UPDATE` then clean it up with:
-
-```bash
-unset HOMEBREW_NO_AUTO_UPDATE
-```

@@ -8,9 +8,13 @@ The type of change you want to make influences which of Homebrew's main reposito
 
 1. Use `brew bump-formula-pr` to do everything (i.e. forking, committing, pushing) with a single command. Run `brew bump-formula-pr --help` to learn more.
 
+For more details, see [Updating Software in Homebrew](Updating-Software-in-Homebrew.md).
+
 ## Submit a new version of an existing cask
 
 1. Use `brew bump-cask-pr` to do everything (i.e. forking, committing, pushing) with a single command. Run `brew bump-cask-pr --help` to learn more.
+
+For more details, see [Updating Software in Homebrew](Updating-Software-in-Homebrew.md).
 
 ## Set up your own fork of the Homebrew repository
 
@@ -104,24 +108,44 @@ To make changes on a new branch and submit it for review, create a GitHub pull r
 
 4. Make your changes. For formulae or casks, use `brew edit` or your favourite text editor, following all the guidelines in the [Formula Cookbook](Formula-Cookbook.md) or [Cask Cookbook](Cask-Cookbook.md).
    * If there's a `bottle do` block in the formula, don't remove or change it; we'll update it when we merge your PR.
+
 5. Test your changes by running the following, and ensure they all pass without issue. For changed formulae and casks, make sure you do the `brew audit` step after your changed formula/cask has been installed.
 
    ```sh
    brew tests
-   HOMEBREW_NO_INSTALL_FROM_API=1 brew install --build-from-source <CHANGED_FORMULA|CHANGED_CASK>
-   brew test <CHANGED_FORMULA|CHANGED_CASK>
-   brew audit --strict --online <CHANGED_FORMULA|CHANGED_CASK>
+   HOMEBREW_NO_INSTALL_FROM_API=1 brew install --build-from-source <FORMULA|CASK>
+   brew test <FORMULA|CASK>
+
+   brew style --fix <FORMULA|CASK>
+
+   brew audit --new <FORMULA|CASK>              # For new formula / cask
+   brew audit --strict --online <FORMULA|CASK>  # For existing formula / cask
    ```
 
 6. [Make a separate commit](Formula-Cookbook.md#commit) for each changed formula with `git add` and `git commit`.
-   * Please note that our preferred commit message format for simple version updates is "`<FORMULA_NAME> <NEW_VERSION>`", e.g. "`source-highlight 3.1.8`".
+   * Please note that for formula, our preferred commit message format for simple version updates is "`<FORMULA_NAME> <NEW_VERSION>`", e.g. "`source-highlight 3.1.8`".
+
 7. Upload your branch of new commits to your fork:
 
    ```sh
    git push --set-upstream <YOUR_USERNAME> <YOUR_BRANCH_NAME>
    ```
 
-8. Go to the relevant repository (e.g. <https://github.com/Homebrew/brew>, <https://github.com/Homebrew/homebrew-core>, etc.) and create a pull request to request review and merging of the commits from your pushed branch. Explain why the change is needed and, if fixing a bug, how to reproduce the bug. Make sure you have done each step in the checklist that appears in your new PR.
+   If you are using [GitHub two-factor authentication](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa) and have set your remote repository as HTTPS you will need to [set up a personal access token](https://docs.github.com/en/repositories/creating-and-managing-repositories/troubleshooting-cloning-errors#provide-an-access-token) and use that instead of your password.
+
+8. To create a pull request on GitHub for your changes, you can follow one of these methods:
+
+   a) **Use the Suggestion from `git push`**: After pushing your changes, `git` will display a URL to create a pull request in your terminal. It looks like this:
+
+        remote: Create a pull request for 'new-branch' on GitHub by visiting:
+        remote:      https://github.com/{{my-github-username}}/homebrew-repository-name/pull/new/my-new-branch
+
+   b) **Use GitHub's Website Suggestion**: Navigate to the relevant Homebrew repository (e.g. <https://github.com/Homebrew/brew>, <https://github.com/Homebrew/homebrew-core>, <https://github.com/Homebrew/homebrew-cask>, etc.) GitHub often displays your new branch with a button to `Compare & pull request`.
+
+   c) **Manually Create a Pull Request on GitHub**: If there’s no prompt, click `Contribute > Open pull request` on the repository's main page. Choose to `compare across forks`. Set the base fork to `Homebrew/homebrew-repository-name @ master`, and the head fork to `my-github-username/homebrew-repository-name @ my-new-branch`. You can also add further comments to your pull request here.
+
+   In your pull request, clearly explain why the change is necessary, and if it fixes a bug, describe how to reproduce the issue. Ensure that you have completed each step in the checklist that appears in your new PR.
+
 9. Await feedback or a merge from Homebrew's maintainers. We typically respond to all PRs within a couple days, but it may take up to a week, depending on the maintainers' workload.
 
 Thank you!
@@ -162,3 +186,22 @@ To make changes based on feedback:
 Once all feedback has been addressed and if it's a change we want to include (we include most changes), then we'll add your changes to Homebrew. Note that the PR status may show up as "Closed" instead of "Merged" because of the way we merge contributions. Don't worry: you will still get author credit in the actual merged commit.
 
 Well done, you are now a Homebrew contributor!
+
+## Cleaning up
+
+After your pull request is submitted, you should get yourself back onto `master`, so that `brew update` will pull down new casks properly:
+
+```bash
+# One of:
+cd "$(brew --repository homebrew/core)
+cd "$(brew --repository homebrew/cask)
+# etc
+
+git checkout master
+```
+
+If earlier you set the variable `HOMEBREW_NO_AUTO_UPDATE` then clean it up with:
+
+```bash
+unset HOMEBREW_NO_AUTO_UPDATE
+```
