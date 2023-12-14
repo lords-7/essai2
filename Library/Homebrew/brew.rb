@@ -78,7 +78,7 @@ begin
   # - no arguments are passed
   if empty_argv || help_flag
     require "help"
-    Homebrew::Help.help cmd, remaining_args: args.remaining, empty_argv: empty_argv
+    Homebrew::Help.help cmd, remaining_args: args.remaining, empty_argv:
     # `Homebrew::Help.help` never returns, except for unknown commands.
   end
 

@@ -31,12 +31,12 @@ module Utils
         options = nil if options.blank?
 
         # Tags are always implicitly strings and must have low cardinality.
-        tags = default_tags_influx.merge(on_request: on_request)
+        tags = default_tags_influx.merge(on_request:)
                                   .map { |k, v| "#{k}=#{v}" }
                                   .join(",")
 
         # Fields need explicitly wrapped with quotes and can have high cardinality.
-        fields = default_fields_influx.merge(package: package_name, tap_name: tap_name, options: options)
+        fields = default_fields_influx.merge(package: package_name, tap_name:, options:)
                                       .compact
                                       .map { |k, v| %Q(#{k}="#{v}") }
                                       .join(",")
@@ -73,8 +73,8 @@ module Utils
                on_request: T::Boolean, options: String).void
       }
       def report_event(measurement, package_name:, tap_name:, on_request:, options: "")
-        report_influx_event(measurement, package_name: package_name, tap_name: tap_name, on_request: on_request,
-options: options)
+        report_influx_event(measurement, package_name:, tap_name:, on_request:,
+options:)
       end
 
       sig {
@@ -84,8 +84,8 @@ options: options)
       def report_influx_event(measurement, package_name:, tap_name:, on_request: false, options: "")
         return if not_this_run? || disabled?
 
-        report_influx(measurement, package_name: package_name, tap_name: tap_name, on_request: on_request,
-options: options)
+        report_influx(measurement, package_name:, tap_name:, on_request:,
+options:)
       end
 
       sig { params(exception: BuildError).void }
@@ -105,7 +105,7 @@ options: options)
         return unless tap.should_report_analytics?
 
         options = exception.options.to_a.map(&:to_s).join(" ")
-        report_influx_event(:build_error, package_name: formula.name, tap_name: tap.name, options: options)
+        report_influx_event(:build_error, package_name: formula.name, tap_name: tap.name, options:)
       end
 
       def influx_message_displayed?
@@ -186,7 +186,7 @@ options: options)
           return
         end
 
-        table_output(category, days, results, os_version: os_version, cask_install: cask_install)
+        table_output(category, days, results, os_version:, cask_install:)
       end
 
       def output_analytics(json, args:)
@@ -265,8 +265,8 @@ options: options)
         json = Homebrew::API::Formula.fetch formula.name
         return if json.blank? || json["analytics"].blank?
 
-        output_analytics(json, args: args)
-        output_github_packages_downloads(formula, args: args)
+        output_analytics(json, args:)
+        output_github_packages_downloads(formula, args:)
       rescue ArgumentError
         # Ignore failed API requests
         nil
@@ -278,7 +278,7 @@ options: options)
         json = Homebrew::API::Cask.fetch cask.token
         return if json.blank? || json["analytics"].blank?
 
-        output_analytics(json, args: args)
+        output_analytics(json, args:)
       rescue ArgumentError
         # Ignore failed API requests
         nil
@@ -298,7 +298,7 @@ options: options)
           # Tags are always strings and must have low cardinality.
           {
             ci:             ENV["CI"].present?,
-            prefix:         prefix,
+            prefix:,
             default_prefix: Homebrew.default_prefix?,
             developer:      Homebrew::EnvConfig.developer?,
             devcmdrun:      config_true?(:devcmdrun),
@@ -326,8 +326,8 @@ options: options)
           end
 
           {
-            version:             version,
-            os_name_and_version: os_name_and_version,
+            version:,
+            os_name_and_version:,
           }
         end
       end
@@ -428,7 +428,7 @@ options: options)
       end
 
       def format_percent(percent)
-        format("%<percent>.2f", percent: percent)
+        format("%<percent>.2f", percent:)
       end
     end
   end

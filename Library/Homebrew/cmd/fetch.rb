@@ -98,7 +98,7 @@ module Homebrew
         ref = formula.loaded_from_api? ? formula.full_name : formula.path
 
         os_arch_combinations.each do |os, arch|
-          SimulateSystem.with os: os, arch: arch do
+          SimulateSystem.with(os:, arch:) do
             Formulary.clear_cache
             formula = Formulary.factory(ref, args.HEAD? ? :head : :stable)
 
@@ -119,7 +119,7 @@ module Homebrew
                 bottle_tag = if (bottle_tag = args.bottle_tag&.to_sym)
                   Utils::Bottles::Tag.from_symbol(bottle_tag)
                 else
-                  Utils::Bottles::Tag.new(system: os, arch: arch)
+                  Utils::Bottles::Tag.new(system: os, arch:)
                 end
 
                 bottle = formula.bottle_for_tag(bottle_tag)
@@ -132,10 +132,10 @@ module Homebrew
                 begin
                   bottle.fetch_tab
                 rescue DownloadError
-                  retry if retry_fetch?(bottle, args: args)
+                  retry if retry_fetch?(bottle, args:)
                   raise
                 end
-                fetch_formula(bottle, args: args)
+                fetch_formula(bottle, args:)
               rescue Interrupt
                 raise
               rescue => e
@@ -151,14 +151,14 @@ module Homebrew
 
             next if fetched_bottle
 
-            fetch_formula(formula, args: args)
+            fetch_formula(formula, args:)
 
             formula.resources.each do |r|
-              fetch_resource(r, args: args)
-              r.patches.each { |p| fetch_patch(p, args: args) if p.external? }
+              fetch_resource(r, args:)
+              r.patches.each { |p| fetch_patch(p, args:) if p.external? }
             end
 
-            formula.patchlist.each { |p| fetch_patch(p, args: args) if p.external? }
+            formula.patchlist.each { |p| fetch_patch(p, args:) if p.external? }
           end
         end
       else
@@ -168,7 +168,7 @@ module Homebrew
         os_arch_combinations.each do |os, arch|
           next if os == :linux
 
-          SimulateSystem.with os: os, arch: arch do
+          SimulateSystem.with(os:, arch:) do
             cask = Cask::CaskLoader.load(ref)
 
             if cask.url.nil? || cask.sha256.nil?
@@ -179,8 +179,8 @@ module Homebrew
             quarantine = args.quarantine?
             quarantine = true if quarantine.nil?
 
-            download = Cask::Download.new(cask, quarantine: quarantine)
-            fetch_cask(download, args: args)
+            download = Cask::Download.new(cask, quarantine:)
+            fetch_cask(download, args:)
           end
         end
       end
@@ -189,28 +189,28 @@ module Homebrew
 
   def self.fetch_resource(resource, args:)
     puts "Resource: #{resource.name}"
-    fetch_fetchable resource, args: args
+    fetch_fetchable resource, args:
   rescue ChecksumMismatchError => e
-    retry if retry_fetch?(resource, args: args)
+    retry if retry_fetch?(resource, args:)
     opoo "Resource #{resource.name} reports different sha256: #{e.expected}"
   end
 
   def self.fetch_formula(formula, args:)
-    fetch_fetchable formula, args: args
+    fetch_fetchable(formula, args:)
   rescue ChecksumMismatchError => e
-    retry if retry_fetch?(formula, args: args)
+    retry if retry_fetch?(formula, args:)
     opoo "Formula reports different sha256: #{e.expected}"
   end
 
   def self.fetch_cask(cask_download, args:)
-    fetch_fetchable cask_download, args: args
+    fetch_fetchable(cask_download, args:)
   rescue ChecksumMismatchError => e
-    retry if retry_fetch?(cask_download, args: args)
+    retry if retry_fetch?(cask_download, args:)
     opoo "Cask reports different sha256: #{e.expected}"
   end
 
   def self.fetch_patch(patch, args:)
-    fetch_fetchable patch, args: args
+    fetch_fetchable(patch, args:)
   rescue ChecksumMismatchError => e
     opoo "Patch reports different sha256: #{e.expected}"
     Homebrew.failed = true
@@ -243,7 +243,7 @@ module Homebrew
     begin
       download = formula.fetch(verify_download_integrity: false)
     rescue DownloadError
-      retry if retry_fetch?(formula, args: args)
+      retry if retry_fetch?(formula, args:)
       raise
     end
 

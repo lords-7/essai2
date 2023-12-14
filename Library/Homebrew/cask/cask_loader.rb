@@ -43,7 +43,7 @@ module Cask
         ).returns(Cask)
       }
       def cask(header_token, **options, &block)
-        Cask.new(header_token, source: content, tap: tap, **options, config: @config, &block)
+        Cask.new(header_token, source: content, tap:, **options, config: @config, &block)
       end
     end
 
@@ -108,7 +108,7 @@ module Cask
         @config = config
 
         if path.extname == ".json"
-          return FromAPILoader.new(token, from_json: JSON.parse(@content)).load(config: config)
+          return FromAPILoader.new(token, from_json: JSON.parse(@content)).load(config:)
         end
 
         begin
@@ -255,7 +255,7 @@ module Cask
         cask_options = {
           loaded_from_api: true,
           source:          JSON.pretty_generate(json_cask),
-          config:          config,
+          config:,
           loader:          self,
         }
 
@@ -410,7 +410,7 @@ module Cask
     end
 
     def self.load(ref, config: nil, warn: true)
-      self.for(ref, warn: warn).load(config: config)
+      self.for(ref, warn:).load(config:)
     end
 
     def self.for(ref, need_path: false, warn: true)
@@ -430,7 +430,7 @@ module Cask
         end
       end
 
-      case (possible_tap_casks = tap_paths(ref, warn: warn)).count
+      case (possible_tap_casks = tap_paths(ref, warn:)).count
       when 1
         return FromTapPathLoader.new(possible_tap_casks.first)
       when 2..Float::INFINITY

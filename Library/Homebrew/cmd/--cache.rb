@@ -63,10 +63,10 @@ module Homebrew
         ref = formula.loaded_from_api? ? formula.full_name : formula.path
 
         os_arch_combinations.each do |os, arch|
-          SimulateSystem.with os: os, arch: arch do
+          SimulateSystem.with(os:, arch:) do
             Formulary.clear_cache
             formula = Formulary.factory(ref)
-            print_formula_cache(formula, os: os, arch: arch, args: args)
+            print_formula_cache(formula, os:, arch:, args:)
           end
         end
       else
@@ -76,7 +76,7 @@ module Homebrew
         os_arch_combinations.each do |os, arch|
           next if os == :linux
 
-          SimulateSystem.with os: os, arch: arch do
+          SimulateSystem.with(os:, arch:) do
             cask = Cask::CaskLoader.load(ref)
             print_cask_cache(cask)
           end
@@ -98,7 +98,7 @@ module Homebrew
       bottle_tag = if (bottle_tag = args.bottle_tag&.to_sym)
         Utils::Bottles::Tag.from_symbol(bottle_tag)
       else
-        Utils::Bottles::Tag.new(system: os, arch: arch)
+        Utils::Bottles::Tag.new(system: os, arch:)
       end
 
       bottle = formula.bottle_for_tag(bottle_tag)

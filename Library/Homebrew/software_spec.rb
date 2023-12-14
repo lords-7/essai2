@@ -199,7 +199,7 @@ class SoftwareSpec
 
     @uses_from_macos_elements << deps
 
-    depends_on UsesFromMacOSDependency.new(spec, Array(tags), bounds: bounds)
+    depends_on UsesFromMacOSDependency.new(spec, Array(tags), bounds:)
   end
 
   # @deprecated
@@ -359,7 +359,7 @@ class Bottle
   end
 
   def fetch(verify_download_integrity: true)
-    @resource.fetch(verify_download_integrity: verify_download_integrity)
+    @resource.fetch(verify_download_integrity:)
   rescue DownloadError
     raise unless fallback_on_error
 
@@ -579,7 +579,7 @@ class BottleSpecification
 
   sig { params(tag: T.any(Symbol, Utils::Bottles::Tag), no_older_versions: T::Boolean).returns(T::Boolean) }
   def tag?(tag, no_older_versions: false)
-    collector.tag?(tag, no_older_versions: no_older_versions)
+    collector.tag?(tag, no_older_versions:)
   end
 
   # Checksum methods in the DSL's bottle block take
@@ -603,7 +603,7 @@ class BottleSpecification
 
     cellar ||= tag.default_cellar
 
-    collector.add(tag, checksum: Checksum.new(digest), cellar: cellar)
+    collector.add(tag, checksum: Checksum.new(digest), cellar:)
   end
 
   sig {
@@ -611,7 +611,7 @@ class BottleSpecification
       .returns(T.nilable(Utils::Bottles::TagSpecification))
   }
   def tag_specification_for(tag, no_older_versions: false)
-    collector.specification_for(tag, no_older_versions: no_older_versions)
+    collector.specification_for(tag, no_older_versions:)
   end
 
   def checksums

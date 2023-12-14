@@ -12,12 +12,12 @@ module Homebrew
              .compact
              .select(&:directory?)
              .each do |keg|
-        unlink(keg, verbose: verbose)
+        unlink(keg, verbose:)
       end
     end
 
     def self.unlink(keg, dry_run: false, verbose: false)
-      options = { dry_run: dry_run, verbose: verbose }
+      options = { dry_run:, verbose: }
 
       keg.lock do
         print "Unlinking #{keg}... "

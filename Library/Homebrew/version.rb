@@ -353,7 +353,7 @@ class Version
 
     VERSION_PARSERS.each do |parser|
       version = parser.parse(spec)
-      return new(version, detected_from_url: detected_from_url) if version.present?
+      return new(version, detected_from_url:) if version.present?
     end
 
     NULL

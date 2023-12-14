@@ -136,7 +136,7 @@ describe Cask::Cask, :cask do
           context "when versions #{installed_version} are installed and the " \
                   "tap version is #{tap_version}, #{"not " unless greedy}greedy " \
                   "and sha is #{"not " unless outdated_sha}outdated" do
-            subject { cask.outdated_version(greedy: greedy) }
+            subject { cask.outdated_version(greedy:) }
 
             it {
               allow(cask).to receive_messages(installed_version:      installed_version,

@@ -93,7 +93,7 @@ module Cask
       end
 
       def to_h
-        { path: path }.tap do |h|
+        { path: }.tap do |h|
           h[:args] = args unless is_a?(ManualInstaller)
         end
       end

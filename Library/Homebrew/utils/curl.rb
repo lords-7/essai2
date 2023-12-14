@@ -130,16 +130,16 @@ module Utils
       end_time = Time.now + timeout if timeout
 
       command_options = {
-        secrets:      secrets,
-        print_stdout: print_stdout,
-        print_stderr: print_stderr,
-        debug:        debug,
-        verbose:      verbose,
+        secrets:,
+        print_stdout:,
+        print_stderr:,
+        debug:,
+        verbose:,
       }.compact
 
-      result = system_command curl_executable(use_homebrew_curl: use_homebrew_curl),
+      result = system_command curl_executable(use_homebrew_curl:),
                               args:    curl_args(*args, **options),
-                              env:     env,
+                              env:,
                               timeout: end_time&.remaining,
                               **command_options
 
@@ -173,7 +173,7 @@ module Utils
     end
 
     def curl(*args, print_stdout: true, **options)
-      result = curl_with_workarounds(*args, print_stdout: print_stdout, **options)
+      result = curl_with_workarounds(*args, print_stdout:, **options)
       result.assert_success!
       result
     end
@@ -279,11 +279,11 @@ module Utils
           secure_details = begin
             curl_http_content_headers_and_checksum(
               secure_url,
-              specs:             specs,
+              specs:,
               hash_needed:       true,
-              use_homebrew_curl: use_homebrew_curl,
-              user_agent:        user_agent,
-              referer:           referer,
+              use_homebrew_curl:,
+              user_agent:,
+              referer:,
             )
           rescue Timeout::Error
             next
@@ -303,11 +303,11 @@ module Utils
         loop do
           details = curl_http_content_headers_and_checksum(
             url,
-            specs:             specs,
-            hash_needed:       hash_needed,
-            use_homebrew_curl: use_homebrew_curl,
-            user_agent:        user_agent,
-            referer:           referer,
+            specs:,
+            hash_needed:,
+            use_homebrew_curl:,
+            user_agent:,
+            referer:,
           )
 
           # Retry on network issues
@@ -416,12 +416,12 @@ module Utils
       max_time = hash_needed ? 600 : 25
       output, _, status = curl_output(
         *specs, "--dump-header", "-", "--output", file.path, "--location", url,
-        use_homebrew_curl: use_homebrew_curl,
+        use_homebrew_curl:,
         connect_timeout:   15,
-        max_time:          max_time,
+        max_time:,
         retry_max_time:    max_time,
-        user_agent:        user_agent,
-        referer:           referer
+        user_agent:,
+        referer:
       )
 
       parsed_output = parse_curl_output(output)
@@ -455,16 +455,16 @@ module Utils
       end
 
       {
-        url:            url,
-        final_url:      final_url,
+        url:,
+        final_url:,
         exit_status:    status.exitstatus,
-        status_code:    status_code,
-        headers:        headers,
-        etag:           etag,
-        content_length: content_length,
+        status_code:,
+        headers:,
+        etag:,
+        content_length:,
         file:           file_contents,
-        file_hash:      file_hash,
-        responses:      responses,
+        file_hash:,
+        responses:,
       }
     ensure
       T.must(file).unlink
@@ -512,7 +512,7 @@ module Utils
         responses << response if response.present?
       end
 
-      { responses: responses, body: output }
+      { responses:, body: output }
     end
 
     # Returns the URL from the last location header found in cURL responses,

@@ -32,7 +32,7 @@ module Homebrew
     members = {
       plc:         GitHub.members_by_team("Homebrew", "plc"),
       tsc:         GitHub.members_by_team("Homebrew", "tsc"),
-      maintainers: maintainers,
+      maintainers:,
     }
 
     sentences = {}
