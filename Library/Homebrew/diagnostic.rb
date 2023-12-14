@@ -691,7 +691,7 @@ module Homebrew
         return unless coreutils.any_version_installed?
 
         gnubin = %W[#{coreutils.opt_libexec}/gnubin #{coreutils.libexec}/gnubin]
-        return if (paths & gnubin).empty?
+        return if !paths.intersect?(gnubin)
 
         <<~EOS
           Putting non-prefixed coreutils in your path can cause GMP builds to fail.
