@@ -298,8 +298,8 @@ module Homebrew
         @offenses.fetch(Pathname(path), [])
       end
 
-      def each(*args, &block)
-        @offenses.each(*args, &block)
+      def each(...)
+        @offenses.each(...)
       end
     end
 

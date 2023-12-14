@@ -90,8 +90,8 @@ class Options
     super
   end
 
-  def each(*args, &block)
-    @options.each(*args, &block)
+  def each(...)
+    @options.each(...)
   end
 
   def <<(other)
