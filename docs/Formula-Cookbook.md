@@ -341,6 +341,8 @@ In case there are specific issues with the Homebrew packaging (compared to how t
 
 ### A quick word on naming
 
+_Note: These naming rules only apply to formulae. Casks follow their own rules, which you can read more about in the [Token reference section of the Cask Cookbook](Cask-Cookbook.md#token-reference)._
+
 Name the formula like the project markets the product. So it’s `pkg-config`, not `pkgconfig`; `sdl_mixer`, not `sdl-mixer` or `sdlmixer`.
 
 The only exception is stuff like “Apache Ant”. Apache sticks “Apache” in front of everything, but we use the formula name `ant`. We only include the prefix in cases like `gnuplot` (because it’s part of the name) and `gnu-go` (because everyone calls it “GNU Go”—nobody just calls it “Go”). The word “Go” is too common and there are too many implementations of it.
