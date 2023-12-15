@@ -8,7 +8,7 @@ Before you start, please check the open pull requests for [Homebrew/homebrew-cor
 
 Next, you will want to go through the [Acceptable Formulae](Acceptable-Formulae.md) or [Acceptable Casks](Acceptable-Casks.md) documentation to determine if the software is an appropriate addition to Homebrew. If you are creating a formula for an alternative version of software already in Homebrew (e.g. a major/minor version that differs significantly from the existing version), be sure to read the [Versions](Versions.md) documentation to understand versioned formulae requirements.
 
-If everything checks out, you're ready to get started on a new formula / cask!
+If everything checks out, you're ready to get started on a new formula or cask!
 
 **Note:** For updating the version of an existing formula or cask, refer to the [Updating Software in Homebrew](Updating-Software-in-Homebrew.md) guidelines, as well as 'submitting a new version of a [formula](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-formula) / [cask](How-To-Open-a-Homebrew-Pull-Request.md#submit-a-new-version-of-an-existing-cask)' in 'How To Open a Homebrew pull request'.
 
@@ -26,7 +26,7 @@ Making a new formula is easy, and the [Formula Cookbook](Formula-Cookbook.md) is
 
 1. It's a good idea to find existing formulae in Homebrew that have similarities to the software you want to add. This will help you to understand how specific languages, build methods, etc. are typically handled. Start by tapping `homebrew/core`: first set `HOMEBREW_NO_INSTALL_FROM_API=1` in your shell environment, then run `brew tap homebrew/core` to clone the `homebrew/core` tap to the path returned by `brew --repository homebrew/core`.
 
-1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python` / `--go`.
+1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python` or `--go`.
 
 1. You will now have to develop the boilerplate code from `brew create` into a complete formula. Your main references will be the [Formula Cookbook](Formula-Cookbook.md), similar existing formulae, and the official documentation of the software you're packaging. Be sure to also take note of the Homebrew documentation for writing [Python](Python-for-Formula-Authors.md) and [Node](Node-for-Formula-Authors.md) formulae, if applicable.
 
@@ -128,10 +128,10 @@ This format is tailored to the unique needs of the [homebrew-cask](https://githu
 
 Examples of clear and effective Homebrew Cask commit summaries:
 
-* `Add Transmission.app v1.0`
-* `Upgrade Transmission.app to v2.82`
-* `Fix checksum in Transmission.app cask`
-* `Add CodeBox Latest`
+* `tranmission 1.0 (new cask)`
+* `transmission 2.82`
+* `transmission: fix checksum`
+* `codebox: add latest`
 
 Examples to avoid due to their ambiguity or lack of specific details:
 
@@ -239,7 +239,7 @@ Additional [`artifact` stanzas](Cask-Cookbook.md#at-least-one-artifact-stanza-is
 
 #### Generating a token for the cask
 
-The cask **token** is the mnemonic string people will use to interact with the cask via `brew install`, etc. The name of the cask **file** is simply the token with the extension `.rb` appended.
+The cask **token** is the name people will use to interact with the cask via `brew install`, etc. The name of the cask **file** is simply the token with the extension `.rb` appended.
 
 The easiest way to generate a token for a cask is to run `generate_cask_token`:
 

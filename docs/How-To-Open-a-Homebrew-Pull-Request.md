@@ -193,11 +193,8 @@ After your pull request is submitted, you should get yourself back onto `master`
 
 ```bash
 # One of:
-cd "$(brew --repository homebrew/core)
-cd "$(brew --repository homebrew/cask)
-# etc
-
-git checkout master
+git -C "$(brew --repository homebrew/core)" checkout master
+git -C "$(brew --repository homebrew/cask)" checkout master
 ```
 
 If earlier you set the variable `HOMEBREW_NO_AUTO_UPDATE` then clean it up with:
