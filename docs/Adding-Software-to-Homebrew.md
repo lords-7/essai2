@@ -68,7 +68,7 @@ If you've made it this far, congratulations on successfully submitting a Homebre
 
 Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essential resource to guide you through the process. The Cookbook provides detailed instructions, best practices, and solutions to common problems you may encounter when creating a cask. Familiarizing yourself with its contents before you start is advisable.
 
-1. Begin by researching existing casks in Homebrew that are similar to the software you plan to add. This will help you understand the typical structure and conventions used in casks. Start by tapping `homebrew/cask`: run `brew tap homebrew/cask` to clone the `homebrew/cask` tap to the path returned by `brew --repository homebrew/cask`.
+1. It's a good idea to find existing casks in Homebrew that have similarities to the software you want to add. This will help you to understand the typical structure and conventions used in casks. Start by tapping `homebrew/cask`: first set `HOMEBREW_NO_INSTALL_FROM_API=1` in your shell environment, then run `brew tap homebrew/cask` to clone the `homebrew/cask` tap to the path returned by `brew --repository homebrew/cask`.
 
 1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url) to produce a basic version of your cask.
 
@@ -112,7 +112,7 @@ If your application and Homebrew Cask do not work well together, feel free to [f
 
 ### Submitting the Cask
 
-You're now ready to contribute your cask to the [homebrew-cask](https://github.com/Homebrew/homebrew-cask) repository. If this is your first time making a submission, consult the [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#cask-related-pull-request) guide for detailed instructions. Your pull request will be reviewed by the maintainers, who may suggest improvements or changes before your cask can be added to Homebrew.
+You're finally ready to submit your cask to the [homebrew-cask](https://github.com/Homebrew/homebrew-cask) repository. If you haven't done this before, you can refer to the [How to Open a Homebrew Pull Request](How-To-Open-a-Homebrew-Pull-Request.md#cask-related-pull-request) documentation for help. Maintainers will review the pull request and provide feedback about any areas that need to be addressed before the cask can be added to Homebrew.
 
 If you've made it this far, congratulations on successfully submitting a Homebrew cask! Your dedication and hard work are highly valued. Take satisfaction in knowing that your contribution provides a valuable addition that will benefit many Homebrew users.
 
