@@ -28,7 +28,7 @@ Making a new formula is easy, and the [Formula Cookbook](Formula-Cookbook.md) is
 
 1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python` or `--go`.
 
-  After executing `brew create`, `$EDITOR` will open with the formula template. To revisit the formula for editing later, simply use `brew edit <formula>`.
+  After executing `brew create`, `EDITOR` will open with the formula template. To revisit the formula for editing later, simply use `brew edit <formula>`.
 
   _Note: `brew create` and `brew edit` conveniently display your formula's path for easy location. To access the `homebrew-core` folder, you can use `cd $(brew --repository homebrew/core)`._
 
@@ -80,7 +80,7 @@ Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essen
 
 1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url). This generates a basic template for your cask.
 
-  After executing `brew create`, `$EDITOR` will open with the cask template. To revisit the cask for editing later, simply use `brew edit <cask>`.
+  After executing `brew create`, `EDITOR` will open with the cask template. To revisit the cask for editing later, simply use `brew edit <cask>`.
 
   _Note: `brew create` and `brew edit` conveniently display your cask's path for easy location. To access the `homebrew-cask` folder, you can use `cd $(brew --repository homebrew/cask)`._
 
