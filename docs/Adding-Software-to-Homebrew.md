@@ -28,6 +28,10 @@ Making a new formula is easy, and the [Formula Cookbook](Formula-Cookbook.md) is
 
 1. If you're starting from scratch, you can use the [`brew create` command](Manpage.md#create-options-url) to produce a basic version of your formula. This command accepts a number of options and you may be able to save yourself some work by using an appropriate template option like `--python` or `--go`.
 
+  After executing `brew create`, `$EDITOR` will open with the formula template. To revisit the formula for editing later, simply use `brew edit <formula>`.
+
+  _Note: `brew create` and `brew edit` conveniently display your formula's path for easy location. To access the `homebrew-core` folder, you can use `cd $(brew --repository homebrew/core)`._
+
 1. You will now have to develop the boilerplate code from `brew create` into a complete formula. Your main references will be the [Formula Cookbook](Formula-Cookbook.md), similar existing formulae, and the official documentation of the software you're packaging. Be sure to also take note of the Homebrew documentation for writing [Python](Python-for-Formula-Authors.md) and [Node](Node-for-Formula-Authors.md) formulae, if applicable.
 
 1. Make sure you write a good test as part of your formula. Refer to the [Add a test to the formula](Formula-Cookbook.md#add-a-test-to-the-formula) section of the Formula Cookbook for help with this.
@@ -70,9 +74,11 @@ Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essen
 
 1. It's a good idea to find existing casks in Homebrew that have similarities to the software you want to add. This will help you to understand the typical structure and conventions used in casks. Start by tapping `homebrew/cask`: first set `HOMEBREW_NO_INSTALL_FROM_API=1` in your shell environment, then run `brew tap homebrew/cask` to clone the `homebrew/cask` tap to the path returned by `brew --repository homebrew/cask`.
 
-1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url) to produce a basic version of your cask.
+1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url). This generates a basic template for your cask.
 
-  After executing the `create` command, `EDITOR` will open with a cask template at `$(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb` (where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask).
+  After executing `brew create`, `$EDITOR` will open with the cask template. To revisit the cask for editing later, simply use `brew edit <cask>`.
+
+  _Note: `brew create` and `brew edit` conveniently display your cask's path for easy location. To access the `homebrew-cask` folder, you can use `cd $(brew --repository homebrew/cask)`._
 
 1. You will now have to develop the boilerplate code from `brew create --cask` into a complete cask. Your main references will be the [Cask Cookbook](Cask-Cookbook.md), similar existing casks, and the official documentation of the software you're packaging.
 
