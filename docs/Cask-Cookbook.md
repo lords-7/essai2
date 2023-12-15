@@ -19,6 +19,10 @@ end
 * Table of Contents
 {:toc}
 
+## Homebrew terminology
+
+For common Homebrew terms like **formula**, **cask**, **keg**, and others, please refer to the [Homebrew Terminology section in the Formula Cookbook](Formula-Cookbook.md#homebrew-terminology). This section provides essential definitions applicable to both formulae and casks.
+
 ## The cask language is declarative
 
 Each cask contains a series of stanzas (or “fields”) which *declare* how the software is to be obtained and installed. In a declarative language, the author does not need to worry about **order**. As long as all the needed fields are present, Homebrew Cask will figure out what needs to be done at install time.
