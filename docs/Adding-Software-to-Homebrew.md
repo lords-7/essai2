@@ -44,9 +44,11 @@ If you're stuck, ask for help on GitHub or the [Homebrew discussion forum](https
 
 1. Unlike creating a cask, testing the uninstallation process is not necessary for a formula, as its removal is typically smooth and issue-free.
 
-1. Run `brew audit --formula --new <formula>` with your formula. If any errors occur, correct your formula and run the audit again. The audit should finish without any errors by the end of this step.
+1. Run `brew style --formula --fix <formula>` to automatically check and correct your formula's style conformity against Homebrew's guidelines. This step ensures any style violations are fixed before proceeding.
 
-1. Run `brew style --formula --fix <formula>` to automatically check and correct your formula's conformity to Homebrew's style guidelines.
+1. Run `brew audit --formula --new <cask>` with your formula. If any errors occur, correct your formula and run the audit again. The audit should finish without any errors by the end of this step.
+
+   _Note: `brew audit` automatically includes style checks. To correct style issues automatically during the audit, use `brew audit --formula --new --fix <formula>`. Running `brew style --formula --fix <formula>` separately is an alternative for specifically addressing style corrections._
 
 1. Run your formula's test using `brew test <formula>`. The test should finish without any errors.
 
@@ -92,9 +94,11 @@ Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essen
 
 1. Additionally, verify the proper uninstallation of the cask by using the command `brew uninstall --cask <cask>`, ensuring it removes the software without issues.
 
+1. Run `brew style --cask --fix <cask>` to automatically check and correct your cask's style conformity against Homebrew's guidelines. This step ensures any style violations are fixed before proceeding.
+
 1. Run `brew audit --cask --new <cask>` with your cask. If any errors occur, correct your cask and run the audit again. The audit should finish without any errors by the end of this step.
 
-1. Run `brew style --cask --fix <cask>` to automatically check and correct your cask's conformity to Homebrew's style guidelines.
+   _Note: `brew audit` automatically includes style checks. To correct style issues automatically during the audit, use `brew audit --cask --new --fix <cask>`. Running `brew style --cask --fix <cask>` separately is an alternative for specifically addressing style corrections._
 
 1. Run your cask's test using `brew test <cask>`. The test should finish without any errors.
 
