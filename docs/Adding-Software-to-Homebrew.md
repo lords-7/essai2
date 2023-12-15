@@ -40,7 +40,9 @@ If you're stuck, ask for help on GitHub or the [Homebrew discussion forum](https
 
 ### Testing and auditing the formula
 
-1. Test your formula installation using `brew install --formula --build-from-source $(brew --repository homebrew/core)/Formula/<prefix>/<formula>.rb`, where `<prefix>` is the first letter of your formula's name and `<formula>` is the name of your formula. Correct any errors that occur and repeat the installation until it completes without errors.
+1. Test your formula installation using `HOMEBREW_NO_INSTALL_FROM_API=1 brew install --formula --build-from-source <formula>`, where `<formula>` is the name of your formula. Correct any errors that occur and repeat the installation until it completes without errors.
+
+   _Note: After making changes to your formula, you can use `HOMEBREW_NO_INSTALL_FROM_API=1 brew reinstall <formula>` to test the reinstallation process. This ensures that updates or modifications to the formula behave as expected._
 
 1. Unlike creating a cask, testing the uninstallation process is not necessary for a formula, as its removal is typically smooth and issue-free.
 
@@ -90,7 +92,9 @@ Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essen
 
 ### Testing and auditing the Cask
 
-1. Test your cask installation using `brew install --cask $(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb`, where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask. Correct any errors that occur and repeat the installation until it completes without errors.
+1. Test your cask installation using `HOMEBREW_NO_INSTALL_FROM_API=1 brew install --cask <cask>`, where `<cask>` is the name of your cask. Correct any errors that occur and repeat the installation until it completes without errors.
+
+   _Note: After making changes to your cask, you can use `HOMEBREW_NO_INSTALL_FROM_API=1 brew reinstall <cask>` to test the reinstallation process. This ensures that updates or modifications to the cask behave as expected._
 
 1. Additionally, verify the proper uninstallation of the cask by using the command `brew uninstall --cask <cask>`, ensuring it removes the software without issues.
 
