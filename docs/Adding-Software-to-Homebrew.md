@@ -72,21 +72,7 @@ Making a new cask is easy, and the [Cask Cookbook](Cask-Cookbook.md) is an essen
 
 1. If you're starting from scratch, you can use the [`brew create --cask <download-url>` command](Manpage.md#create-options-url) to produce a basic version of your cask.
 
-  After executing the `create` command, `EDITOR` will open with a cask template at `$(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb` (where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask). The template will appear as follows:
-
-  ```ruby
-  cask "my-new-cask" do
-    version ""
-    sha256 ""
-  
-    url "download-url"
-    name ""
-    desc ""
-    homepage ""
-  
-    app ""
-  end
-  ```
+  After executing the `create` command, `EDITOR` will open with a cask template at `$(brew --repository homebrew/cask)/Casks/<prefix>/<cask>.rb` (where `<prefix>` is the first letter of your cask's name and `<cask>` is the name of your cask).
 
 1. You will now have to develop the boilerplate code from `brew create --cask` into a complete cask. Your main references will be the [Cask Cookbook](Cask-Cookbook.md), similar existing casks, and the official documentation of the software you're packaging.
 
