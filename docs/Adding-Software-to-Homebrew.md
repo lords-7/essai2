@@ -48,7 +48,7 @@ If you're stuck, ask for help on GitHub or the [Homebrew discussion forum](https
 
 Keep in mind that these checks will happen automatically when you submit your pull request. Completing them beforehand not only saves time but also makes the whole process smoother for everyone.
 
-If your application and Homebrew do not work well together, feel free to [file an issue](https://github.com/Homebrew/homebrew-core/issues/new/choose) after checking out open issues.
+If your application and Homebrew do not work well together, feel free to [start a discussion](https://github.com/orgs/Homebrew/discussions) after checking out open issues.
 
 ### Submitting the formula
 
