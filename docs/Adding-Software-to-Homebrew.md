@@ -42,7 +42,7 @@ If you're stuck, ask for help on GitHub or the [Homebrew discussion forum](https
 
 1. Test your formula installation using `brew install --formula --build-from-source $(brew --repository homebrew/core)/Formula/<prefix>/<formula>.rb`, where `<prefix>` is the first letter of your formula's name and `<formula>` is the name of your formula. Correct any errors that occur and repeat the installation until it completes without errors.
 
-1. Additionally, verify the proper uninstallation of the formula by using the command `brew uninstall --formula <formula>`, ensuring it removes the software without issues.
+1. Unlike creating a cask, testing the uninstallation process is not necessary for a formula, as its removal is typically smooth and issue-free.
 
 1. Run `brew audit --formula --new <formula>` with your formula. If any errors occur, correct your formula and run the audit again. The audit should finish without any errors by the end of this step.
 
