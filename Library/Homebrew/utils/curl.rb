@@ -55,6 +55,7 @@ module Utils
         show_error:      T.nilable(T::Boolean),
         user_agent:      T.any(String, Symbol, NilClass),
         referer:         T.nilable(String),
+        require_en_lang: T::Boolean,
       ).returns(T::Array[T.untyped])
     }
     def curl_args(
@@ -66,7 +67,8 @@ module Utils
       show_output: false,
       show_error: true,
       user_agent: nil,
-      referer: nil
+      referer: nil,
+      require_en_lang: true
     )
       args = []
 
@@ -100,7 +102,7 @@ module Utils
         raise TypeError, ":user_agent must be :browser/:fake, :default, or a String"
       end
 
-      args << "--header" << "Accept-Language: en"
+      args << "--header" << "Accept-Language: en" if require_en_lang
 
       if show_output != true
         args << "--fail"
@@ -268,7 +270,8 @@ module Utils
     end
 
     def curl_check_http_content(url, url_type, specs: {}, user_agents: [:default], referer: nil,
-                                check_content: false, strict: false, use_homebrew_curl: false)
+                                check_content: false, strict: false, use_homebrew_curl: false,
+                                require_en_lang: true)
       return unless url.start_with? "http"
 
       secure_url = url.sub(/\Ahttp:/, "https:")
@@ -284,6 +287,7 @@ module Utils
               use_homebrew_curl: use_homebrew_curl,
               user_agent:        user_agent,
               referer:           referer,
+              require_en_lang:   require_en_lang,
             )
           rescue Timeout::Error
             next
@@ -308,6 +312,7 @@ module Utils
             use_homebrew_curl: use_homebrew_curl,
             user_agent:        user_agent,
             referer:           referer,
+            require_en_lang:   require_en_lang,
           )
 
           # Retry on network issues
@@ -399,7 +404,7 @@ module Utils
 
     def curl_http_content_headers_and_checksum(
       url, specs: {}, hash_needed: false,
-      use_homebrew_curl: false, user_agent: :default, referer: nil
+      use_homebrew_curl: false, user_agent: :default, referer: nil, require_en_lang: true
     )
       file = Tempfile.new.tap(&:close)
 
@@ -421,7 +426,8 @@ module Utils
         max_time:          max_time,
         retry_max_time:    max_time,
         user_agent:        user_agent,
-        referer:           referer
+        referer:           referer,
+        require_en_lang:   require_en_lang
       )
 
       parsed_output = parse_curl_output(output)
