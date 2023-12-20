@@ -4,6 +4,7 @@
 require "cache_store"
 require "did_you_mean"
 require "formula_support"
+require "formula_conflict"
 require "lock_file"
 require "formula_pin"
 require "hardware"

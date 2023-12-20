@@ -154,7 +154,7 @@ Each cask must declare one or more *artifacts* (i.e. something to install).
 | name                                       | multiple occurrences allowed? | value |
 | ------------------------------------------ | :---------------------------: | ----- |
 | [`uninstall`](#stanza-uninstall)           | yes                           | Procedures to uninstall a cask. Optional unless the `pkg` stanza is used. |
-| [`conflicts_with`](#stanza-conflicts_with) | yes                           | List of conflicts with this cask (*not yet functional*). |
+| [`conflicts_with`](#stanza-conflicts_with) | yes                           | List of conflicts with this cask. |
 | [`caveats`](#stanza-caveats)               | yes                           | String or Ruby block providing the user with cask-specific information at install time. |
 | [`deprecate!`](#stanza-deprecate--disable) | no                            | Date as a String in `YYYY-MM-DD` format and a String or Symbol providing a reason. |
 | [`disable!`](#stanza-deprecate--disable)   | no                            | Date as a String in `YYYY-MM-DD` format and a String or Symbol providing a reason. |
@@ -350,8 +350,6 @@ conflicts_with cask: "macfuse-dev"
 ```
 
 #### `conflicts_with` *formula*
-
-**Note:** `conflicts_with formula:` is a stub and is not yet functional.
 
 The value should be another formula name.
 

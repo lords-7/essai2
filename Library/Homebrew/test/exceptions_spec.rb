@@ -166,7 +166,10 @@ describe "Exception" do
     subject { described_class.new(formula, [conflict]) }
 
     let(:formula) { instance_double(Formula, full_name: "foo/qux") }
-    let(:conflict) { instance_double(FormulaConflict, name: "bar", reason: "I decided to") }
+    let(:conflict) do
+      instance_double(FormulaConflict, name: "bar", reason: "I decided to", conflicts?: true,
+                      conflict_message: "  bar: because I decided to")
+    end
 
     its(:to_s) { is_expected.to match(/Please `brew unlink bar` before continuing\./) }
   end

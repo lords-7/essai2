@@ -420,18 +420,11 @@ class FormulaConflictError < RuntimeError
     super message
   end
 
-  def conflict_message(conflict)
-    message = []
-    message << "  #{conflict.name}"
-    message << ": because #{conflict.reason}" if conflict.reason
-    message.join
-  end
-
   sig { returns(String) }
   def message
     message = []
     message << "Cannot install #{formula.full_name} because conflicting formulae are installed."
-    message.concat conflicts.map { |c| conflict_message(c) } << ""
+    message.concat conflicts.map(&:conflict_message) << ""
     message << <<~EOS
       Please `brew unlink #{conflicts.map(&:name) * " "}` before continuing.
 

@@ -1,9 +1,6 @@
 # typed: true
 # frozen_string_literal: true
 
-# Used to track formulae that cannot be installed at the same time.
-FormulaConflict = Struct.new(:name, :reason)
-
 # Used to annotate formulae that duplicate macOS-provided software
 # or cause conflicts when linked in.
 class KegOnlyReason

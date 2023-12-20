@@ -88,6 +88,34 @@ module Cask
     end
   end
 
+  # Error when a cask conflicts with formulae.
+  #
+  # @api private
+  class CaskConflictWithFormulaError < AbstractCaskErrorWithToken
+    attr_reader :conflicting_formulae
+
+    def initialize(token, conflicting_formulae)
+      super(token)
+      @conflicting_formulae = conflicting_formulae
+    end
+
+    sig { returns(String) }
+    def to_s
+      message = []
+      message << "Cask '#{token}' conflicts with the following formulae that are installed:"
+      message.concat conflicting_formulae.map(&:conflict_message) << ""
+      message << <<~EOS
+        Please `brew unlink #{conflicting_formulae.map(&:name) * " "}` before continuing.
+
+        Unlinking removes a formula's symlinks from #{HOMEBREW_PREFIX}. You can
+        link the formula again after the install finishes. You can --force this
+        install, but the build may fail or cause obscure side effects in the
+        resulting software.
+      EOS
+      message.join("\n")
+    end
+  end
+
   # Error when a cask is not available.
   #
   # @api private

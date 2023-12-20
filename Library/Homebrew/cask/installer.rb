@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "formula_installer"
+require "formula_conflict"
 require "unpack_strategy"
 require "utils/topological_hash"
 
@@ -138,6 +139,7 @@ on_request: true)
     end
 
     def check_conflicts
+      return if force?
       return unless @cask.conflicts_with
 
       @cask.conflicts_with[:cask].each do |conflicting_cask|
@@ -151,6 +153,12 @@ on_request: true)
       rescue CaskUnavailableError
         next # Ignore conflicting Casks that do not exist.
       end
+
+      formula_conflicts = @cask.conflicts_with[:formula].map do |conflicting_formula|
+        FormulaConflict.new(conflicting_formula, nil)
+      end
+      formula_conflicts.select! { |c| c.conflicts?(@cask) }
+      raise CaskConflictWithFormulaError.new(@cask, formula_conflicts) unless formula_conflicts.empty?
     end
 
     def uninstall_existing_cask

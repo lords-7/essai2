@@ -483,29 +483,7 @@ on_request: installed_on_request?, options: options)
   def check_conflicts
     return if force?
 
-    conflicts = formula.conflicts.select do |c|
-      f = Formulary.factory(c.name)
-    rescue TapFormulaUnavailableError
-      # If the formula name is a fully-qualified name let's silently
-      # ignore it as we don't care about things used in taps that aren't
-      # currently tapped.
-      false
-    rescue FormulaUnavailableError => e
-      # If the formula name doesn't exist any more then complain but don't
-      # stop installation from continuing.
-      opoo <<~EOS
-        #{formula}: #{e.message}
-        'conflicts_with "#{c.name}"' should be removed from #{formula.path.basename}.
-      EOS
-
-      raise if Homebrew::EnvConfig.developer?
-
-      $stderr.puts "Please report this issue to the #{formula.tap} tap (not Homebrew/brew or Homebrew/homebrew-core)!"
-      false
-    else
-      f.linked_keg.exist? && f.opt_prefix.exist?
-    end
-
+    conflicts = formula.conflicts.select { |c| c.conflicts?(formula) }
     raise FormulaConflictError.new(formula, conflicts) unless conflicts.empty?
   end
 
