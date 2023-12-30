@@ -279,7 +279,8 @@ class UsesFromMacOSDependency < Dependency
       if Homebrew::SimulateSystem.current_os != :macos
         current_os = MacOSVersion.from_symbol(Homebrew::SimulateSystem.current_os)
         since_os = MacOSVersion.from_symbol(bounds[:since]) if bounds.key?(:since)
-        return true if current_os >= since_os
+        until_os = MacOSVersion.from_symbol(bounds[:until]) if bounds.key?(:until)
+        return true if current_os >= since_os && (until_os.nil? || current_os <= until_os)
       end
     end
 
