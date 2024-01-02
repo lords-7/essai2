@@ -174,6 +174,9 @@ class Build
 
             (formula.logs/"00.options.out").write \
               "#{formula.full_name} #{formula.build.used_options.sort.join(" ")}".strip
+
+            raise "You shall not build!" if formula.prefix
+
             formula.install
 
             stdlibs = detect_stdlibs
