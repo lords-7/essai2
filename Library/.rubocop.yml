@@ -264,6 +264,24 @@ Sorbet/ConstantsFromStrings:
 Sorbet/FalseSigil:
   Enabled: false
 
+# Implicit conversions have been a frequent source of runtime errors
+Sorbet/ImplicitConversionMethod:
+  Enabled: true
+  # TODO: These are pre-existing violations and should be corrected
+  Exclude:
+    - Homebrew/PATH.rb
+    - Homebrew/extend/pathname.rb
+    - Homebrew/formula.rb
+    - Homebrew/formula_support.rb
+    - Homebrew/livecheck.rb
+    - Homebrew/options.rb
+    - Homebrew/pkg_version.rb
+    - Homebrew/software_spec.rb
+    - Homebrew/system_command.rb
+    - Homebrew/tap.rb
+    - Homebrew/version.rb
+    - Taps/homebrew/homebrew-services/lib/service/formula_wrapper.rb
+
 # T::Sig is monkey-patched into Module
 Sorbet/RedundantExtendTSig:
   Enabled: true
