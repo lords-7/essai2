@@ -3,6 +3,7 @@
 
 require "extend/cachable"
 require "api/download"
+require "utils/collection"
 
 module Homebrew
   module API
@@ -100,6 +101,71 @@ module Homebrew
               file.puts "#{alias_name}|#{real_name}"
             end
           end
+        end
+
+        REQUIRED_FIELDS = %w[
+          aliases
+          bottle
+          build_dependencies
+          caveats
+          conflicts_with
+          conflicts_with_reasons
+          dependencies
+          deprecation_date
+          deprecation_reason
+          desc
+          disable_date
+          disable_reason
+          full_name
+          homepage
+          keg_only_reason
+          license
+          link_overwrite
+          name
+          oldnames
+          optional_dependencies
+          options
+          post_install_defined
+          pour_bottle_only_if
+          recommended_dependencies
+          requirements
+          revision
+          ruby_source_checksum
+          ruby_source_path
+          service
+          tap
+          tap_git_head
+          test_dependencies
+          urls
+          uses_from_macos
+          uses_from_macos_bounds
+          variations
+          version_scheme
+          versioned_formulae
+          versions
+        ].freeze
+        private_constant :REQUIRED_FIELDS
+
+        sig { params(formula_hash: Hash).returns(Hash) }
+        def slim_hash(formula_hash)
+          hash = formula_hash.slice(*REQUIRED_FIELDS)
+
+          if stable_bottle = hash.dig("bottle", "stable")
+            stable_bottle["files"] = stable_bottle["files"].transform_values do |file|
+              # The "url" is not used here and takes up a lot of space.
+              file.slice("cellar", "sha256")
+            end
+          end
+
+          # This array can include empty hashes but they should not be omitted since
+          # array index position matters here. It corresponds to "uses_from_macos".
+          uses_from_macos_bounds = hash["uses_from_macos_bounds"]
+
+          hash = Utils::Collection.recursive_compact_hash(hash)
+          raise ArgumentError, "Invalid formula hash" if hash.nil?
+
+          hash["uses_from_macos_bounds"] = uses_from_macos_bounds if uses_from_macos_bounds
+          hash
         end
       end
     end
