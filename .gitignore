@@ -40,7 +40,6 @@
 # Ignore Ruby gems for versions other than we explicitly vendor.
 # Keep this in sync with the list in standalone/init.rb.
 **/vendor/bundle/ruby/*/
-!**/vendor/bundle/ruby/2.6.0/
 !**/vendor/bundle/ruby/3.1.0/
 
 # Ignore Bundler binary files
@@ -69,13 +68,10 @@
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/file/atomic.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/deep_merge.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/deep_transform_values.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/except.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/keys.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/slice.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/object/deep_dup.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/object/duplicable.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/string/exclude.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/string/filters.rb
 !**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/string/indent.rb
 
 # Ignore partially included gems where we don't need all files
@@ -105,6 +101,7 @@
 **/vendor/bundle/ruby/*/gems/diff-lcs-*/
 **/vendor/bundle/ruby/*/gems/docile-*/
 **/vendor/bundle/ruby/*/gems/ecma-re-validator-*/
+**/vendor/bundle/ruby/*/gems/erubi-*/
 **/vendor/bundle/ruby/*/gems/hana-*/
 **/vendor/bundle/ruby/*/gems/highline-*/
 **/vendor/bundle/ruby/*/gems/hpricot-*/
@@ -112,17 +109,21 @@
 **/vendor/bundle/ruby/*/gems/jaro_winkler-*/
 **/vendor/bundle/ruby/*/gems/json-*/
 **/vendor/bundle/ruby/*/gems/json_schemer-*/
+**/vendor/bundle/ruby/*/gems/language_server-protocol-*/
 **/vendor/bundle/ruby/*/gems/method_source-*/
 **/vendor/bundle/ruby/*/gems/mini_portile2-*/
 **/vendor/bundle/ruby/*/gems/minitest-*/
 **/vendor/bundle/ruby/*/gems/msgpack-*/
 **/vendor/bundle/ruby/*/gems/mustache-*/
+**/vendor/bundle/ruby/*/gems/netrc-*/
 **/vendor/bundle/ruby/*/gems/ntlm-http-*/
 **/vendor/bundle/ruby/*/gems/parallel-*/
 **/vendor/bundle/ruby/*/gems/parallel_tests-*/
 **/vendor/bundle/ruby/*/gems/parlour-*/
 **/vendor/bundle/ruby/*/gems/parser-*/
 **/vendor/bundle/ruby/*/gems/powerpack-*/
+**/vendor/bundle/ruby/*/gems/prettier_print-*/
+**/vendor/bundle/ruby/*/gems/prism-*/
 **/vendor/bundle/ruby/*/gems/psych-*/
 **/vendor/bundle/ruby/*/gems/pry-*/
 **/vendor/bundle/ruby/*/gems/racc-*/
@@ -143,13 +144,7 @@
 **/vendor/bundle/ruby/*/gems/rspec-support-*/
 **/vendor/bundle/ruby/*/gems/rspec-sorbet-*/
 **/vendor/bundle/ruby/*/gems/rspec-wait-*/
-**/vendor/bundle/ruby/*/gems/rubocop-1*/
-**/vendor/bundle/ruby/*/gems/rubocop-ast-*/
-**/vendor/bundle/ruby/*/gems/rubocop-capybara-*/
-**/vendor/bundle/ruby/*/gems/rubocop-performance-*/
-**/vendor/bundle/ruby/*/gems/rubocop-rails-*/
-**/vendor/bundle/ruby/*/gems/rubocop-rspec-*/
-**/vendor/bundle/ruby/*/gems/rubocop-sorbet-*/
+**/vendor/bundle/ruby/*/gems/rubocop-*/
 **/vendor/bundle/ruby/*/gems/ruby-prof-*/
 **/vendor/bundle/ruby/*/gems/ruby-progressbar-*/
 **/vendor/bundle/ruby/*/gems/simplecov-*/
@@ -161,6 +156,7 @@
 **/vendor/bundle/ruby/*/gems/spoom-*/
 **/vendor/bundle/ruby/*/gems/stackprof-*/
 **/vendor/bundle/ruby/*/gems/strscan-*/
+**/vendor/bundle/ruby/*/gems/syntax_tree-*/
 **/vendor/bundle/ruby/*/gems/tapioca-*/
 **/vendor/bundle/ruby/*/gems/thor-*/
 **/vendor/bundle/ruby/*/gems/tzinfo-*/

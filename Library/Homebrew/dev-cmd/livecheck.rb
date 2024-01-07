@@ -54,7 +54,7 @@ module Homebrew
       unless File.exist?(watchlist)
         previous_default_watchlist = File.expand_path("~/.brew_livecheck_watchlist")
         if File.exist?(previous_default_watchlist)
-          odeprecated "~/.brew_livecheck_watchlist", "~/.homebrew/livecheck_watchlist.txt"
+          odisabled "~/.brew_livecheck_watchlist", "~/.homebrew/livecheck_watchlist.txt"
           watchlist = previous_default_watchlist
         end
       end
@@ -87,7 +87,7 @@ module Homebrew
         formulae + casks
       elsif all
         formulae = args.cask? ? [] : Formula.all(eval_all: args.eval_all?)
-        casks = args.formula? ? [] : Cask::Cask.all
+        casks = args.formula? ? [] : Cask::Cask.all(eval_all: args.eval_all?)
         formulae + casks
       elsif args.named.present?
         if args.formula?

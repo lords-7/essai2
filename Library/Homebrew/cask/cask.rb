@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "attrable"
 require "cask/cask_loader"
 require "cask/config"
 require "cask/dsl"
@@ -14,7 +15,7 @@ module Cask
   # @api private
   class Cask
     extend Forwardable
-    extend Predicable
+    extend Attrable
     extend APIHashable
     include Metadata
 
@@ -23,14 +24,17 @@ module Cask
 
     attr_predicate :loaded_from_api?
 
-    def self.all
-      # TODO: ideally avoid using ARGV by moving to e.g. CLI::Parser
-      if ARGV.exclude?("--eval-all") && !Homebrew::EnvConfig.eval_all?
-        odisabled "Cask::Cask#all without --eval-all or HOMEBREW_EVAL_ALL"
+    # @api private
+    def self.all(eval_all: false)
+      if !eval_all && !Homebrew::EnvConfig.eval_all?
+        raise ArgumentError, "Cask::Cask#all cannot be used without --eval-all or HOMEBREW_EVAL_ALL"
       end
 
-      Tap.flat_map(&:cask_files).map do |f|
-        CaskLoader::FromTapPathLoader.new(f).load(config: nil)
+      # Load core casks from tokens so they load from the API when the core cask is not tapped.
+      tokens_and_files = CoreCaskTap.instance.cask_tokens
+      tokens_and_files += Tap.reject(&:core_cask_tap?).flat_map(&:cask_files)
+      tokens_and_files.map do |token_or_file|
+        CaskLoader.load(token_or_file)
       rescue CaskUnreadableError => e
         opoo e.message
 
@@ -121,7 +125,7 @@ module Cask
 
     def full_name
       return token if tap.nil?
-      return token if tap.user == "Homebrew"
+      return token if tap.core_cask_tap?
 
       "#{tap.name}/#{token}"
     end
@@ -275,7 +279,7 @@ module Cask
     def populate_from_api!(json_cask)
       raise ArgumentError, "Expected cask to be loaded from the API" unless loaded_from_api?
 
-      @languages = json_cask[:languages]
+      @languages = json_cask.fetch(:languages, [])
       @tap_git_head = json_cask.fetch(:tap_git_head, "HEAD")
 
       @ruby_source_path = json_cask[:ruby_source_path]
@@ -330,6 +334,12 @@ module Cask
         "conflicts_with"       => conflicts_with,
         "container"            => container&.pairs,
         "auto_updates"         => auto_updates,
+        "deprecated"           => deprecated?,
+        "deprecation_date"     => deprecation_date,
+        "deprecation_reason"   => deprecation_reason,
+        "disabled"             => disabled?,
+        "disable_date"         => disable_date,
+        "disable_reason"       => disable_reason,
         "tap_git_head"         => tap_git_head,
         "languages"            => languages,
         "ruby_source_path"     => ruby_source_path,

@@ -48,7 +48,7 @@ Before submitting a new formula make sure your package:
 * isn't already waiting to be merged (check the [issue tracker](https://github.com/Homebrew/homebrew-core/pulls))
 * is still supported by upstream (i.e. doesn't require extensive patching)
 * has a stable, tagged version (i.e. isn't just a GitHub repository with no versions)
-* passes all `brew audit --new-formula <formula>` tests
+* passes all `brew audit --new --formula <formula>` tests
 
 Before submitting a new formula make sure you read over our [contribution guidelines](https://github.com/Homebrew/brew/blob/HEAD/CONTRIBUTING.md#contributing-to-homebrew).
 
@@ -366,7 +366,7 @@ Add aliases by creating symlinks in an `Aliases` directory in the tap root.
 
 You can run `brew audit --strict --online` to test formulae for adherence to Homebrew house style, which is loosely based on the [Ruby Style Guide](https://github.com/rubocop-hq/ruby-style-guide#the-ruby-style-guide). The `audit` command includes warnings for trailing whitespace, preferred URLs for certain source hosts, and many other style issues. Fixing these warnings before committing will make the process a lot quicker for everyone.
 
-New formulae being submitted to Homebrew should run `brew audit --new-formula foo`. This command is performed by Brew Test Bot on new submissions as part of the automated build and test process, and highlights more potential issues than the standard audit.
+New formulae being submitted to Homebrew should run `brew audit --new --formula foo`. This command is performed by Brew Test Bot on new submissions as part of the automated build and test process, and highlights more potential issues than the standard audit.
 
 Use `brew info` and check if the version guessed by Homebrew from the URL is correct. Add an explicit [`version`](https://rubydoc.brew.sh/Formula#version-class_method) if not.
 
@@ -433,6 +433,17 @@ if build.head?
   doc_jar = Dir["cfr-*-SNAPSHOT-javadoc.jar"]
   odie "Unexpected number of artifacts!" if (lib_jar.length != 1) || (doc_jar.length != 1)
 end
+```
+
+### Standard arguments
+
+For any formula using a well-known build system, there'll be arguments that should be passed during compilation such that its build conforms to Homebrew standards. These have been collected into a set of `std_*_args` methods (like [`std_configure_args`](https://rubydoc.brew.sh/Formula#std_configure_args-instance_method) and [`std_cmake_args`](https://rubydoc.brew.sh/Formula#std_cmake_args-instance_method) as seen in the [output of `brew create`](#grab-the-url)) that set the build type and installation paths, plus any other applicable options.
+
+Most of these methods accept parameters to customize their output. For example, to set the install prefix to [**`libexec`**](#variables-for-directory-locations) for `configure` or `cmake`:
+
+```ruby
+system "./configure", *std_configure_args(prefix: libexec)
+system "cmake", "-S", ".", "-B", "build", *std_cmake_args(install_prefix: libexec)
 ```
 
 ### `bin.install "foo"`

@@ -12,7 +12,7 @@ require "erb"
 require "utils/gzip"
 require "api"
 
-BOTTLE_ERB = <<-EOS
+BOTTLE_ERB = <<-EOS.freeze
   bottle do
     <% if [HOMEBREW_BOTTLE_DEFAULT_DOMAIN.to_s,
            "#{HOMEBREW_BOTTLE_DEFAULT_DOMAIN}/bottles"].exclude?(root_url) %>
@@ -116,7 +116,7 @@ module Homebrew
 
       @put_filenames ||= []
 
-      return if @put_filenames.include?(filename)
+      return false if @put_filenames.include?(filename)
 
       puts Formatter.error(filename.to_s)
       @put_filenames << filename
@@ -294,7 +294,7 @@ module Homebrew
 
     # Ignore matches to go keg, because all go binaries are statically linked.
     any_go_deps = formula.deps.any? do |dep|
-      dep.name =~ Version.formula_optionally_versioned_regex(:go)
+      Version.formula_optionally_versioned_regex(:go).match?(dep.name)
     end
     if any_go_deps
       go_regex = Version.formula_optionally_versioned_regex(:go, full: false)
@@ -365,9 +365,9 @@ module Homebrew
       end || 0
     end
 
-    filename = Bottle::Filename.create(formula, bottle_tag.to_sym, rebuild)
+    filename = Bottle::Filename.create(formula, bottle_tag, rebuild)
     local_filename = filename.to_s
-    bottle_path = Pathname.pwd/filename
+    bottle_path = Pathname.pwd/local_filename
 
     tab = nil
     keg = nil
@@ -690,8 +690,8 @@ module Homebrew
       bottle_hash["bottle"]["tags"].each do |tag, tag_hash|
         filename = Bottle::Filename.new(
           formula_name,
-          bottle_hash["formula"]["pkg_version"],
-          tag,
+          PkgVersion.parse(bottle_hash["formula"]["pkg_version"]),
+          Utils::Bottles::Tag.from_symbol(tag.to_sym),
           bottle_hash["bottle"]["rebuild"],
         )
 
@@ -700,8 +700,8 @@ module Homebrew
 
           all_filename = Bottle::Filename.new(
             formula_name,
-            bottle_hash["formula"]["pkg_version"],
-            "all",
+            PkgVersion.parse(bottle_hash["formula"]["pkg_version"]),
+            Utils::Bottles::Tag.from_symbol(:all),
             bottle_hash["bottle"]["rebuild"],
           )
 

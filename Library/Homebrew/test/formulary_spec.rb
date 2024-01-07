@@ -161,8 +161,7 @@ describe Formulary do
         allow(described_class).to receive(:loader_for).and_call_original
 
         # don't try to load/fetch gcc/glibc
-        allow(DevelopmentTools).to receive(:needs_libc_formula?).and_return(false)
-        allow(DevelopmentTools).to receive(:needs_compiler_formula?).and_return(false)
+        allow(DevelopmentTools).to receive_messages(needs_libc_formula?: false, needs_compiler_formula?: false)
       end
 
       let(:installed_formula) { described_class.factory(formula_path) }
@@ -375,8 +374,7 @@ describe Formulary do
         allow(described_class).to receive(:loader_for).and_return(described_class::FormulaAPILoader.new(formula_name))
 
         # don't try to load/fetch gcc/glibc
-        allow(DevelopmentTools).to receive(:needs_libc_formula?).and_return(false)
-        allow(DevelopmentTools).to receive(:needs_compiler_formula?).and_return(false)
+        allow(DevelopmentTools).to receive_messages(needs_libc_formula?: false, needs_compiler_formula?: false)
       end
 
       it "returns a Formula when given a name" do
@@ -521,17 +519,6 @@ describe Formulary do
 
     it "returns a symbol if the original string starts with a colon" do
       expect(described_class.convert_to_string_or_symbol(":foo")).to eq :foo
-    end
-  end
-
-  describe "::convert_to_deprecate_disable_reason_string_or_symbol" do
-    it "returns the original string if it isn't a preset reason" do
-      expect(described_class.convert_to_deprecate_disable_reason_string_or_symbol("foo")).to eq "foo"
-    end
-
-    it "returns a symbol if the original string is a preset reason" do
-      expect(described_class.convert_to_deprecate_disable_reason_string_or_symbol("does_not_build"))
-        .to eq :does_not_build
     end
   end
 end

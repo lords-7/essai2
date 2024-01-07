@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "attrable"
 require "formula_installer"
 require "unpack_strategy"
 require "utils/topological_hash"
@@ -17,7 +18,7 @@ module Cask
   #
   # @api private
   class Installer
-    extend Predicable
+    extend Attrable
 
     def initialize(cask, command: SystemCommand, force: false, adopt: false,
                    skip_cask_deps: false, binaries: true, verbose: false,
@@ -93,6 +94,7 @@ module Cask
       old_config = @cask.config
       predecessor = @cask if reinstall? && @cask.installed?
 
+      check_deprecate_disable
       check_conflicts
 
       print caveats
@@ -122,6 +124,18 @@ on_request: true)
     rescue
       restore_backup
       raise
+    end
+
+    def check_deprecate_disable
+      deprecate_disable_type = DeprecateDisable.type(@cask)
+      return if deprecate_disable_type.nil?
+
+      case deprecate_disable_type
+      when :deprecated
+        opoo "#{@cask.token} has been #{DeprecateDisable.message(@cask)}"
+      when :disabled
+        raise CaskCannotBeInstalledError.new(@cask, DeprecateDisable.message(@cask))
+      end
     end
 
     def check_conflicts

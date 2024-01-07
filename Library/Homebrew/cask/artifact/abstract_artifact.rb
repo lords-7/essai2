@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "attrable"
 require "active_support/core_ext/object/deep_dup"
 
 module Cask
@@ -13,14 +14,14 @@ module Cask
       abstract!
 
       include Comparable
-      extend Predicable
+      extend Attrable
 
       def self.english_name
         @english_name ||= T.must(name).sub(/^.*:/, "").gsub(/(.)([A-Z])/, '\1 \2')
       end
 
       def self.english_article
-        @english_article ||= (english_name =~ /^[aeiou]/i) ? "an" : "a"
+        @english_article ||= /^[aeiou]/i.match?(english_name) ? "an" : "a"
       end
 
       def self.dsl_key
@@ -28,7 +29,7 @@ module Cask
       end
 
       def self.dirmethod
-        @dirmethod ||= "#{dsl_key}dir".to_sym
+        @dirmethod ||= :"#{dsl_key}dir"
       end
 
       sig { abstract.returns(String) }

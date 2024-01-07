@@ -541,6 +541,9 @@ information is displayed in interactive shells, and suppressed otherwise.
 Pin the specified *`formula`*, preventing them from being upgraded when
 issuing the `brew upgrade` *`formula`* command. See also `unpin`.
 
+Note: Other packages which depend on newer versions of a pinned formula
+might not install or run correctly.
+
 ### `postinstall`, `post_install` *`installed_formula`* [...]
 
 Rerun the post-install steps for *`formula`*.
@@ -797,8 +800,6 @@ upgraded formulae or, every 30 days, for all formulae.
   Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation.
 * `--fetch-HEAD`:
   Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released.
-* `--ignore-pinned`:
-  Set a successful exit status even if pinned formulae are not upgraded.
 * `--keep-tmp`:
   Retain the temporary files created during installation.
 * `--debug-symbols`:
@@ -951,7 +952,7 @@ non-zero status if any errors are found.
 * `--eval-all`:
   Evaluate all available formulae and casks, whether installed or not, to audit them. Implied if `HOMEBREW_EVAL_ALL` is set.
 * `--new`:
-  Run various additional style checks to determine if a new formula or cask is eligible for Homebrew. This should be used when creating new formula and implies `--strict` and `--online`.
+  Run various additional style checks to determine if a new formula or cask is eligible for Homebrew. This should be used when creating new formulae or casks and implies `--strict` and `--online`.
 * `--[no-]signing`:
   Audit for signed apps, which are required on ARM
 * `--token-conflicts`:
@@ -1384,8 +1385,6 @@ Find pull requests that can be automatically merged using `brew pr-publish`.
   Run `brew pr-publish` on matching pull requests.
 * `--autosquash`:
   Instruct `brew pr-publish` to automatically reformat and reword commits in the pull request to the preferred format.
-* `--no-autosquash`:
-  Instruct `brew pr-publish` to skip automatically reformatting and rewording commits in the pull request to the preferred format.
 * `--ignore-failures`:
   Include pull requests that have failing status checks.
 
@@ -1396,8 +1395,6 @@ Requires write access to the repository.
 
 * `--autosquash`:
   If supported on the target tap, automatically reformat and reword commits to our preferred format.
-* `--no-autosquash`:
-  Skip automatically reformatting and rewording commits in the pull request to the preferred format, even if supported on the target tap.
 * `--large-runner`:
   Run the upload job on a large runner.
 * `--branch`:
@@ -1429,8 +1426,6 @@ Requires write access to the repository.
   If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL.
 * `--autosquash`:
   Automatically reformat and reword commits in the pull request to our preferred format.
-* `--no-autosquash`:
-  Skip automatically reformatting and rewording commits in the pull request to our preferred format.
 * `--branch-okay`:
   Do not warn if pulling to a branch besides the repository default (useful for testing).
 * `--resolve`:
@@ -1991,6 +1986,8 @@ Only supports GitHub Actions as a CI provider. This is because Homebrew uses Git
   Don't test livecheck.
 * `--skip-recursive-dependents`:
   Only test the direct dependents.
+* `--skip-stable-version-audit`:
+  Don't audit the stable version.
 * `--only-cleanup-before`:
   Only run the pre-cleanup step. Needs `--cleanup`.
 * `--only-setup`:

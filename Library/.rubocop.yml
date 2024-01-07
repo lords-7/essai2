@@ -12,7 +12,7 @@ inherit_mode:
     - Exclude
 
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.1
   ActiveSupportExtensionsEnabled: true
   NewCops: enable
   Include:
@@ -208,25 +208,11 @@ Rails:
     - "Homebrew/rubocops/**/*"
 
 # These relate to ActiveSupport and not other parts of Rails.
-Rails/ActiveSupportAliases:
-  Enabled: true
 Rails/Blank:
   Enabled: true
 Rails/CompactBlank:
   Enabled: true
-Rails/Delegate:
-  Enabled: false # TODO
-Rails/DelegateAllowBlank:
-  Enabled: true
-Rails/DurationArithmetic:
-  Enabled: true
-Rails/ExpandedDateRange:
-  Enabled: true
-Rails/Inquiry:
-  Enabled: true
 Rails/NegateInclude:
-  Enabled: true
-Rails/PluralizationGrammar:
   Enabled: true
 Rails/Presence:
   Enabled: true
@@ -235,15 +221,7 @@ Rails/Present:
   Exclude:
     # `present?` is defined as `!blank?` wihin this file
     - "Homebrew/extend/blank.rb"
-Rails/RelativeDateConstant:
-  Enabled: true
-Rails/SafeNavigation:
-  Enabled: true
 Rails/SafeNavigationWithBlank:
-  Enabled: true
-Rails/StripHeredoc:
-  Enabled: true
-Rails/ToFormattedS:
   Enabled: true
 
 # Intentionally disabled as it doesn't fit with our code style.
@@ -252,6 +230,8 @@ RSpec/AnyInstance:
 RSpec/DescribeClass:
   Enabled: false
 RSpec/FilePath:
+  Enabled: false
+RSpec/SpecFilePathFormat:
   Enabled: false
 RSpec/StubbedMock:
   Enabled: false
@@ -299,7 +279,6 @@ Sorbet/StrictSigil:
 Sorbet/TrueSigil:
   Enabled: true
   Exclude:
-    - "Homebrew/standalone/init.rb" # loaded before sorbet-runtime
     - "Taps/**/*"
     - "/**/{Formula,Casks}/**/*.rb"
     - "**/{Formula,Casks}/**/*.rb"
@@ -381,9 +360,11 @@ Style/InvertibleUnlessCondition:
     :==: :!=
     # Unset this (prefer `unless a.zero?` over `if a.nonzero?`)
     :zero?:
+    # Don't require non-standard `exclude?` (for now at least) - it's not available in every file
+    :include?:
 
-# would rather freeze too much than too little
 Style/MutableConstant:
+  # would rather freeze too much than too little
   EnforcedStyle: strict
 
 # Zero-prefixed octal literals are widely used and understood.
@@ -436,6 +417,10 @@ Style/StringLiteralsInInterpolation:
 Style/StringMethods:
   Enabled: true
 
+# Treating this the same as Style/MethodCallWithArgsParentheses
+Style/SuperWithArgsParentheses:
+  Enabled: false
+
 # An array of symbols is more readable than a symbol array
 # and also allows for easier grepping.
 Style/SymbolArray:
@@ -461,3 +446,21 @@ Style/UnlessLogicalOperators:
 # a bit confusing to non-Rubyists but useful for longer arrays
 Style/WordArray:
   MinSize: 4
+
+# TODO: Enable these cops once https://github.com/Homebrew/brew/pull/16337#issuecomment-1855668516 is done.
+Lint/RedundantDirGlobSort:
+  Enabled: false
+Naming/BlockForwarding:
+  Enabled: false
+Performance/BindCall:
+  Enabled: false
+Performance/MapCompact:
+  Enabled: false
+Style/ArgumentsForwarding:
+  Enabled: false
+Style/ArrayIntersect:
+  Enabled: false
+Style/HashSyntax:
+  EnforcedShorthandSyntax: either
+Style/RedundantFreeze:
+  Enabled: false

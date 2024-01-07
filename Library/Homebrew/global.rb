@@ -16,10 +16,8 @@ require "active_support/core_ext/array/access"
 require "active_support/core_ext/enumerable"
 require "active_support/core_ext/file/atomic"
 require "active_support/core_ext/hash/deep_merge"
-require "active_support/core_ext/hash/except"
 require "active_support/core_ext/hash/keys"
 require "active_support/core_ext/string/exclude"
-require "active_support/core_ext/string/filters"
 require "active_support/core_ext/string/indent"
 
 HOMEBREW_API_DEFAULT_DOMAIN = ENV.fetch("HOMEBREW_API_DEFAULT_DOMAIN").freeze
@@ -43,7 +41,7 @@ HOMEBREW_PHYSICAL_PROCESSOR = ENV.fetch("HOMEBREW_PHYSICAL_PROCESSOR").freeze
 HOMEBREW_BREWED_CURL_PATH = Pathname(ENV.fetch("HOMEBREW_BREWED_CURL_PATH")).freeze
 HOMEBREW_USER_AGENT_CURL = ENV.fetch("HOMEBREW_USER_AGENT_CURL").freeze
 HOMEBREW_USER_AGENT_RUBY =
-  "#{ENV.fetch("HOMEBREW_USER_AGENT")} ruby/#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
+  "#{ENV.fetch("HOMEBREW_USER_AGENT")} ruby/#{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}".freeze
 HOMEBREW_USER_AGENT_FAKE_SAFARI =
   # Don't update this beyond 10.15.7 until Safari actually updates their
   # user agent to be beyond 10.15.7 (not the case as-of macOS 14)
@@ -84,10 +82,10 @@ require "default_prefix"
 module Homebrew
   extend FileUtils
 
-  DEFAULT_CELLAR = "#{DEFAULT_PREFIX}/Cellar"
-  DEFAULT_MACOS_CELLAR = "#{HOMEBREW_DEFAULT_PREFIX}/Cellar"
-  DEFAULT_MACOS_ARM_CELLAR = "#{HOMEBREW_MACOS_ARM_DEFAULT_PREFIX}/Cellar"
-  DEFAULT_LINUX_CELLAR = "#{HOMEBREW_LINUX_DEFAULT_PREFIX}/Cellar"
+  DEFAULT_CELLAR = "#{DEFAULT_PREFIX}/Cellar".freeze
+  DEFAULT_MACOS_CELLAR = "#{HOMEBREW_DEFAULT_PREFIX}/Cellar".freeze
+  DEFAULT_MACOS_ARM_CELLAR = "#{HOMEBREW_MACOS_ARM_DEFAULT_PREFIX}/Cellar".freeze
+  DEFAULT_LINUX_CELLAR = "#{HOMEBREW_LINUX_DEFAULT_PREFIX}/Cellar".freeze
 
   class << self
     attr_writer :failed, :raise_deprecation_exceptions, :auditing
@@ -136,7 +134,6 @@ require "context"
 require "extend/array"
 require "git_repository"
 require "extend/pathname"
-require "extend/predicable"
 require "cli/args"
 
 require "PATH"

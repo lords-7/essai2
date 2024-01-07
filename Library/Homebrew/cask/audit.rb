@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "attrable"
 require "cask/denylist"
 require "cask/download"
 require "digest"
@@ -17,7 +18,7 @@ module Cask
   # @api private
   class Audit
     include ::Utils::Curl
-    extend Predicable
+    extend Attrable
 
     attr_reader :cask, :download
 
@@ -289,7 +290,7 @@ module Cask
 
     sig { params(livecheck_result: T.any(NilClass, T::Boolean, Symbol)).void }
     def audit_hosting_with_livecheck(livecheck_result: audit_livecheck_version)
-      return if cask.discontinued?
+      return if cask.discontinued? || cask.deprecated? || cask.disabled?
       return if cask.version&.latest?
       return unless cask.url
       return if block_url_offline?
@@ -544,7 +545,7 @@ module Cask
         )
       end
 
-      # Respect cask skip conditions (e.g. discontinued, latest, unversioned)
+      # Respect cask skip conditions (e.g. deprecated, disabled, latest, unversioned)
       skip_info ||= Homebrew::Livecheck::SkipConditions.skip_information(cask)
       return :skip if skip_info.present?
 
@@ -682,8 +683,8 @@ module Cask
 
     sig { void }
     def audit_github_repository_archived
-      # Discontinued casks may have an archived repo.
-      return if cask.discontinued?
+      # Deprecated/disabled casks may have an archived repo.
+      return if cask.discontinued? || cask.deprecated? || cask.disabled?
 
       user, repo = get_repo_data(%r{https?://github\.com/([^/]+)/([^/]+)/?.*}) if online?
       return if user.nil?
@@ -696,8 +697,8 @@ module Cask
 
     sig { void }
     def audit_gitlab_repository_archived
-      # Discontinued casks may have an archived repo.
-      return if cask.discontinued?
+      # Deprecated/disabled casks may have an archived repo.
+      return if cask.discontinued? || cask.deprecated? || cask.disabled?
 
       user, repo = get_repo_data(%r{https?://gitlab\.com/([^/]+)/([^/]+)/?.*}) if online?
       return if user.nil?
@@ -785,15 +786,21 @@ module Cask
 
       return unless cask.homepage
 
+      user_agents = if cask.tap&.audit_exception(:simple_user_agent_for_homepage, cask.token)
+        ["curl"]
+      else
+        [:browser, :default]
+      end
+
       validate_url_for_https_availability(cask.homepage, SharedAudits::URL_TYPE_HOMEPAGE, cask.token, cask.tap,
-                                          user_agents:   [:browser, :default],
+                                          user_agents:   user_agents,
                                           check_content: true,
                                           strict:        strict?)
     end
 
     sig { void }
     def audit_cask_path
-      return if cask.tap != "homebrew/cask"
+      return unless cask.tap.core_cask_tap?
 
       expected_path = cask.tap.new_cask_path(cask.token)
 
@@ -837,7 +844,7 @@ module Cask
     def bad_url_format?(regex, valid_formats_array)
       return false unless cask.url.to_s.match?(regex)
 
-      valid_formats_array.none? { |format| cask.url.to_s =~ format }
+      valid_formats_array.none? { |format| cask.url.to_s.match?(format) }
     end
 
     sig { returns(T::Boolean) }
@@ -937,7 +944,7 @@ module Cask
       formula_path = Formulary.core_path(cask.token)
                               .to_s
                               .delete_prefix(core_tap.path.to_s)
-      "#{core_tap.default_remote}/blob/HEAD/Formula/#{formula_path}"
+      "#{core_tap.default_remote}/blob/HEAD#{formula_path}"
     end
   end
 end

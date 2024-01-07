@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   syntax:
-    if: github.repository == 'Homebrew/brew'
+    if: github.repository_owner == 'Homebrew'
     runs-on: ubuntu-22.04
     steps:
       - name: Set up Homebrew
@@ -47,6 +47,13 @@ jobs:
       - name: Install shellcheck and shfmt
         run: brew install shellcheck shfmt
 
+      - name: Cache style cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Homebrew/style
+          key: syntax-style-cache-${{ github.sha }}
+          restore-keys: syntax-style-cache-
+
       - run: brew style
 
       - run: brew typecheck
@@ -54,7 +61,7 @@ jobs:
       - name: Check RuboCop filepaths
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}/Library/Homebrew
         run: |
-          public_apis=$(git grep -l "@api public" | wc -l | tr -d ' ')
+          public_apis=$(git grep -l "@api public" -- :^sorbet/ :^vendor/ | wc -l | tr -d ' ')
           rubocop_docs=$(yq '.Style/Documentation.Include' .rubocop.yml | wc -l | tr -d ' ')
           if [[ public_apis -ne rubocop_docs ]]
           then
@@ -67,7 +74,7 @@ jobs:
   tap-syntax:
     name: tap syntax
     needs: syntax
-    if: startsWith(github.repository, 'Homebrew/')
+    if: github.repository_owner == 'Homebrew'
     runs-on: ubuntu-22.04
     steps:
       - name: Set up Homebrew
@@ -87,6 +94,13 @@ jobs:
 
       - name: Install Bundler RubyGems
         run: brew install-bundler-gems --groups=style
+
+      - name: Cache style cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/Homebrew/style
+          key: tap-syntax-style-cache-${{ github.sha }}
+          restore-keys: tap-syntax-style-cache-
 
       - name: Run brew style on homebrew-core
         run: brew style homebrew/core
@@ -127,7 +141,7 @@ jobs:
   formula-audit:
     name: formula audit
     needs: syntax
-    if: startsWith(github.repository, 'Homebrew/')
+    if: github.repository_owner == 'Homebrew'
     runs-on: ubuntu-22.04
     steps:
       - name: Set up Homebrew
@@ -150,7 +164,7 @@ jobs:
   cask-audit:
     name: cask audit
     needs: syntax
-    if: startsWith(github.repository, 'Homebrew/')
+    if: github.repository_owner == 'Homebrew'
     runs-on: macos-13
     steps:
       - name: Set up Homebrew
@@ -294,12 +308,6 @@ jobs:
           - name: tests (macOS 13)
             test-flags: --coverage
             runs-on: macos-13
-          - name: tests (Ubuntu 22.04; Ruby 2.6)
-            runs-on: ubuntu-22.04
-            ruby: '2.6'
-          - name: tests (macOS 13; Ruby 2.6)
-            runs-on: macos-13
-            ruby: '2.6'
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -313,21 +321,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
-          key: ${{ matrix.runs-on }}-tests-rubygems${{ matrix.ruby }}-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ${{ matrix.runs-on }}-tests-rubygems${{ matrix.ruby }}-
-
-      - name: Setup Ruby
-        if: matrix.ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler: none
-
-      - name: Setup Ruby environment
-        if: matrix.ruby
-        run: |
-          echo "HOMEBREW_USE_RUBY_FROM_PATH=1" >> "${GITHUB_ENV}"
-          rm -rf "${{ steps.set-up-homebrew.outputs.repository-path }}/Library/Homebrew/vendor/portable-ruby"
+          key: ${{ matrix.runs-on }}-tests-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ matrix.runs-on }}-tests-rubygems-
 
       - run: brew config
 
@@ -341,8 +336,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: tests
-          key: ${{ runner.os }}-${{ matrix.test-flags }}-parallel_runtime_rspec${{ matrix.ruby }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-${{ matrix.test-flags }}-parallel_runtime_rspec${{ matrix.ruby }}-
+          key: ${{ runner.os }}-${{ matrix.test-flags }}-parallel_runtime_rspec-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ matrix.test-flags }}-parallel_runtime_rspec-
 
       - name: Install brew tests dependencies
         if: matrix.name != 'tests (generic OS)'
@@ -402,7 +397,7 @@ jobs:
   test-default-formula:
     name: ${{ matrix.name }}
     needs: syntax
-    if: startsWith(github.repository, 'Homebrew/')
+    if: github.repository_owner == 'Homebrew'
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:

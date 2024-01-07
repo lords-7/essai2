@@ -51,7 +51,7 @@ module Utils
 
       def receipt_path(bottle_file)
         bottle_file_list(bottle_file).find do |line|
-          line =~ %r{.+/.+/INSTALL_RECEIPT.json}
+          %r{.+/.+/INSTALL_RECEIPT.json}.match?(line)
         end
       end
 
@@ -190,7 +190,7 @@ module Utils
         elsif macos? && [:x86_64, :intel].include?(arch)
           system
         else
-          "#{standardized_arch}_#{system}".to_sym
+          :"#{standardized_arch}_#{system}"
         end
       end
 

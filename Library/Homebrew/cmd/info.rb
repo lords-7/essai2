@@ -207,7 +207,10 @@ module Homebrew
       end
     when :v2
       formulae, casks = if all
-        [Formula.all(eval_all: args.eval_all?).sort, Cask::Cask.all.sort_by(&:full_name)]
+        [
+          Formula.all(eval_all: args.eval_all?).sort,
+          Cask::Cask.all(eval_all: args.eval_all?).sort_by(&:full_name),
+        ]
       elsif args.installed?
         [Formula.installed.sort, Cask::Caskroom.casks.sort_by(&:full_name)]
       else
@@ -278,14 +281,8 @@ module Homebrew
     puts formula.desc if formula.desc
     puts Formatter.url(formula.homepage) if formula.homepage
 
-    deprecate_disable_type, deprecate_disable_reason = DeprecateDisable.deprecate_disable_info formula
-    if deprecate_disable_type.present?
-      if deprecate_disable_reason.present?
-        puts "#{deprecate_disable_type.capitalize} because it #{deprecate_disable_reason}!"
-      else
-        puts "#{deprecate_disable_type.capitalize}!"
-      end
-    end
+    deprecate_disable_info_string = DeprecateDisable.message(formula)
+    puts deprecate_disable_info_string.capitalize if deprecate_disable_info_string.present?
 
     conflicts = formula.conflicts.map do |conflict|
       reason = " (because #{conflict.reason})" if conflict.reason

@@ -1,4 +1,4 @@
-# typed: false
+# typed: true
 # frozen_string_literal: true
 
 # This file is included before any other files. It intentionally has typing disabled and has minimal use of `require`.
@@ -9,13 +9,15 @@ gems_vendored = if required_ruby_minor.nil?
   true
 else
   ruby_major, ruby_minor, = RUBY_VERSION.split(".").map(&:to_i)
+  raise "Could not parse Ruby requirements" if !ruby_major || !ruby_minor || !required_ruby_major
+
   if ruby_major < required_ruby_major || (ruby_major == required_ruby_major && ruby_minor < required_ruby_minor)
     raise "Homebrew must be run under Ruby #{required_ruby_major}.#{required_ruby_minor}! " \
           "You're running #{RUBY_VERSION}."
   end
 
   # This list should match .gitignore
-  vendored_versions = ["2.6", "3.1"].freeze
+  vendored_versions = ["3.1"].freeze
   vendored_versions.include?("#{ruby_major}.#{ruby_minor}")
 end.freeze
 
@@ -25,7 +27,8 @@ require "rbconfig"
 $LOAD_PATH.reject! { |path| path.start_with?(RbConfig::CONFIG["sitedir"]) }
 
 require "pathname"
-HOMEBREW_LIBRARY_PATH = Pathname(__dir__).parent.realpath.freeze
+dir = __dir__ || raise("__dir__ is not defined")
+HOMEBREW_LIBRARY_PATH = Pathname(dir).parent.realpath.freeze
 
 require_relative "../utils/gems"
 Homebrew.setup_gem_environment!(setup_path: false)
@@ -40,9 +43,4 @@ $LOAD_PATH.push HOMEBREW_LIBRARY_PATH.to_s unless $LOAD_PATH.include?(HOMEBREW_L
 require_relative "../vendor/bundle/bundler/setup"
 $LOAD_PATH.unshift "#{HOMEBREW_LIBRARY_PATH}/vendor/bundle/#{RUBY_ENGINE}/#{Gem.ruby_api_version}/gems/" \
                    "bundler-#{Homebrew::HOMEBREW_BUNDLER_VERSION}/lib"
-if ruby_major == 2 && ruby_minor == 6
-  # TEMP: Ruby 3 transition
-  $LOAD_PATH.unshift "#{HOMEBREW_LIBRARY_PATH}/vendor/bundle/#{RUBY_ENGINE}/#{Gem.ruby_api_version}/gems/" \
-                     "did_you_mean-1.6.3/lib"
-end
 $LOAD_PATH.uniq!

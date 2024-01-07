@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "attrable"
 require "cache_store"
 require "did_you_mean"
 require "formula_support"
@@ -66,7 +67,7 @@ class Formula
   include Homebrew::Livecheck::Constants
   extend Forwardable
   extend Cachable
-  extend Predicable
+  extend Attrable
   extend APIHashable
 
   # The name of this {Formula}.
@@ -295,7 +296,7 @@ class Formula
 
     spec.owner = self
     add_global_deps_to_spec(spec)
-    instance_variable_set("@#{name}", spec)
+    instance_variable_set(:"@#{name}", spec)
   end
 
   sig { params(spec: SoftwareSpec).void }
@@ -307,13 +308,15 @@ class Formula
   end
 
   def validate_attributes!
-    raise FormulaValidationError.new(full_name, :name, name) if name.blank? || name.match?(/\s/)
+    if name.blank? || name.match?(/\s/) || !Utils.safe_filename?(name)
+      raise FormulaValidationError.new(full_name, :name, name)
+    end
 
     url = active_spec.url
     raise FormulaValidationError.new(full_name, :url, url) if url.blank? || url.match?(/\s/)
 
     val = version.respond_to?(:to_str) ? version.to_str : version
-    return if val.present? && !val.match?(/\s/)
+    return if val.present? && !val.match?(/\s/) && Utils.safe_filename?(val)
 
     raise FormulaValidationError.new(full_name, :version, val)
   end
@@ -530,7 +533,7 @@ class Formula
   # @deprecated Use {#oldnames} instead.
   sig { returns(T.nilable(String)) }
   def oldname
-    odeprecated "Formula#oldname", "Formula#oldnames"
+    odisabled "Formula#oldname", "Formula#oldnames"
     @oldname ||= oldnames.first
   end
 
@@ -567,9 +570,11 @@ class Formula
   delegate declared_deps: :active_spec
 
   # Dependencies provided by macOS for the currently active {SoftwareSpec}.
+  # @deprecated
   delegate uses_from_macos_elements: :active_spec
 
   # Dependency names provided by macOS for the currently active {SoftwareSpec}.
+  # @deprecated
   delegate uses_from_macos_names: :active_spec
 
   # The {Requirement}s for the currently active {SoftwareSpec}.
@@ -1084,6 +1089,7 @@ class Formula
   #
   # @deprecated Please use {Homebrew::Service} instead.
   def plist
+    # odeprecated: consider removing entirely in 4.3.0
     nil
   end
 
@@ -1097,13 +1103,6 @@ class Formula
   sig { returns(String) }
   def service_name
     service.service_name
-  end
-
-  # The generated launchd {.plist} file path.
-  sig { returns(Pathname) }
-  def plist_path
-    odisabled "formula.plist_path", "formula.launchd_service_path"
-    launchd_service_path
   end
 
   # The generated launchd {.service} file path.
@@ -1128,12 +1127,6 @@ class Formula
   def service
     @service ||= Homebrew::Service.new(self, &self.class.service)
   end
-
-  # @private
-  delegate plist_manual: :"self.class"
-
-  # @private
-  delegate plist_startup: :"self.class"
 
   # A stable path for this formula, when installed. Contains the formula name
   # but no version number. Only the active version will be linked here if
@@ -1338,7 +1331,7 @@ class Formula
     self.class.link_overwrite_paths.any? do |p|
       p == to_check ||
         to_check.start_with?("#{p.chomp("/")}/") ||
-        to_check =~ /^#{Regexp.escape(p).gsub('\*', ".*?")}$/
+        /^#{Regexp.escape(p).gsub('\*', ".*?")}$/.match?(to_check)
     end
   end
 
@@ -1621,9 +1614,15 @@ class Formula
   end
 
   # Standard parameters for configure builds.
-  sig { returns(T::Array[String]) }
-  def std_configure_args
-    ["--disable-debug", "--disable-dependency-tracking", "--prefix=#{prefix}", "--libdir=#{lib}"]
+  sig {
+    params(
+      prefix: T.any(String, Pathname),
+      libdir: T.any(String, Pathname),
+    ).returns(T::Array[String])
+  }
+  def std_configure_args(prefix: self.prefix, libdir: "lib")
+    libdir = Pathname(libdir).expand_path(prefix)
+    ["--disable-debug", "--disable-dependency-tracking", "--prefix=#{prefix}", "--libdir=#{libdir}"]
   end
 
   # Standard parameters for cargo builds.
@@ -1933,7 +1932,9 @@ class Formula
   # this should only be used when users specify `--all` to a command
   # @private
   def self.all(eval_all: false)
-    odisabled "Formula#all without --eval-all or HOMEBREW_EVAL_ALL" if !eval_all && !Homebrew::EnvConfig.eval_all?
+    if !eval_all && !Homebrew::EnvConfig.eval_all?
+      raise ArgumentError, "Formula#all without --eval-all or HOMEBREW_EVAL_ALL"
+    end
 
     (core_names + tap_files).map do |name_or_file|
       Formulary.factory(name_or_file)
@@ -1956,6 +1957,13 @@ class Formula
     else
       []
     end
+  end
+
+  # An array of all currently installed formula names.
+  # @private
+  sig { returns(T::Array[String]) }
+  def self.installed_formula_names
+    racks.map { |rack| rack.basename.to_s }
   end
 
   # An array of all installed {Formula}
@@ -2235,6 +2243,7 @@ class Formula
       "revision"                 => revision,
       "version_scheme"           => version_scheme,
       "bottle"                   => {},
+      "pour_bottle_only_if"      => self.class.pour_bottle_only_if&.to_s,
       "keg_only"                 => keg_only?,
       "keg_only_reason"          => keg_only_reason&.to_hash,
       "options"                  => [],
@@ -2910,7 +2919,7 @@ class Formula
 
   # The methods below define the formula DSL.
   class << self
-    extend Predicable
+    extend Attrable
 
     include BuildEnvironment::DSL
     include OnSystem::MacOSAndLinux
@@ -2927,7 +2936,6 @@ class Formula
         @conflicts = []
         @skip_clean_paths = Set.new
         @link_overwrite_paths = Set.new
-        @allowed_missing_libraries = Set.new
         @loaded_from_api = false
       end
     end
@@ -2949,7 +2957,6 @@ class Formula
       @conflicts.freeze
       @skip_clean_paths.freeze
       @link_overwrite_paths.freeze
-      @allowed_missing_libraries.freeze
       super
     end
 
@@ -3031,14 +3038,6 @@ class Formula
       @service_block.present?
     end
 
-    # The `:startup` attribute set by {.plist_options}.
-    # @private
-    attr_reader :plist_startup
-
-    # The `:manual` attribute set by {.plist_options}.
-    # @private
-    attr_reader :plist_manual
-
     # @private
     attr_reader :conflicts
 
@@ -3047,9 +3046,6 @@ class Formula
 
     # @private
     attr_reader :link_overwrite_paths
-
-    # @private
-    attr_reader :allowed_missing_libraries
 
     # If `pour_bottle?` returns `false` the user-visible reason to display for
     # why they cannot use the bottle.
@@ -3359,24 +3355,6 @@ class Formula
       specs.each { |spec| spec.patch(strip, src, &block) }
     end
 
-    # Defines launchd plist handling.
-    #
-    # Does your plist need to be loaded at startup?
-    # <pre>plist_options startup: true</pre>
-    #
-    # Or only when necessary or desired by the user?
-    # <pre>plist_options manual: "foo"</pre>
-    #
-    # Or perhaps you'd like to give the user a choice? Ooh fancy.
-    # <pre>plist_options startup: true, manual: "foo start"</pre>
-    #
-    # @deprecated Please use {Homebrew::Service.require_root} instead.
-    def plist_options(options)
-      odisabled "plist_options", "service.require_root"
-      @plist_startup = options[:startup]
-      @plist_manual = options[:manual]
-    end
-
     # One or more formulae that conflict with this one and why.
     # <pre>conflicts_with "imagemagick", because: "both install `convert` binaries"</pre>
     def conflicts_with(*names)
@@ -3538,6 +3516,7 @@ class Formula
     # <pre>pour_bottle? only_if: :clt_installed</pre>
     def pour_bottle?(only_if: nil, &block)
       @pour_bottle_check = PourBottleCheck.new(self)
+      @pour_bottle_only_if = only_if
 
       if only_if.present? && block.present?
         raise ArgumentError, "Do not pass both a preset condition and a block to `pour_bottle?`"
@@ -3571,13 +3550,16 @@ class Formula
       @pour_bottle_check.instance_eval(&block)
     end
 
+    # @private
+    attr_reader :pour_bottle_only_if
+
     # Deprecates a {Formula} (on the given date) so a warning is
     # shown on each installation. If the date has not yet passed the formula
     # will not be deprecated.
     # <pre>deprecate! date: "2020-08-27", because: :unmaintained</pre>
     # <pre>deprecate! date: "2020-08-27", because: "has been replaced by foo"</pre>
     # @see https://docs.brew.sh/Deprecating-Disabling-and-Removing-Formulae
-    # @see DeprecateDisable::DEPRECATE_DISABLE_REASONS
+    # @see DeprecateDisable::FORMULA_DEPRECATE_DISABLE_REASONS
     def deprecate!(date:, because:)
       @deprecation_date = Date.parse(date)
       return if @deprecation_date > Date.today
@@ -3612,7 +3594,7 @@ class Formula
     # <pre>disable! date: "2020-08-27", because: :does_not_build</pre>
     # <pre>disable! date: "2020-08-27", because: "has been replaced by foo"</pre>
     # @see https://docs.brew.sh/Deprecating-Disabling-and-Removing-Formulae
-    # @see DeprecateDisable::DEPRECATE_DISABLE_REASONS
+    # @see DeprecateDisable::FORMULA_DEPRECATE_DISABLE_REASONS
     def disable!(date:, because:)
       @disable_date = Date.parse(date)
 
@@ -3655,21 +3637,6 @@ class Formula
     def link_overwrite(*paths)
       paths.flatten!
       link_overwrite_paths.merge(paths)
-    end
-
-    # Permit links to certain libraries that don't exist. Available on Linux only.
-    def ignore_missing_libraries(*libs)
-      odisabled "ignore_missing_libraries"
-      unless Homebrew::SimulateSystem.simulating_or_running_on_linux?
-        raise FormulaSpecificationError, "#{__method__} is available on Linux only"
-      end
-
-      libraries = libs.flatten
-      if libraries.any? { |x| !x.is_a?(String) && !x.is_a?(Regexp) }
-        raise FormulaSpecificationError, "#{__method__} can handle Strings and Regular Expressions only"
-      end
-
-      allowed_missing_libraries.merge(libraries)
     end
   end
 end

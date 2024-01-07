@@ -7,6 +7,7 @@ require "tab"
 require "utils/bottles"
 require "service"
 require "utils/curl"
+require "deprecate_disable"
 
 require "active_support/core_ext/hash/deep_transform_values"
 
@@ -153,14 +154,14 @@ module Formulary
 
     json_formula = Homebrew::API.merge_variations(json_formula)
 
-    uses_from_macos_names = json_formula["uses_from_macos"].map do |dep|
+    uses_from_macos_names = json_formula["uses_from_macos"]&.map do |dep|
       next dep unless dep.is_a? Hash
 
       dep.keys.first
     end
 
     requirements = {}
-    json_formula["requirements"].map do |req|
+    json_formula["requirements"]&.map do |req|
       req_name = req["name"].to_sym
       next if API_SUPPORTED_REQUIREMENTS.exclude?(req_name)
 
@@ -175,7 +176,7 @@ module Formulary
 
       req_tags = []
       req_tags << req_version if req_version.present?
-      req_tags += req["contexts"].map do |tag|
+      req_tags += req["contexts"]&.map do |tag|
         case tag
         when String
           tag.to_sym
@@ -201,7 +202,7 @@ module Formulary
 
       dep_json = json_formula.fetch("#{spec}_dependencies", json_formula)
 
-      dep_json["dependencies"].each do |dep|
+      dep_json["dependencies"]&.each do |dep|
         # Backwards compatibility check - uses_from_macos used to be a part of dependencies on Linux
         next if !json_formula.key?("uses_from_macos_bounds") && uses_from_macos_names.include?(dep) &&
                 !Homebrew::SimulateSystem.simulating_or_running_on_macos?
@@ -210,7 +211,7 @@ module Formulary
       end
 
       [:build, :test, :recommended, :optional].each do |type|
-        dep_json["#{type}_dependencies"].each do |dep|
+        dep_json["#{type}_dependencies"]&.each do |dep|
           # Backwards compatibility check - uses_from_macos used to be a part of dependencies on Linux
           next if !json_formula.key?("uses_from_macos_bounds") && uses_from_macos_names.include?(dep) &&
                   !Homebrew::SimulateSystem.simulating_or_running_on_macos?
@@ -219,7 +220,7 @@ module Formulary
         end
       end
 
-      dep_json["uses_from_macos"].each_with_index do |dep, index|
+      dep_json["uses_from_macos"]&.each_with_index do |dep, index|
         bounds = dep_json.fetch("uses_from_macos_bounds", [])[index] || {}
         bounds.deep_transform_keys!(&:to_sym)
         bounds.deep_transform_values! { |val| val.is_a?(String) ? val.to_sym : val }
@@ -291,22 +292,26 @@ module Formulary
         end
       end
 
+      if (pour_bottle_only_if = json_formula["pour_bottle_only_if"])
+        pour_bottle? only_if: pour_bottle_only_if.to_sym
+      end
+
       if (keg_only_reason = json_formula["keg_only_reason"].presence)
         reason = Formulary.convert_to_string_or_symbol keg_only_reason["reason"]
         keg_only reason, keg_only_reason["explanation"]
       end
 
       if (deprecation_date = json_formula["deprecation_date"].presence)
-        reason = Formulary.convert_to_deprecate_disable_reason_string_or_symbol json_formula["deprecation_reason"]
+        reason = DeprecateDisable.to_reason_string_or_symbol json_formula["deprecation_reason"], type: :formula
         deprecate! date: deprecation_date, because: reason
       end
 
       if (disable_date = json_formula["disable_date"].presence)
-        reason = Formulary.convert_to_deprecate_disable_reason_string_or_symbol json_formula["disable_reason"]
+        reason = DeprecateDisable.to_reason_string_or_symbol json_formula["disable_reason"], type: :formula
         disable! date: disable_date, because: reason
       end
 
-      json_formula["conflicts_with"].each_with_index do |conflict, index|
+      json_formula["conflicts_with"]&.each_with_index do |conflict, index|
         conflicts_with conflict, because: json_formula.dig("conflicts_with_reasons", index)
       end
 
@@ -456,13 +461,6 @@ module Formulary
     return string[1..].to_sym if string.start_with?(":")
 
     string
-  end
-
-  def self.convert_to_deprecate_disable_reason_string_or_symbol(string)
-    require "deprecate_disable"
-    return string unless DeprecateDisable::DEPRECATE_DISABLE_REASONS.keys.map(&:to_s).include?(string)
-
-    string.to_sym
   end
 
   # A {FormulaLoader} returns instances of formulae.

@@ -280,11 +280,21 @@ module Cask
 
           url json_cask[:url], **json_cask.fetch(:url_specs, {}) if json_cask[:url].present?
           appcast json_cask[:appcast] if json_cask[:appcast].present?
-          json_cask[:name].each do |cask_name|
+          json_cask[:name]&.each do |cask_name|
             name cask_name
           end
           desc json_cask[:desc]
           homepage json_cask[:homepage]
+
+          if (deprecation_date = json_cask[:deprecation_date].presence)
+            reason = DeprecateDisable.to_reason_string_or_symbol json_cask[:deprecation_reason], type: :cask
+            deprecate! date: deprecation_date, because: reason
+          end
+
+          if (disable_date = json_cask[:disable_date].presence)
+            reason = DeprecateDisable.to_reason_string_or_symbol json_cask[:disable_reason], type: :cask
+            disable! date: disable_date, because: reason
+          end
 
           auto_updates json_cask[:auto_updates] unless json_cask[:auto_updates].nil?
           conflicts_with(**json_cask[:conflicts_with]) if json_cask[:conflicts_with].present?
