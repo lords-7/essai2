@@ -1,3 +1,4 @@
+![Uploading Screenshot_20240103-230227.jpg…]()
 # `brew` Shell Completion
 
 Homebrew comes with completion definitions for the `brew` command. Some packages also provide completion definitions for their own programs.
