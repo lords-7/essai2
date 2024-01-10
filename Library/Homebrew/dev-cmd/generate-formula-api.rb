@@ -58,10 +58,12 @@ module Homebrew
       Formulary.enable_factory_cache!
       Formula.generating_hash!
 
+      internal_formula_hashes = []
       tap.formula_names.each do |name|
         formula = Formulary.factory(name)
         name = formula.name
         json = JSON.pretty_generate(formula.to_hash_with_variations)
+        internal_formula_hashes << formula.to_api_hash
         html_template_name = html_template(name)
 
         unless args.dry_run?
@@ -74,6 +76,8 @@ module Homebrew
         raise
       end
 
+      internal_formula_json = JSON.generate(internal_formula_hashes)
+      File.write("internal_formula.json", internal_formula_json) unless args.dry_run?
       canonical_json = JSON.pretty_generate(tap.formula_renames.merge(tap.alias_table))
       File.write("_data/formula_canonical.json", "#{canonical_json}\n") unless args.dry_run?
     end

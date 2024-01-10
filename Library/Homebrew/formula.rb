@@ -2404,9 +2404,10 @@ class Formula
       )
     end
 
-    variations = {}
+    @variations_hash ||= {}.tap do |variations|
+      next unless path.exist?
+      next unless on_system_blocks_exist?
 
-    if path.exist? && on_system_blocks_exist?
       formula_contents = path.read
       OnSystem::ALL_OS_ARCH_COMBINATIONS.each do |os, arch|
         bottle_tag = Utils::Bottles::Tag.new(system: os, arch: arch)
@@ -2429,8 +2430,22 @@ class Formula
       end
     end
 
-    hash["variations"] = variations
+    hash["variations"] = @variations_hash
     hash
+  end
+
+  # @private
+  def to_api_hash
+    hash = to_hash_with_variations
+
+    if (stable_bottle = hash.dig("bottle", "stable"))
+      stable_bottle["files"] = stable_bottle["files"].transform_values do |file|
+        # The "url" is not used here and takes up a lot of space.
+        file.slice("cellar", "sha256")
+      end
+    end
+
+    hash.reject { |_, value| value.blank? }.to_h
   end
 
   # Returns the bottle information for a formula.
