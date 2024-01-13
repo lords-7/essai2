@@ -322,6 +322,7 @@ describe Formulary do
               "run_type"    => "immediate",
               "working_dir" => "/$HOME",
             },
+            "ruby_source_path"         => "Formula/t/testball_bottle.rb",
           }.merge(extra_items),
         }
       end
@@ -370,8 +371,38 @@ describe Formulary do
         }
       end
 
+      let(:blank_fields) do
+        {
+          "oldnames"                 => [],
+          "aliases"                  => [],
+          "versioned_formulae"       => [],
+          "keg_only_reason"          => nil,
+          "options"                  => [],
+          "build_dependencies"       => [],
+          "dependencies"             => [],
+          "test_dependencies"        => [],
+          "recommended_dependencies" => [],
+          "optional_dependencies"    => [],
+          "uses_from_macos"          => [],
+          "uses_from_macos_bounds"   => [],
+          "requirements"             => [],
+          "conflicts_with"           => [],
+          "conflicts_with_reasons"   => [],
+          "link_overwrite"           => [],
+          "caveats"                  => nil,
+          "installed"                => [],
+          "linked_keg"               => nil,
+          "deprecation_date"         => [],
+          "deprecation_reason"       => [],
+          "disable_date"             => [],
+          "disable_reason"           => [],
+          "service"                  => nil,
+          "variations"               => {},
+        }
+      end
+
       before do
-        allow(described_class).to receive(:loader_for).and_return(described_class::FormulaAPILoader.new(formula_name))
+        allow(Homebrew::EnvConfig).to receive(:no_install_from_api?).and_return(false)
 
         # don't try to load/fetch gcc/glibc
         allow(DevelopmentTools).to receive_messages(needs_libc_formula?: false, needs_compiler_formula?: false)
@@ -468,6 +499,30 @@ describe Formulary do
         expect(formula.declared_deps.count).to eq 6
         expect(formula.deps.count).to eq 5
         expect(formula.deps.map(&:name).include?("uses_from_macos_dep")).to be true
+      end
+
+      it "returns a Formula from a hash with missing keys" do
+        # Use a hash with blank fields to load the first formula.
+        all_formulae = formula_json_contents(blank_fields)
+        allow(Homebrew::API::Formula).to receive(:all_formulae).and_return(all_formulae)
+
+        formula = described_class.factory(formula_name)
+        expect(formula).to be_a(Formula)
+
+        # Use a hash with missing fields to load the second formula.
+        api_json = formula.to_api_hash
+        expect(api_json).not_to have_key("dependencies")
+        expect(api_json).not_to have_key("caveats")
+
+        described_class.clear_cache
+        all_formulae = { formula_name => api_json.except("name") }
+        allow(Homebrew::API::Formula).to receive(:all_formulae).and_return(all_formulae)
+
+        internal_formula = described_class.factory(formula_name)
+        expect(internal_formula).to be_a(Formula)
+
+        # Check for loading inconsistencies based on missing fields.
+        expect(formula.to_hash).to eq internal_formula.to_hash
       end
     end
   end
