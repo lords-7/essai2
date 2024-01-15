@@ -396,6 +396,7 @@ describe Formulary do
           "deprecation_reason"       => [],
           "disable_date"             => [],
           "disable_reason"           => [],
+          "post_install_defined"     => false,
           "service"                  => nil,
           "variations"               => {},
         }
@@ -513,6 +514,8 @@ describe Formulary do
         api_json = formula.to_api_hash
         expect(api_json).not_to have_key("dependencies")
         expect(api_json).not_to have_key("caveats")
+        # This needs to be included when false because nil implies true for backwards compatibility.
+        expect(api_json).to have_key("post_install_defined")
 
         described_class.clear_cache
         all_formulae = { formula_name => api_json.except("name") }

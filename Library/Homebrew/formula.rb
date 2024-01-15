@@ -2436,16 +2436,20 @@ class Formula
 
   # @private
   def to_api_hash
-    hash = to_hash_with_variations
+    api_hash = to_hash_with_variations
 
-    if (stable_bottle = hash.dig("bottle", "stable"))
+    if (stable_bottle = api_hash.dig("bottle", "stable"))
       stable_bottle["files"] = stable_bottle["files"].transform_values do |file|
         # The "url" is not used here and takes up a lot of space.
         file.slice("cellar", "sha256")
       end
     end
 
-    hash.reject { |_, value| value.blank? }.to_h
+    api_hash.reject { |_, value| value.blank? }.to_h.tap do |hash|
+      # We use nil here to mean that post install is defined for backwards compatibility
+      # in `Formulary.load_formula_from_api` so we need to preserve the boolean value.
+      hash["post_install_defined"] = post_install_defined?
+    end
   end
 
   # Returns the bottle information for a formula.
