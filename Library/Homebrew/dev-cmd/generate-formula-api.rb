@@ -77,7 +77,7 @@ module Homebrew
       end
 
       internal_formula_json = JSON.generate(internal_formula_hashes)
-      File.write("internal_formula.json", internal_formula_json) unless args.dry_run?
+      File.write("api/internal_formula.json", internal_formula_json) unless args.dry_run?
       canonical_json = JSON.pretty_generate(tap.formula_renames.merge(tap.alias_table))
       File.write("_data/formula_canonical.json", "#{canonical_json}\n") unless args.dry_run?
     end
