@@ -55,15 +55,20 @@ module Homebrew
       tap_migrations_json = JSON.dump(tap.tap_migrations)
       File.write("api/formula_tap_migrations.json", tap_migrations_json) unless args.dry_run?
 
+      internal_formula_v3_hash = {
+        "aliases"        => tap.alias_table,
+        "formulae"       => {},
+        "renames"        => tap.formula_renames,
+        "tap_migrations" => tap.tap_migrations,
+      }
+
       Formulary.enable_factory_cache!
       Formula.generating_hash!
 
-      internal_formula_hashes = []
       tap.formula_names.each do |name|
         formula = Formulary.factory(name)
         name = formula.name
         json = JSON.pretty_generate(formula.to_hash_with_variations)
-        internal_formula_hashes << formula.to_api_hash
         html_template_name = html_template(name)
 
         unless args.dry_run?
@@ -71,13 +76,15 @@ module Homebrew
           File.write("api/formula/#{name}.json", FORMULA_JSON_TEMPLATE)
           File.write("formula/#{name}.html", html_template_name)
         end
+
+        internal_formula_v3_hash["formulae"][formula.name] = formula.to_api_hash.except("name")
       rescue
         onoe "Error while generating data for formula '#{name}'."
         raise
       end
 
-      internal_formula_json = JSON.generate(internal_formula_hashes)
-      File.write("api/internal_formula.json", internal_formula_json) unless args.dry_run?
+      internal_formula_v3_json = JSON.generate(internal_formula_v3_hash)
+      File.write("api/internal_formula_v3.json", internal_formula_v3_json) unless args.dry_run?
       canonical_json = JSON.pretty_generate(tap.formula_renames.merge(tap.alias_table))
       File.write("_data/formula_canonical.json", "#{canonical_json}\n") unless args.dry_run?
     end
