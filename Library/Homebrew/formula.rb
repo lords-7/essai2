@@ -2434,9 +2434,26 @@ class Formula
     hash
   end
 
+  # Builds internal json v3 hash.
+  #
   # @private
   def to_api_hash
-    api_hash = to_hash_with_variations
+    api_hash = to_hash_with_variations.except(
+      # Included in the top-level of the `internal_formula_v3.json` file
+      # created by the `brew generate-formula-api` command.
+      "aliases",
+      "oldname",
+      "oldnames",
+      "tap",
+      "tap_git_head",
+    )
+
+    # Remove keys that default to zero.
+    %w[revision version_scheme].each do |key|
+      next unless api_hash[key].zero?
+
+      api_hash.delete(key)
+    end
 
     if (stable_bottle = api_hash.dig("bottle", "stable"))
       stable_bottle["files"] = stable_bottle["files"].transform_values do |file|

@@ -376,6 +376,9 @@ describe Formulary do
           "oldnames"                 => [],
           "aliases"                  => [],
           "versioned_formulae"       => [],
+          "revision"                 => 0,
+          "version_scheme"           => 0,
+          "key_only"                 => false,
           "keg_only_reason"          => nil,
           "options"                  => [],
           "build_dependencies"       => [],
@@ -502,7 +505,7 @@ describe Formulary do
         expect(formula.deps.map(&:name).include?("uses_from_macos_dep")).to be true
       end
 
-      it "returns a Formula from a hash with missing keys" do
+      it "returns a Formula from a json v3 hash with missing keys" do
         # Use a hash with blank fields to load the first formula.
         all_formulae = formula_json_contents(blank_fields)
         allow(Homebrew::API::Formula).to receive(:all_formulae).and_return(all_formulae)
@@ -514,6 +517,7 @@ describe Formulary do
         api_json = formula.to_api_hash
         expect(api_json).not_to have_key("dependencies")
         expect(api_json).not_to have_key("caveats")
+        expect(api_json).not_to have_key("revision")
         # This needs to be included when false because nil implies true for backwards compatibility.
         expect(api_json).to have_key("post_install_defined")
 

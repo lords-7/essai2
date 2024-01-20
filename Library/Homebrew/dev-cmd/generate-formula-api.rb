@@ -56,10 +56,12 @@ module Homebrew
       File.write("api/formula_tap_migrations.json", tap_migrations_json) unless args.dry_run?
 
       internal_formula_v3_hash = {
+        "tap_name"       => tap.name,
+        "tap_git_head"   => tap.git_head,
         "aliases"        => tap.alias_table,
-        "formulae"       => {},
         "renames"        => tap.formula_renames,
         "tap_migrations" => tap.tap_migrations,
+        "formulae"       => {},
       }
 
       Formulary.enable_factory_cache!
