@@ -55,6 +55,14 @@ module Homebrew
       tap_migrations_json = JSON.dump(tap.tap_migrations)
       File.write("api/cask_tap_migrations.json", tap_migrations_json) unless args.dry_run?
 
+      internal_cask_v3_hash = {
+        "tap_name"       => tap.name,
+        "tap_git_head"   => tap.git_head,
+        "tap_migrations" => tap.tap_migrations,
+        "renames"        => tap.cask_renames,
+        "casks"          => {},
+      }
+
       Cask::Cask.generating_hash!
 
       tap.cask_files.each do |path|
@@ -70,10 +78,15 @@ module Homebrew
           File.write("api/cask-source/#{name}.rb", cask_source)
           File.write("cask/#{name}.html", html_template_name)
         end
+
+        internal_cask_v3_hash["casks"][cask.token] = cask.to_api_hash.except("token")
       rescue
         onoe "Error while generating data for cask '#{path.stem}'."
         raise
       end
+
+      internal_cask_v3_json = JSON.generate(internal_cask_v3_hash)
+      File.write("api/internal_cask_v3.json", internal_cask_v3_json) unless args.dry_run?
     end
   end
 end
