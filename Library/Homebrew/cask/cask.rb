@@ -353,11 +353,12 @@ module Cask
       end
 
       hash = to_h
-      variations = {}
 
-      hash_keys_to_skip = %w[outdated installed versions]
+      @variations_hash ||= {}.tap do |variations|
+        next unless @dsl.on_system_blocks_exist?
 
-      if @dsl.on_system_blocks_exist?
+        hash_keys_to_skip = %w[outdated installed versions]
+
         begin
           MacOSVersion::SYMBOLS.keys.product(OnSystem::ARCH_OPTIONS).each do |os, arch|
             bottle_tag = ::Utils::Bottles::Tag.new(system: os, arch: arch)
@@ -380,8 +381,20 @@ module Cask
         end
       end
 
-      hash["variations"] = variations
+      hash["variations"] = @variations_hash
       hash
+    end
+
+    def to_api_hash
+      api_hash = to_hash_with_variations.except(
+        # Included in the top-level of the `internal_cask_v3.json` file
+        # created by the `brew generate-cask-api` command.
+        "old_tokens",
+        "tap",
+        "tap_git_head",
+      )
+
+      api_hash.reject { |_, value| value.blank? }.to_h
     end
 
     private
