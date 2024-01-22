@@ -33,7 +33,7 @@ require "find"
 require "byebug"
 require "timeout"
 
-$LOAD_PATH.push(File.expand_path("#{ENV.fetch("HOMEBREW_LIBRARY")}/Homebrew/test/support/lib"))
+$LOAD_PATH.unshift(File.expand_path("#{ENV.fetch("HOMEBREW_LIBRARY")}/Homebrew/test/support/lib"))
 
 require_relative "../global"
 
@@ -217,7 +217,7 @@ RSpec.configure do |config|
     @__stdin = $stdin.clone
 
     begin
-      if (example.metadata.keys & [:focus, :byebug]).empty? && !ENV.key?("HOMEBREW_VERBOSE_TESTS")
+      if !example.metadata.keys.intersect?([:focus, :byebug]) && !ENV.key?("HOMEBREW_VERBOSE_TESTS")
         $stdout.reopen(File::NULL)
         $stderr.reopen(File::NULL)
       else
