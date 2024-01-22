@@ -2439,7 +2439,7 @@ class Formula
   # @private
   def to_api_hash
     api_hash = to_hash_with_variations.except(
-      # Included in the top-level of the `internal_formula_v3.json` file
+      # Included in the top-level of the `homebrew-core.json` file
       # created by the `brew generate-formula-api` command.
       "aliases",
       "oldname",
