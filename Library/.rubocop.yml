@@ -20,7 +20,6 @@ AllCops:
   Exclude:
     - "Homebrew/sorbet/rbi/gems/**/*.rbi"
     - "Homebrew/sorbet/rbi/hidden-definitions/*.rbi"
-    - "Homebrew/sorbet/rbi/todo.rbi"
     - "Homebrew/bin/*"
     - "Homebrew/vendor/**/*"
     - "Taps/*/*/vendor/**/*"
@@ -113,6 +112,7 @@ Layout/LineLength:
       '"/Library/PreferencePanes/',
       ' "~/Library/Application Support/',
       '"~/Library/Caches/',
+      '"~/Library/Containers',
       '"~/Application Support',
       " was verified as official when first introduced to the cask",
     ]
@@ -203,8 +203,10 @@ Performance/MethodObjectAsBlock:
 Rails:
   # Selectively enable what we want.
   Enabled: false
-  # Do not use ActiveSupport in RuboCops.
   Exclude:
+    # This file is loaded before any extra methods are defined.
+    - "Homebrew/standalone/init.rb"
+    # Do not use ActiveSupport in RuboCops.
     - "Homebrew/rubocops/**/*"
 
 # These relate to ActiveSupport and not other parts of Rails.
@@ -458,9 +460,5 @@ Performance/MapCompact:
   Enabled: false
 Style/ArgumentsForwarding:
   Enabled: false
-Style/ArrayIntersect:
-  Enabled: false
 Style/HashSyntax:
   EnforcedShorthandSyntax: either
-Style/RedundantFreeze:
-  Enabled: false
