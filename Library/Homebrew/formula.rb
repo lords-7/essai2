@@ -2446,17 +2446,25 @@ class Formula
       "oldnames",
       "tap",
       "tap_git_head",
+      # Not used at all and identical to "name" anyway.
+      "full_name",
     )
 
     # Remove keys that default to zero.
     %w[revision version_scheme].each do |key|
-      next unless api_hash[key].zero?
+      next unless api_hash.fetch(key).zero?
 
       api_hash.delete(key)
     end
 
+    # Remove unused url options.
+    api_hash["urls"] = api_hash.fetch("urls").transform_values(&:compact)
+
     if (stable_bottle = api_hash.dig("bottle", "stable"))
-      stable_bottle["files"] = stable_bottle["files"].transform_values do |file|
+      stable_bottle.delete("rebuild") if stable_bottle.fetch("rebuild").zero? # default value
+      stable_bottle.delete("root_url") # not used at all
+
+      stable_bottle["files"] = stable_bottle.fetch("files").transform_values do |file|
         # The "url" is not used here and takes up a lot of space.
         file.slice("cellar", "sha256")
       end
