@@ -1104,6 +1104,12 @@ class CoreTap < AbstractCoreTap
 
   # @private
   sig { params(file: Pathname).returns(String) }
+  def cask_file_to_name(file)
+    file.basename(".rb").to_s
+  end
+
+  # @private
+  sig { params(file: Pathname).returns(String) }
   def alias_file_to_name(file)
     file.basename.to_s
   end
