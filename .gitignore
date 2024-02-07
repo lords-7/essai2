@@ -53,25 +53,6 @@
 !**/vendor/bundle/ruby/*/gems/*/lib
 !**/vendor/bundle/ruby/*/gems/addressable-*/data
 !**/vendor/bundle/ruby/*/gems/public_suffix-*/data
-!**/vendor/bundle/ruby/*/gems/rubocop-performance-*/config
-!**/vendor/bundle/ruby/*/gems/rubocop-rails-*/config
-!**/vendor/bundle/ruby/*/gems/rubocop-rspec-*/config
-!**/vendor/bundle/ruby/*/gems/rubocop-sorbet-*/config
-
-# Ignore activesupport, except the ones we need.
-**/vendor/bundle/ruby/*/gems/activesupport-*/lib/**/*
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/*/
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/array/access.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/enumerable.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/file/atomic.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/deep_merge.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/deep_transform_values.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/hash/keys.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/object/deep_dup.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/object/duplicable.rb
-!**/vendor/bundle/ruby/*/gems/activesupport-*/lib/active_support/core_ext/string/exclude.rb
 
 # Ignore partially included gems where we don't need all files
 **/vendor/gems/mechanize-*/.*
@@ -96,7 +77,6 @@
 **/vendor/bundle/ruby/*/gems/coderay-*/
 **/vendor/bundle/ruby/*/gems/colorize-*/
 **/vendor/bundle/ruby/*/gems/commander-*/
-**/vendor/bundle/ruby/*/gems/concurrent-ruby-*/
 **/vendor/bundle/ruby/*/gems/diff-lcs-*/
 **/vendor/bundle/ruby/*/gems/docile-*/
 **/vendor/bundle/ruby/*/gems/ecma-re-validator-*/
@@ -104,7 +84,6 @@
 **/vendor/bundle/ruby/*/gems/hana-*/
 **/vendor/bundle/ruby/*/gems/highline-*/
 **/vendor/bundle/ruby/*/gems/hpricot-*/
-**/vendor/bundle/ruby/*/gems/i18n-*/
 **/vendor/bundle/ruby/*/gems/jaro_winkler-*/
 **/vendor/bundle/ruby/*/gems/json-*/
 **/vendor/bundle/ruby/*/gems/json_schemer-*/
@@ -126,7 +105,6 @@
 **/vendor/bundle/ruby/*/gems/psych-*/
 **/vendor/bundle/ruby/*/gems/pry-*/
 **/vendor/bundle/ruby/*/gems/racc-*/
-**/vendor/bundle/ruby/*/gems/rack-*/
 **/vendor/bundle/ruby/*/gems/rainbow-*/
 **/vendor/bundle/ruby/*/gems/rbi-*/
 **/vendor/bundle/ruby/*/gems/rdiscount-*/
@@ -158,7 +136,6 @@
 **/vendor/bundle/ruby/*/gems/syntax_tree-*/
 **/vendor/bundle/ruby/*/gems/tapioca-*/
 **/vendor/bundle/ruby/*/gems/thor-*/
-**/vendor/bundle/ruby/*/gems/tzinfo-*/
 **/vendor/bundle/ruby/*/gems/unf-*/
 **/vendor/bundle/ruby/*/gems/unf_ext-*/
 **/vendor/bundle/ruby/*/gems/unicode-display_width-*/
@@ -167,7 +144,6 @@
 **/vendor/bundle/ruby/*/gems/webrobots-*/
 **/vendor/bundle/ruby/*/gems/yard-*/
 **/vendor/bundle/ruby/*/gems/yard-sorbet-*/
-**/vendor/bundle/ruby/*/gems/zeitwerk-*/
 **/vendor/cache/
 **/vendor/specifications/
 

@@ -4,12 +4,15 @@
 require "utils/curl"
 require "json"
 require "zlib"
+require "extend/hash/keys"
+require "system_command"
 
 # GitHub Packages client.
 #
 # @api private
 class GitHubPackages
   include Context
+  include SystemCommand::Mixin
 
   URL_DOMAIN = "ghcr.io"
   URL_PREFIX = "https://#{URL_DOMAIN}/v2/".freeze
@@ -313,7 +316,7 @@ class GitHubPackages
         "org.opencontainers.image.url"           => bottle_hash["formula"]["homepage"],
         "org.opencontainers.image.vendor"        => org,
         "org.opencontainers.image.version"       => version,
-      }.reject { |_, v| v.blank? }
+      }.compact_blank
       manifests = []
     end
 
@@ -368,7 +371,7 @@ class GitHubPackages
         architecture: architecture,
         os: os,
         "os.version" => os_version,
-      }.reject { |_, v| v.blank? }
+      }.compact_blank
 
       tar_sha256 = Digest::SHA256.new
       Zlib::GzipReader.open(local_file) do |gz|
@@ -390,7 +393,7 @@ class GitHubPackages
         "sh.brew.bottle.glibc.version"      => glibc_version,
         "sh.brew.bottle.size"               => local_file_size.to_s,
         "sh.brew.tab"                       => tab.to_json,
-      }.reject { |_, v| v.blank? }
+      }.compact_blank
 
       annotations_hash = formula_annotations_hash.merge(descriptor_annotations_hash).merge(
         {
@@ -398,7 +401,7 @@ class GitHubPackages
           "org.opencontainers.image.documentation" => documentation,
           "org.opencontainers.image.title"         => "#{formula_full_name} #{tag}",
         },
-      ).reject { |_, v| v.blank? }.sort.to_h
+      ).compact_blank.sort.to_h
 
       image_manifest = {
         schemaVersion: 2,

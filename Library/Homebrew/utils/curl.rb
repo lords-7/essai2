@@ -3,14 +3,16 @@
 
 require "open3"
 
-require "extend/time"
+require "utils/timer"
+require "system_command"
 
 module Utils
   # Helper function for interacting with `curl`.
   #
   # @api private
   module Curl
-    using TimeRemaining
+    include SystemCommand::Mixin
+    extend SystemCommand::Mixin
 
     # This regex is used to extract the part of an ETag within quotation marks,
     # ignoring any leading weak validator indicator (`W/`). This simplifies
@@ -140,7 +142,7 @@ module Utils
       result = system_command curl_executable(use_homebrew_curl: use_homebrew_curl),
                               args:    curl_args(*args, **options),
                               env:     env,
-                              timeout: end_time&.remaining,
+                              timeout: Utils::Timer.remaining(end_time),
                               **command_options
 
       return result if result.success? || args.include?("--http1.1")
@@ -151,7 +153,7 @@ module Utils
       if result.exit_status == 16
         return curl_with_workarounds(
           *args, "--http1.1",
-          timeout: end_time&.remaining, **command_options, **options
+          timeout: Utils::Timer.remaining(end_time), **command_options, **options
         )
       end
 
