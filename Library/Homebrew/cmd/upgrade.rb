@@ -215,6 +215,7 @@ module Homebrew
           "#{f.full_specified_name} #{f.pkg_version}"
         end
       end
+      formulae_upgrades.sort!
       puts formulae_upgrades.join("\n")
     end
 
