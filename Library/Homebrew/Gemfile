@@ -42,6 +42,7 @@ group :pry, optional: true do
 end
 group :style, optional: true do
   gem "rubocop", require: false
+  gem "rubocop-md", require: false
   gem "rubocop-performance", require: false
   gem "rubocop-rspec", require: false
   gem "rubocop-sorbet", require: false
@@ -59,6 +60,7 @@ group :tests, optional: true do
   gem "simplecov-cobertura", require: false
 end
 group :typecheck, optional: true do
+  gem "method_source", require: false
   gem "parlour", require: false
   gem "sorbet-static-and-runtime", require: false
   gem "spoom", require: false

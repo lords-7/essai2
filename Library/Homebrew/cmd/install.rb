@@ -139,7 +139,7 @@ module Homebrew
         }],
         [:switch, "--adopt", {
           description: "Adopt existing artifacts in the destination that are identical to those being installed. " \
-                       "Cannot be combined with --force.",
+                       "Cannot be combined with `--force`.",
         }],
         [:switch, "--skip-cask-deps", {
           description: "Skip installing cask dependencies.",
@@ -192,7 +192,7 @@ module Homebrew
     end
 
     begin
-      formulae, casks = args.named.to_formulae_and_casks
+      formulae, casks = args.named.to_formulae_and_casks(warn: false)
                             .partition { |formula_or_cask| formula_or_cask.is_a?(Formula) }
     rescue FormulaOrCaskUnavailableError, Cask::CaskUnavailableError
       cask_tap = CoreCaskTap.instance

@@ -1,6 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
+require "system_command"
 require "tempfile"
 require "utils/shell"
 require "utils/formatter"
@@ -32,6 +33,8 @@ module GitHub
   #
   # @api private
   module API
+    extend SystemCommand::Mixin
+
     # Generic API error.
     class Error < RuntimeError
       attr_reader :github_message
@@ -197,6 +200,7 @@ module GitHub
       credentials_scopes = response_headers["x-oauth-scopes"]
       return if needed_scopes.subset?(Set.new(credentials_scopes.to_s.split(", ")))
 
+      github_permission_link = GitHub.pat_blurb(needed_scopes.to_a)
       needed_scopes = needed_scopes.to_a.join(", ").presence || "none"
       credentials_scopes = "none" if credentials_scopes.blank?
 
@@ -205,7 +209,7 @@ module GitHub
         Your #{what} credentials do not have sufficient scope!
         Scopes required: #{needed_scopes}
         Scopes present:  #{credentials_scopes}
-        #{GitHub.pat_blurb}
+        #{github_permission_link}
       EOS
     end
 

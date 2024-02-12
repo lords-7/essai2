@@ -1,6 +1,7 @@
 ---
 require:
   - ./Homebrew/rubocops.rb
+  - rubocop-md
   - rubocop-performance
   - rubocop-rspec
   - rubocop-sorbet
@@ -17,7 +18,6 @@ AllCops:
     - "**/*.rbi"
   Exclude:
     - "Homebrew/sorbet/rbi/gems/**/*.rbi"
-    - "Homebrew/sorbet/rbi/hidden-definitions/*.rbi"
     - "Homebrew/bin/*"
     - "Homebrew/vendor/**/*"
     - "Taps/*/*/vendor/**/*"
@@ -68,6 +68,7 @@ Homebrew/NegateInclude:
     # `exclude?` is not available here:
     - "Homebrew/standalone/init.rb"
     - "Homebrew/rubocops/**/*"
+    - "Homebrew/sorbet/tapioca/**/*"
 
 # `system` is a special case and aligns on second argument, so allow this for formulae.
 Layout/ArgumentAlignment:
@@ -213,6 +214,10 @@ Performance/CaseWhenSplat:
 # Makes code less readable for minor performance increases.
 Performance/MethodObjectAsBlock:
   Enabled: false
+
+RSpec:
+  Include:
+    - 'Homebrew/test/**/*'
 
 # Intentionally disabled as it doesn't fit with our code style.
 RSpec/AnyInstance:
@@ -373,7 +378,7 @@ Style/NumericLiterals:
 
 Style/OpenStructUse:
   Exclude:
-    - "Taps/**/*.rb"
+    - "Taps/**/*"
     # TODO: This is a pre-existing violation and should be corrected
     #   to define methods so that call sites can be type-checked.
     - "Homebrew/cli/args.rb"
@@ -426,7 +431,7 @@ Style/TernaryParentheses:
 Style/TopLevelMethodDefinition:
   Enabled: true
   Exclude:
-    - "Taps/**/*.rb"
+    - "Taps/**/*"
 
 # Trailing commas make diffs nicer.
 Style/TrailingCommaInArguments:
