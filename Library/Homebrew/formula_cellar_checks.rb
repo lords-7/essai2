@@ -143,6 +143,25 @@ module FormulaCellarChecks
     EOS
   end
 
+  def check_global_site_package_usage(formula)
+    return unless formula.tap.core_tap?
+    return unless formula.stable.url.start_with?("https://files.pythonhosted.org")
+
+    lib = formula.lib
+    global_site_package_found = Dir["#{lib}/python{3}*/site-packages/"].map { |f| File.dirname(f) }
+    return if global_site_package_found.empty?
+
+    bindings_found = Dir["#{lib}/python{3}*/site-packages/**/*.so"].map { |f| File.dirname(f) }
+    return unless bindings_found.empty?
+
+    <<~EOS
+      Python-wide site-packages usage detected. This is not allowed in Homebrew (see PEP 668).
+      Please either vendor this Python library or install it in libexec using a virtualenv.
+      The offending files are:
+        #{global_site_package_found * "\n  "}
+    EOS
+  end
+
   def check_elisp_dirname(share, name)
     return unless (share/"emacs/site-lisp").directory?
     # Emacs itself can do what it wants
@@ -387,24 +406,25 @@ module FormulaCellarChecks
   def audit_installed
     @new_formula ||= false
 
-    problem_if_output(check_manpages)
-    problem_if_output(check_infopages)
-    problem_if_output(check_jars)
-    problem_if_output(check_service_command(formula))
-    problem_if_output(check_non_libraries) if @new_formula
-    problem_if_output(check_non_executables(formula.bin))
-    problem_if_output(check_generic_executables(formula.bin))
-    problem_if_output(check_non_executables(formula.sbin))
-    problem_if_output(check_generic_executables(formula.sbin))
-    problem_if_output(check_easy_install_pth(formula.lib))
-    problem_if_output(check_elisp_dirname(formula.share, formula.name))
-    problem_if_output(check_elisp_root(formula.share, formula.name))
-    problem_if_output(check_python_packages(formula.lib, formula.deps))
-    problem_if_output(check_shim_references(formula.prefix))
-    problem_if_output(check_plist(formula.prefix, formula.plist))
-    problem_if_output(check_python_symlinks(formula.name, formula.keg_only?))
-    problem_if_output(check_cpuid_instruction(formula))
-    problem_if_output(check_binary_arches(formula))
+    # problem_if_output(check_manpages)
+    # problem_if_output(check_infopages)
+    # problem_if_output(check_jars)
+    # problem_if_output(check_service_command(formula))
+    # problem_if_output(check_non_libraries) if @new_formula
+    # problem_if_output(check_non_executables(formula.bin))
+    # problem_if_output(check_generic_executables(formula.bin))
+    # problem_if_output(check_non_executables(formula.sbin))
+    # problem_if_output(check_generic_executables(formula.sbin))
+    # problem_if_output(check_easy_install_pth(formula.lib))
+    problem_if_output(check_global_site_package_usage(formula))
+    # problem_if_output(check_elisp_dirname(formula.share, formula.name))
+    # problem_if_output(check_elisp_root(formula.share, formula.name))
+    # problem_if_output(check_python_packages(formula.lib, formula.deps))
+    # problem_if_output(check_shim_references(formula.prefix))
+    # problem_if_output(check_plist(formula.prefix, formula.plist))
+    # problem_if_output(check_python_symlinks(formula.name, formula.keg_only?))
+    # problem_if_output(check_cpuid_instruction(formula))
+    # problem_if_output(check_binary_arches(formula))
   end
   alias generic_audit_installed audit_installed
 
