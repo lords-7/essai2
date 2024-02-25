@@ -36,8 +36,6 @@ RSpec.describe FormulaInstaller do
       keg.unlink
       keg.uninstall
       formula.clear_cache
-      # there will be log files when sandbox is enable.
-      formula.logs.rmtree if formula.logs.directory?
     end
 
     expect(keg).not_to exist

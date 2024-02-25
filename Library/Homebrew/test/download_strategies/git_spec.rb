@@ -56,8 +56,6 @@ RSpec.describe GitDownloadStrategy do
 
     before { remote_repo.mkpath }
 
-    after { FileUtils.rm_rf remote_repo }
-
     it "fetches the hash of the last commit" do
       remote_repo.cd do
         setup_git_repo

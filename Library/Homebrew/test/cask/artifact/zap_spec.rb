@@ -20,10 +20,6 @@ RSpec.describe Cask::Artifact::Zap, :cask do
         FileUtils.touch ds_store
       end
 
-      after do
-        FileUtils.rm_rf empty_directory
-      end
-
       it "is supported" do
         expect(empty_directory_tree).to exist
         expect(ds_store).to exist

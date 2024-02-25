@@ -11,17 +11,11 @@ RSpec.describe Homebrew::Cleanup do
   let(:ds_store) { Pathname.new("#{HOMEBREW_CELLAR}/.DS_Store") }
   let(:lock_file) { Pathname.new("#{HOMEBREW_LOCKS}/foo") }
 
-  around do |example|
+  before do
     FileUtils.touch ds_store
     FileUtils.touch lock_file
     FileUtils.mkdir_p HOMEBREW_LIBRARY/"Homebrew/vendor"
     FileUtils.touch HOMEBREW_LIBRARY/"Homebrew/vendor/portable-ruby-version"
-
-    example.run
-  ensure
-    FileUtils.rm_f ds_store
-    FileUtils.rm_f lock_file
-    FileUtils.rm_rf HOMEBREW_LIBRARY/"Homebrew"
   end
 
   describe "::prune?" do

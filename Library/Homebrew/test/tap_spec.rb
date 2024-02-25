@@ -168,8 +168,6 @@ RSpec.describe Tap do
 
     (Tap::TAP_DIRECTORY/"someone/homebrew-no-git").mkpath
     expect(described_class.new("someone", "no-git").issues_url).to be_nil
-  ensure
-    path.parent.rmtree
   end
 
   specify "files" do
@@ -389,9 +387,6 @@ RSpec.describe Tap do
     expect(HOMEBREW_PREFIX/"etc/bash_completion.d/brew-tap-cmd").not_to exist
     expect(HOMEBREW_PREFIX/"share/zsh/site-functions/_brew-tap-cmd").not_to exist
     expect(HOMEBREW_PREFIX/"share/fish/vendor_completions.d/brew-tap-cmd.fish").not_to exist
-  ensure
-    (HOMEBREW_PREFIX/"etc").rmtree if (HOMEBREW_PREFIX/"etc").exist?
-    (HOMEBREW_PREFIX/"share").rmtree if (HOMEBREW_PREFIX/"share").exist?
   end
 
   specify "#link_completions_and_manpages when completions are enabled for non-official tap" do
@@ -410,9 +405,6 @@ RSpec.describe Tap do
     expect(HOMEBREW_PREFIX/"share/zsh/site-functions/_brew-tap-cmd").to be_a_file
     expect(HOMEBREW_PREFIX/"share/fish/vendor_completions.d/brew-tap-cmd.fish").to be_a_file
     tap.uninstall
-  ensure
-    (HOMEBREW_PREFIX/"etc").rmtree if (HOMEBREW_PREFIX/"etc").exist?
-    (HOMEBREW_PREFIX/"share").rmtree if (HOMEBREW_PREFIX/"share").exist?
   end
 
   specify "#link_completions_and_manpages when completions are disabled for non-official tap" do
@@ -428,9 +420,6 @@ RSpec.describe Tap do
     expect(HOMEBREW_PREFIX/"share/zsh/site-functions/_brew-tap-cmd").not_to be_a_file
     expect(HOMEBREW_PREFIX/"share/fish/vendor_completions.d/brew-tap-cmd.fish").not_to be_a_file
     tap.uninstall
-  ensure
-    (HOMEBREW_PREFIX/"etc").rmtree if (HOMEBREW_PREFIX/"etc").exist?
-    (HOMEBREW_PREFIX/"share").rmtree if (HOMEBREW_PREFIX/"share").exist?
   end
 
   specify "#link_completions_and_manpages when completions are enabled for official tap" do
@@ -449,9 +438,6 @@ RSpec.describe Tap do
     expect(HOMEBREW_PREFIX/"share/zsh/site-functions/_brew-tap-cmd").to be_a_file
     expect(HOMEBREW_PREFIX/"share/fish/vendor_completions.d/brew-tap-cmd.fish").to be_a_file
     tap.uninstall
-  ensure
-    (HOMEBREW_PREFIX/"etc").rmtree if (HOMEBREW_PREFIX/"etc").exist?
-    (HOMEBREW_PREFIX/"share").rmtree if (HOMEBREW_PREFIX/"share").exist?
   end
 
   specify "#config" do

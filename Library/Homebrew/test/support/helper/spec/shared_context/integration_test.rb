@@ -48,7 +48,6 @@ RSpec.shared_context "integration test" do # rubocop:disable RSpec/ContextWordin
 
     example.run
   ensure
-    FileUtils.rm_rf HOMEBREW_PREFIX/"bin"
     ENV.delete("HOMEBREW_INTEGRATION_TEST")
   end
 

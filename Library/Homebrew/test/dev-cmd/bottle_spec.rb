@@ -97,12 +97,6 @@ RSpec.describe "brew bottle" do
       )
     end
 
-    after do
-      FileUtils.rm_f "#{TEST_TMPDIR}/testball-1.0.arm64_big_sur.bottle.json"
-      FileUtils.rm_f "#{TEST_TMPDIR}/testball-1.0.catalina.bottle.json"
-      FileUtils.rm_f "#{TEST_TMPDIR}/testball-1.0.big_sur.bottle.json"
-    end
-
     it "adds the bottle block to a formula that has none" do
       core_tap.path.cd do
         system "git", "-c", "init.defaultBranch=master", "init"

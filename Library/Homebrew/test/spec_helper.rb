@@ -39,7 +39,6 @@ require_relative "../global"
 
 require "test/support/quiet_progress_formatter"
 require "test/support/helper/cask"
-require "test/support/helper/files"
 require "test/support/helper/fixtures"
 require "test/support/helper/formula"
 require "test/support/helper/mktmpdir"
@@ -48,6 +47,12 @@ require "test/support/helper/output_as_tty"
 require "test/support/helper/spec/shared_context/homebrew_cask" if OS.mac?
 require "test/support/helper/spec/shared_context/integration_test"
 require "test/support/helper/spec/shared_examples/formulae_exist"
+
+unless TEST_TMPDIR.to_s.include?("/homebrew-tests-")
+  raise ArgumentError, "TEST_TMPDIR is `#{TEST_TMPDIR}` and that will cause unexpected files to be deleted"
+end
+
+TEST_TMPDIR_GLOB = "#{TEST_TMPDIR}/.".freeze
 
 TEST_DIRECTORIES = [
   CoreTap.instance.path/"Formula",
@@ -221,8 +226,6 @@ RSpec.configure do |config|
 
     @__homebrew_failed = Homebrew.failed?
 
-    @__files_before_test = Test::Helper::Files.find_files
-
     @__env = ENV.to_hash # dup doesn't work on ENV
 
     @__stdout = $stdout.clone
@@ -273,39 +276,7 @@ RSpec.configure do |config|
       Requirement.clear_cache
       Readall.clear_cache if defined?(Readall)
 
-      FileUtils.rm_rf [
-        *TEST_DIRECTORIES,
-        *Keg::MUST_EXIST_SUBDIRECTORIES,
-        HOMEBREW_LINKED_KEGS,
-        HOMEBREW_PINNED_KEGS,
-        HOMEBREW_PREFIX/"var",
-        HOMEBREW_PREFIX/"Caskroom",
-        HOMEBREW_PREFIX/"Frameworks",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-cask",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-bar",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-bundle",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-foo",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-services",
-        HOMEBREW_LIBRARY/"Taps/homebrew/homebrew-shallow",
-        HOMEBREW_LIBRARY/"PinnedTaps",
-        HOMEBREW_REPOSITORY/".git",
-        CoreTap.instance.path/".git",
-        CoreTap.instance.alias_dir,
-        CoreTap.instance.path/"formula_renames.json",
-        CoreTap.instance.path/"tap_migrations.json",
-        CoreTap.instance.path/"audit_exceptions",
-        CoreTap.instance.path/"style_exceptions",
-        CoreTap.instance.path/"pypi_formula_mappings.json",
-        *Pathname.glob("#{HOMEBREW_CELLAR}/*/"),
-      ]
-
-      files_after_test = Test::Helper::Files.find_files
-
-      diff = Set.new(@__files_before_test) ^ Set.new(files_after_test)
-      expect(diff).to be_empty, <<~EOS
-        file leak detected:
-        #{diff.map { |f| "  #{f}" }.join("\n")}
-      EOS
+      FileUtils.rm_rf(TEST_TMPDIR_GLOB)
 
       Homebrew.failed = @__homebrew_failed
     end

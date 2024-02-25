@@ -70,8 +70,6 @@ RSpec.describe Homebrew::Diagnostic::Checks do
     expect(checks.check_user_path_2).to be_nil
     expect(checks.check_user_path_3)
       .to match("Homebrew's \"sbin\" was not found in your PATH")
-  ensure
-    sbin.rmtree
   end
 
   specify "#check_for_symlinked_cellar" do

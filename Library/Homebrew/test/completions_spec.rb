@@ -18,12 +18,6 @@ RSpec.describe Homebrew::Completions do
     external_path.mkpath
   end
 
-  after do
-    FileUtils.rm_rf completions_dir
-    FileUtils.rm_rf internal_path
-    FileUtils.rm_rf external_path.dirname
-  end
-
   context "when linking or unlinking completions" do
     def setup_completions(external:)
       internal_bash_completion = internal_path/"completions/bash"

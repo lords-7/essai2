@@ -32,7 +32,7 @@ module Cask
 end
 
 RSpec.shared_context "Homebrew Cask", :needs_macos do # rubocop:disable RSpec/ContextWording
-  around do |example|
+  before do
     third_party_tap = Tap.fetch("third-party", "tap")
 
     begin
@@ -60,14 +60,6 @@ RSpec.shared_context "Homebrew Cask", :needs_macos do # rubocop:disable RSpec/Co
 
         tap.clear_cache
       end
-
-      example.run
-    ensure
-      FileUtils.rm_rf Cask::Config::DEFAULT_DIRS_PATHNAMES.values
-      FileUtils.rm_rf [Cask::Config.new.binarydir, Cask::Caskroom.path, Cask::Cache.path]
-      FileUtils.rm_rf CoreCaskTap.instance.path
-      FileUtils.rm_rf third_party_tap.path
-      FileUtils.rm_rf third_party_tap.path.parent
     end
   end
 end

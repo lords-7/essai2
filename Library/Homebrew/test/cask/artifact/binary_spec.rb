@@ -10,13 +10,8 @@ RSpec.describe Cask::Artifact::Binary, :cask do
   let(:binarydir) { cask.config.binarydir }
   let(:expected_path) { binarydir.join("binary") }
 
-  around do |example|
+  before do
     binarydir.mkpath
-
-    example.run
-  ensure
-    FileUtils.rm_f expected_path
-    FileUtils.rmdir binarydir
   end
 
   context "when --no-binaries is specified" do

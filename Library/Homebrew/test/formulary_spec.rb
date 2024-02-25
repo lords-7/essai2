@@ -195,11 +195,6 @@ RSpec.describe Formulary do
         another_tap_formula_path.write formula_content
       end
 
-      after do
-        FileUtils.rm_rf tap.path
-        FileUtils.rm_rf another_tap.path
-      end
-
       it "returns a Formula that has gone through a tap migration into homebrew/core" do
         tap_migrations_path.write <<~EOS
           {

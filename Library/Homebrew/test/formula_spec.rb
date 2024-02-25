@@ -1550,8 +1550,6 @@ RSpec.describe Formula do
         setup_tab_for_prefix(head_prefix_c, source_modified_time: 1)
         described_class.clear_cache
         expect(f.outdated_kegs(fetch_head: true)).to be_empty
-      ensure
-        testball_repo.rmtree if testball_repo.exist?
       end
     end
 

@@ -12,10 +12,6 @@ RSpec.describe "brew determine-test-runners" do
                .sort
   end
 
-  after do
-    FileUtils.rm_f github_output
-  end
-
   let(:linux_runner) { "ubuntu-22.04" }
   # We need to make sure we write to a different path for each example.
   let(:github_output) { "#{TEST_TMPDIR}/github_output#{DetermineRunnerTestHelper.new.number}" }

@@ -93,10 +93,6 @@ RSpec.describe "brew update-report" do
         (tap.path/"Formula").mkpath
       end
 
-      after do
-        tap.path.parent.rmtree
-      end
-
       specify "with restructured Tap" do
         perform_update("update_git_diff_output_with_restructured_tap")
 

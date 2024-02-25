@@ -3,17 +3,10 @@
 require "style"
 
 RSpec.describe Homebrew::Style do
-  around do |example|
+  before do
     FileUtils.ln_s HOMEBREW_LIBRARY_PATH, HOMEBREW_LIBRARY/"Homebrew"
     FileUtils.ln_s HOMEBREW_LIBRARY_PATH.parent/".rubocop.yml", HOMEBREW_LIBRARY/".rubocop.yml"
 
-    example.run
-  ensure
-    FileUtils.rm_f HOMEBREW_LIBRARY/"Homebrew"
-    FileUtils.rm_f HOMEBREW_LIBRARY/".rubocop.yml"
-  end
-
-  before do
     allow(Homebrew).to receive(:install_bundler_gems!)
   end
 

@@ -8,10 +8,6 @@ RSpec.describe "brew cleanup" do
     FileUtils.touch HOMEBREW_LIBRARY/"Homebrew/vendor/portable-ruby-version"
   end
 
-  after do
-    FileUtils.rm_rf HOMEBREW_LIBRARY/"Homebrew"
-  end
-
   it_behaves_like "parseable arguments"
 
   describe "--prune=all", :integration_test do
