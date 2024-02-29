@@ -37,16 +37,20 @@ module Homebrew
   def update_python_resources
     args = update_python_resources_args.parse
 
-    args.named.to_formulae.each do |formula|
-      PyPI.update_python_resources! formula,
-                                    version:                  args.version,
-                                    package_name:             args.package_name,
-                                    extra_packages:           args.extra_packages,
-                                    exclude_packages:         args.exclude_packages,
-                                    print_only:               args.print_only?,
-                                    silent:                   args.silent?,
-                                    verbose:                  args.verbose?,
-                                    ignore_non_pypi_packages: args.ignore_non_pypi_packages?
+    # Python packages may need access to additional commands while generating pip report.
+    # We use the same PATH as bump commands to make sure resource updates behave similarly.
+    with_homebrew_path do
+      args.named.to_formulae.each do |formula|
+        PyPI.update_python_resources! formula,
+                                      version:                  args.version,
+                                      package_name:             args.package_name,
+                                      extra_packages:           args.extra_packages,
+                                      exclude_packages:         args.exclude_packages,
+                                      print_only:               args.print_only?,
+                                      silent:                   args.silent?,
+                                      verbose:                  args.verbose?,
+                                      ignore_non_pypi_packages: args.ignore_non_pypi_packages?
+      end
     end
   end
 end
