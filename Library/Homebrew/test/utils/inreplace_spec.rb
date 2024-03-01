@@ -19,13 +19,13 @@ RSpec.describe Utils::Inreplace do
   it "raises error if there are no files given to replace" do
     expect do
       described_class.inreplace [], "d", "f"
-    end.to raise_error(Utils::Inreplace::Error)
+    end.to raise_error(described_class::Error)
   end
 
   it "raises error if there is nothing to replace" do
     expect do
       described_class.inreplace file.path, "d", "f"
-    end.to raise_error(Utils::Inreplace::Error)
+    end.to raise_error(described_class::Error)
   end
 
   it "raises error if there is nothing to replace in block form" do
@@ -33,7 +33,7 @@ RSpec.describe Utils::Inreplace do
       described_class.inreplace(file.path) do |s|
         s.gsub!("d", "f") # rubocop:disable Performance/StringReplacement
       end
-    end.to raise_error(Utils::Inreplace::Error)
+    end.to raise_error(described_class::Error)
   end
 
   it "raises error if there is no make variables to replace" do
@@ -42,14 +42,14 @@ RSpec.describe Utils::Inreplace do
         s.change_make_var! "VAR", "value"
         s.remove_make_var! "VAR2"
       end
-    end.to raise_error(Utils::Inreplace::Error)
+    end.to raise_error(described_class::Error)
   end
 
   describe "#inreplace_pairs" do
     it "raises error if there is no old value" do
       expect do
         described_class.inreplace_pairs(file.path, [[nil, "f"]])
-      end.to raise_error(Utils::Inreplace::Error)
+      end.to raise_error(described_class::Error)
     end
   end
 

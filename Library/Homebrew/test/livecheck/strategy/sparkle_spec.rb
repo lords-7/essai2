@@ -188,7 +188,7 @@ RSpec.describe Homebrew::Livecheck::Strategy::Sparkle do
 
   let(:items) do
     {
-      v124: Homebrew::Livecheck::Strategy::Sparkle::Item.new(
+      v124: described_class::Item.new(
         title:                  item_hashes[:v124][:title],
         release_notes_link:     item_hashes[:v124][:release_notes_link],
         pub_date:               Time.parse(item_hashes[:v124][:pub_date]),
@@ -199,7 +199,7 @@ RSpec.describe Homebrew::Livecheck::Strategy::Sparkle do
         ),
         minimum_system_version: MacOSVersion.new(item_hashes[:v124][:minimum_system_version]),
       ),
-      v123: Homebrew::Livecheck::Strategy::Sparkle::Item.new(
+      v123: described_class::Item.new(
         title:                  item_hashes[:v123][:title],
         release_notes_link:     item_hashes[:v123][:release_notes_link],
         pub_date:               Time.parse(item_hashes[:v123][:pub_date]),
@@ -210,7 +210,7 @@ RSpec.describe Homebrew::Livecheck::Strategy::Sparkle do
         ),
         minimum_system_version: MacOSVersion.new(item_hashes[:v123][:minimum_system_version]),
       ),
-      v122: Homebrew::Livecheck::Strategy::Sparkle::Item.new(
+      v122: described_class::Item.new(
         title:                  item_hashes[:v122][:title],
         link:                   item_hashes[:v122][:link],
         release_notes_link:     item_hashes[:v122][:release_notes_link],
@@ -224,7 +224,7 @@ RSpec.describe Homebrew::Livecheck::Strategy::Sparkle do
         ),
         minimum_system_version: MacOSVersion.new(item_hashes[:v122][:minimum_system_version]),
       ),
-      v121: Homebrew::Livecheck::Strategy::Sparkle::Item.new(
+      v121: described_class::Item.new(
         title:                  item_hashes[:v121][:title],
         release_notes_link:     item_hashes[:v121][:release_notes_link],
         pub_date:               Time.parse(item_hashes[:v121][:pub_date]),
@@ -236,7 +236,7 @@ RSpec.describe Homebrew::Livecheck::Strategy::Sparkle do
         ),
         minimum_system_version: MacOSVersion.new(item_hashes[:v121][:minimum_system_version]),
       ),
-      v120: Homebrew::Livecheck::Strategy::Sparkle::Item.new(
+      v120: described_class::Item.new(
         title:                  item_hashes[:v120][:title],
         release_notes_link:     item_hashes[:v120][:release_notes_link],
         pub_date:               Time.parse(item_hashes[:v120][:pub_date]),

@@ -286,7 +286,7 @@ RSpec.describe SystemCommand do
 
     it 'does not format `stderr` when it starts with \r' do
       expect do
-        Class.new.extend(SystemCommand::Mixin).system_command \
+        Class.new.extend(described_class::Mixin).system_command \
           "bash",
           args: [
             "-c",
@@ -310,7 +310,7 @@ RSpec.describe SystemCommand do
       end
 
       it "does not interpret the executable as a shell line" do
-        expect(Class.new.extend(SystemCommand::Mixin).system_command(executable)).to be_a_success
+        expect(Class.new.extend(described_class::Mixin).system_command(executable)).to be_a_success
       end
     end
 

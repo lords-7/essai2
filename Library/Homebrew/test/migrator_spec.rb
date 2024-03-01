@@ -58,7 +58,7 @@ RSpec.describe Migrator do
     it "raises an error if there is no old path" do
       expect do
         described_class.new(new_formula, "oldname")
-      end.to raise_error(Migrator::MigratorNoOldpathError)
+      end.to raise_error(described_class::MigratorNoOldpathError)
     end
 
     it "raises an error if the Taps differ" do
@@ -71,7 +71,7 @@ RSpec.describe Migrator do
 
       expect do
         described_class.new(new_formula, "oldname")
-      end.to raise_error(Migrator::MigratorDifferentTapsError)
+      end.to raise_error(described_class::MigratorDifferentTapsError)
     end
   end
 

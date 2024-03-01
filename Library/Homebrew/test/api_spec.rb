@@ -69,7 +69,7 @@ RSpec.describe Homebrew::API do
   end
 
   describe "::tap_from_source_download" do
-    let(:api_cache_root) { Homebrew::API::HOMEBREW_CACHE_API_SOURCE }
+    let(:api_cache_root) { described_class::HOMEBREW_CACHE_API_SOURCE }
     let(:cache_path) do
       api_cache_root/"Homebrew"/"homebrew-core"/"cf5c386c1fa2cb54279d78c0990dd7a0fa4bc327"/"Formula"/"foo.rb"
     end

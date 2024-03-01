@@ -540,14 +540,14 @@ RSpec.describe Formulary do
         mktmpdir.cd do
           FileUtils.mkdir "Formula"
           FileUtils.touch "Formula/gcc.rb"
-          expect(described_class.loader_for("./Formula/gcc.rb")).to be_a Formulary::FromPathLoader
+          expect(described_class.loader_for("./Formula/gcc.rb")).to be_a described_class::FromPathLoader
         end
       end
     end
 
     context "when given a tapped name" do
       it "returns a `FromTapLoader`" do
-        expect(described_class.loader_for("homebrew/core/gcc")).to be_a Formulary::FromTapLoader
+        expect(described_class.loader_for("homebrew/core/gcc")).to be_a described_class::FromTapLoader
       end
     end
 

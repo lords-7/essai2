@@ -24,13 +24,13 @@ RSpec.describe AbstractDownloadStrategy do
     let(:specs) { { bottle: true } }
 
     it "extends Pourable" do
-      expect(strategy).to be_a(AbstractDownloadStrategy::Pourable)
+      expect(strategy).to be_a(described_class::Pourable)
     end
   end
 
   context "without specs[:bottle]" do
     it "is does not extend Pourable" do
-      expect(strategy).not_to be_a(AbstractDownloadStrategy::Pourable)
+      expect(strategy).not_to be_a(described_class::Pourable)
     end
   end
 end

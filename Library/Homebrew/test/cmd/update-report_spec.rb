@@ -40,7 +40,7 @@ RSpec.describe "brew update-report" do
 
       expect do
         described_class.new(tap)
-      end.to raise_error(Reporter::ReporterRevisionUnsetError)
+      end.to raise_error(described_class::ReporterRevisionUnsetError)
     end
 
     specify "without any changes" do

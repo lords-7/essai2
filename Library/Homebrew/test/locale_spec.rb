@@ -17,19 +17,19 @@ RSpec.describe Locale do
 
     describe "raises a ParserError when given" do
       it "an empty string" do
-        expect { described_class.parse("") }.to raise_error(Locale::ParserError)
+        expect { described_class.parse("") }.to raise_error(described_class::ParserError)
       end
 
       it "a string in a wrong format" do
-        expect { described_class.parse("zh-CN-Hans") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zh_CN_Hans") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zhCNHans") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zh-CN_Hans") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zhCN") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zh_Hans") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zh-") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("ZH-CN") }.to raise_error(Locale::ParserError)
-        expect { described_class.parse("zh-cn") }.to raise_error(Locale::ParserError)
+        expect { described_class.parse("zh-CN-Hans") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zh_CN_Hans") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zhCNHans") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zh-CN_Hans") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zhCN") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zh_Hans") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zh-") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("ZH-CN") }.to raise_error(described_class::ParserError)
+        expect { described_class.parse("zh-cn") }.to raise_error(described_class::ParserError)
       end
     end
   end
@@ -40,9 +40,9 @@ RSpec.describe Locale do
     end
 
     it "raises a ParserError when one of the arguments does not match the locale format" do
-      expect { described_class.new("ZH", nil, nil) }.to raise_error(Locale::ParserError)
-      expect { described_class.new(nil, "hans", nil) }.to raise_error(Locale::ParserError)
-      expect { described_class.new(nil, nil, "cn") }.to raise_error(Locale::ParserError)
+      expect { described_class.new("ZH", nil, nil) }.to raise_error(described_class::ParserError)
+      expect { described_class.new(nil, "hans", nil) }.to raise_error(described_class::ParserError)
+      expect { described_class.new(nil, nil, "cn") }.to raise_error(described_class::ParserError)
     end
   end
 

@@ -98,13 +98,13 @@ RSpec.describe Keg do
     it "fails when already linked" do
       keg.link
 
-      expect { keg.link }.to raise_error(Keg::AlreadyLinkedError)
+      expect { keg.link }.to raise_error(described_class::AlreadyLinkedError)
     end
 
     it "fails when files exist" do
       touch dst
 
-      expect { keg.link }.to raise_error(Keg::ConflictError)
+      expect { keg.link }.to raise_error(described_class::ConflictError)
     end
 
     it "ignores broken symlinks at target" do
@@ -263,7 +263,7 @@ RSpec.describe Keg do
 
       lib = HOMEBREW_PREFIX/"lib"
       expect(lib.children.length).to eq(2)
-      expect { b.link }.to raise_error(Keg::ConflictError)
+      expect { b.link }.to raise_error(described_class::ConflictError)
       expect(lib.children.length).to eq(2)
     end
 

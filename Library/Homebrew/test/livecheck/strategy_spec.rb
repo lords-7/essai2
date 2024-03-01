@@ -7,7 +7,7 @@ RSpec.describe Homebrew::Livecheck::Strategy do
 
   describe "::from_symbol" do
     it "returns the Strategy module represented by the Symbol argument" do
-      expect(strategy.from_symbol(:page_match)).to eq(Homebrew::Livecheck::Strategy::PageMatch)
+      expect(strategy.from_symbol(:page_match)).to eq(described_class::PageMatch)
     end
   end
 
@@ -16,7 +16,7 @@ RSpec.describe Homebrew::Livecheck::Strategy do
 
     context "when no regex is provided" do
       it "returns an array of usable strategies which doesn't include PageMatch" do
-        expect(strategy.from_url(url)).to eq([Homebrew::Livecheck::Strategy::Sourceforge])
+        expect(strategy.from_url(url)).to eq([described_class::Sourceforge])
       end
     end
 
@@ -24,7 +24,7 @@ RSpec.describe Homebrew::Livecheck::Strategy do
       it "returns an array of usable strategies including PageMatch, sorted in descending order by priority" do
         expect(strategy.from_url(url, regex_provided: true))
           .to eq(
-            [Homebrew::Livecheck::Strategy::Sourceforge, Homebrew::Livecheck::Strategy::PageMatch],
+            [described_class::Sourceforge, described_class::PageMatch],
           )
       end
     end

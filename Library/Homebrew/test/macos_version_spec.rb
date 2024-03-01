@@ -53,7 +53,7 @@ RSpec.describe MacOSVersion do
     it "raises an error if the version is not a valid macOS version" do
       expect do
         described_class.new("1.2")
-      end.to raise_error(MacOSVersion::Error, 'unknown or unsupported macOS version: "1.2"')
+      end.to raise_error(described_class::Error, 'unknown or unsupported macOS version: "1.2"')
     end
 
     it "creates a new version from a valid macOS version" do
@@ -66,7 +66,7 @@ RSpec.describe MacOSVersion do
     it "raises an error if the symbol is not a valid macOS version" do
       expect do
         described_class.from_symbol(:foo)
-      end.to raise_error(MacOSVersion::Error, "unknown or unsupported macOS version: :foo")
+      end.to raise_error(described_class::Error, "unknown or unsupported macOS version: :foo")
     end
 
     it "creates a new version from a valid macOS version" do

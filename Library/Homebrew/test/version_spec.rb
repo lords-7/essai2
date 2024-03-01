@@ -76,7 +76,7 @@ RSpec.describe Version do
   end
 
   describe "when the version is `NULL`" do
-    subject(:null_version) { Version::NULL }
+    subject(:null_version) { described_class::NULL }
 
     it "is always smaller" do
       expect(null_version).to be < described_class.new("1")
@@ -268,7 +268,7 @@ RSpec.describe Version do
   end
 
   it "can be compared against Version::NULL" do
-    expect(described_class.new("2.1.0-p194")).to be > Version::NULL
+    expect(described_class.new("2.1.0-p194")).to be > described_class::NULL
   end
 
   it "can be compared against strings" do
@@ -277,12 +277,12 @@ RSpec.describe Version do
   end
 
   it "can be compared against tokens" do
-    expect(described_class.new("2.1.0-p194")).to be > Version::Token.create("2")
-    expect(described_class.new("1")).to eq Version::Token.create("1")
+    expect(described_class.new("2.1.0-p194")).to be > described_class::Token.create("2")
+    expect(described_class.new("1")).to eq described_class::Token.create("1")
   end
 
   it "can be compared against Version::NULL_TOKEN" do
-    expect(described_class.new("2.1.0-p194")).to be > Version::NULL_TOKEN
+    expect(described_class.new("2.1.0-p194")).to be > described_class::NULL_TOKEN
   end
 
   specify "comparison returns nil for non-version" do
@@ -373,29 +373,29 @@ RSpec.describe Version do
 
   describe "#major" do
     it "returns major version token" do
-      expect(described_class.new("1").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3alpha").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3alpha4").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3beta4").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3pre4").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3rc4").major).to eq Version::Token.create("1")
-      expect(described_class.new("1.2.3-p4").major).to eq Version::Token.create("1")
+      expect(described_class.new("1").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3alpha").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3alpha4").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3beta4").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3pre4").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3rc4").major).to eq described_class::Token.create("1")
+      expect(described_class.new("1.2.3-p4").major).to eq described_class::Token.create("1")
     end
   end
 
   describe "#minor" do
     it "returns minor version token" do
       expect(described_class.new("1").minor).to be_nil
-      expect(described_class.new("1.2").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3alpha").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3alpha4").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3beta4").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3pre4").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3rc4").minor).to eq Version::Token.create("2")
-      expect(described_class.new("1.2.3-p4").minor).to eq Version::Token.create("2")
+      expect(described_class.new("1.2").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3alpha").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3alpha4").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3beta4").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3pre4").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3rc4").minor).to eq described_class::Token.create("2")
+      expect(described_class.new("1.2.3-p4").minor).to eq described_class::Token.create("2")
     end
   end
 
@@ -403,13 +403,13 @@ RSpec.describe Version do
     it "returns patch version token" do
       expect(described_class.new("1").patch).to be_nil
       expect(described_class.new("1.2").patch).to be_nil
-      expect(described_class.new("1.2.3").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3alpha").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3alpha4").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3beta4").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3pre4").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3rc4").patch).to eq Version::Token.create("3")
-      expect(described_class.new("1.2.3-p4").patch).to eq Version::Token.create("3")
+      expect(described_class.new("1.2.3").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3alpha").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3alpha4").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3beta4").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3pre4").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3rc4").patch).to eq described_class::Token.create("3")
+      expect(described_class.new("1.2.3-p4").patch).to eq described_class::Token.create("3")
     end
   end
 

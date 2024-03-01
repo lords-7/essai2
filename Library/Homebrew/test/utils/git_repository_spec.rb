@@ -17,7 +17,7 @@ RSpec.describe Utils do
 
     context "when Git is unavailable" do
       before do
-        allow(Utils::Git).to receive(:available?).and_return(false)
+        allow(described_class::Git).to receive(:available?).and_return(false)
       end
 
       it "returns nil if `safe` parameter is `false`" do
