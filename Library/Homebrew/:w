@@ -283,8 +283,9 @@ module PyPI
       elsif url.blank?
         odie "The main package is not a PyPI package, meaning that version-only " \
              "updates cannot be performed. Please update its URL manually."
-      elsif ["", version].exclude? Version.detect(url).to_s
-        odie "`#{__method__}` version=#{version} argument does not match version detected from url=#{url}."
+      elsif (url_version = Version.detect(url)) && ["", version].exclude?(url_version.to_s)
+        odie "`#{__method__}` version=#{version} argument does not match version " \
+             "detected from url=#{url} argument."
       end
     end
 
