@@ -5,6 +5,7 @@ require "commands"
 require "completions"
 require "extend/cachable"
 require "description_cache_store"
+require "set"
 require "settings"
 
 # A {Tap} is used to extend the formulae provided by Homebrew core.
@@ -401,6 +402,7 @@ class Tap
 
     Commands.rebuild_commands_completion_list
     link_completions_and_manpages
+    Tap.registry << self
 
     formatted_contents = contents.presence&.to_sentence&.dup&.prepend(" ")
     $stderr.puts "Tapped#{formatted_contents} (#{path.abv})." unless quiet
@@ -511,6 +513,7 @@ class Tap
 
     Commands.rebuild_commands_completion_list
     clear_cache
+    Tap.registry.delete(self)
 
     return if !manual || !official?
 
@@ -880,27 +883,32 @@ class Tap
     other = Tap.fetch(other) if other.is_a?(String)
     self.class == other.class && name == other.name
   end
+  alias eql? ==
+
+  sig { returns(Integer) }
+  def hash
+    [self.class, name].hash
+  end
+
+  # A set with all installed and core taps.
+  #
+  # @private
+  sig { returns(T::Set[Tap]) }
+  def self.registry
+    cache[:registry] ||= Set.new.tap do |set|
+      if TAP_DIRECTORY.directory?
+        set.merge TAP_DIRECTORY.subdirs
+                               .flat_map(&:subdirs)
+                               .map(&method(:from_path))
+      end
+
+      set << CoreTap.instance
+      set << CoreCaskTap.instance if OS.mac? # rubocop:disable Homebrew/MoveToExtendOS
+    end
+  end
 
   def self.each(&block)
-    return to_enum unless block
-
-    installed_taps = if TAP_DIRECTORY.directory?
-      TAP_DIRECTORY.subdirs
-                   .flat_map(&:subdirs)
-                   .map(&method(:from_path))
-    else
-      []
-    end
-
-    available_taps = if Homebrew::EnvConfig.no_install_from_api?
-      installed_taps
-    else
-      default_taps = T.let([CoreTap.instance], T::Array[Tap])
-      default_taps << CoreCaskTap.instance if OS.mac? # rubocop:disable Homebrew/MoveToExtendOS
-      installed_taps + default_taps
-    end.sort_by(&:name).uniq
-
-    available_taps.each(&block)
+    registry.each(&block)
   end
 
   # An array of all installed {Tap} names.

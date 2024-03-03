@@ -140,10 +140,6 @@ RSpec.describe Tap do
     end
   end
 
-  specify "::names" do
-    expect(described_class.names.sort).to eq(["homebrew/core", "homebrew/foo"])
-  end
-
   specify "attributes" do
     expect(homebrew_foo_tap.user).to eq("Homebrew")
     expect(homebrew_foo_tap.repo).to eq("foo")
@@ -404,10 +400,12 @@ RSpec.describe Tap do
     setup_completion link: true
 
     tap = described_class.new("Homebrew", "bar")
+    expect(described_class.registry).not_to include(tap)
 
     tap.install clone_target: homebrew_foo_tap.path/".git"
 
     expect(tap).to be_installed
+    expect(described_class.registry).to include(tap)
     expect(HOMEBREW_PREFIX/"share/man/man1/brew-tap-cmd.1").to be_a_file
     expect(HOMEBREW_PREFIX/"etc/bash_completion.d/brew-tap-cmd").to be_a_file
     expect(HOMEBREW_PREFIX/"share/zsh/site-functions/_brew-tap-cmd").to be_a_file
@@ -415,6 +413,7 @@ RSpec.describe Tap do
     tap.uninstall
 
     expect(tap).not_to be_installed
+    expect(described_class.registry).not_to include(tap)
     expect(HOMEBREW_PREFIX/"share/man/man1/brew-tap-cmd.1").not_to exist
     expect(HOMEBREW_PREFIX/"share/man/man1").not_to exist
     expect(HOMEBREW_PREFIX/"etc/bash_completion.d/brew-tap-cmd").not_to exist
@@ -498,6 +497,24 @@ RSpec.describe Tap do
   describe "#each" do
     it "returns an enumerator if no block is passed" do
       expect(described_class.each).to be_an_instance_of(Enumerator)
+    end
+  end
+
+  describe ".registry" do
+    it "includes the core and cask taps by default", :needs_macos do
+      expect(described_class.registry).to include(CoreTap.instance, CoreCaskTap.instance)
+    end
+
+    it "includes the core tap and excludes the cask tap by default", :needs_linux do
+      expect(described_class.registry).to include(CoreTap.instance)
+      expect(described_class.registry).not_to include(CoreCaskTap.instance)
+    end
+
+    it "ignores a second instance of the same tap" do
+      expect { described_class.registry << described_class.new("example", "first") }
+        .to change { described_class.registry.size }.by(1)
+      expect { described_class.registry << described_class.new("example", "first") }
+        .not_to(change { described_class.registry.size })
     end
   end
 
