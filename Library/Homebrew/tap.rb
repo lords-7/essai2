@@ -1347,7 +1347,7 @@ class TapConfig
     Homebrew::Settings.read key, repo: tap.path
   end
 
-  sig { params(key: T.any(Symbol, String), value: T.any(T::Boolean, String)).void }
+  sig { params(key: T.any(Symbol, String), value: T.any(T::Boolean, String, NilClass)).void }
   def []=(key, value)
     return unless tap.git?
     return unless Utils::Git.available?
