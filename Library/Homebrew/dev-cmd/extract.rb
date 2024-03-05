@@ -34,9 +34,8 @@ module Homebrew
   def self.extract
     args = extract_args.parse
 
-    if (match = args.named.first.match(HOMEBREW_TAP_FORMULA_REGEX))
-      name = match[3].downcase
-      source_tap = Tap.fetch(match[1], match[2])
+    if (tap_with_name = args.named.first&.then { Tap.with_formula_name(_1) })
+      source_tap, name = tap_with_name
     else
       name = args.named.first.downcase
       source_tap = CoreTap.instance
@@ -102,9 +101,9 @@ module Homebrew
       odie "Could not find #{name}! The formula or version may not have existed." if test_formula.nil?
     else
       # Search in the root directory of <repo> as well as recursively in all of its subdirectories
-      files = Dir[repo/"{,**/}"].map do |dir|
+      files = Dir[repo/"{,**/}"].filter_map do |dir|
         Pathname.glob("#{dir}/#{name}.rb").find(&:file?)
-      end.compact
+      end
 
       if files.empty?
         ohai "Searching repository history"

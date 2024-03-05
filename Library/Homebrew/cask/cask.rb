@@ -33,13 +33,13 @@ module Cask
       # Load core casks from tokens so they load from the API when the core cask is not tapped.
       tokens_and_files = CoreCaskTap.instance.cask_tokens
       tokens_and_files += Tap.reject(&:core_cask_tap?).flat_map(&:cask_files)
-      tokens_and_files.map do |token_or_file|
+      tokens_and_files.filter_map do |token_or_file|
         CaskLoader.load(token_or_file)
       rescue CaskUnreadableError => e
         opoo e.message
 
         nil
-      end.compact
+      end
     end
 
     def tap
@@ -87,7 +87,7 @@ module Cask
     def old_tokens
       @old_tokens ||= if (tap = self.tap)
         Tap.reverse_tap_migrations_renames.fetch("#{tap}/#{token}", []) +
-          tap.reverse_cask_renames.fetch(token, [])
+          tap.cask_reverse_renames.fetch(token, [])
       else
         []
       end

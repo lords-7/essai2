@@ -77,7 +77,7 @@ module Homebrew
     raise UsageError, "No files have been changed from the master branch!" if changed_files.blank?
 
     filestub_regex = %r{Library/Homebrew/([\w/-]+).rb}
-    changed_files.scan(filestub_regex).map(&:last).map do |filestub|
+    changed_files.scan(filestub_regex).map(&:last).filter_map do |filestub|
       if filestub.start_with?("test/")
         # Only run tests on *_spec.rb files in test/ folder
         filestub.end_with?("_spec") ? Pathname("#{filestub}.rb") : nil
@@ -85,7 +85,7 @@ module Homebrew
         # For all other changed .rb files guess the associated test file name
         Pathname("test/#{filestub}_spec.rb")
       end
-    end.compact.select(&:exist?)
+    end.select(&:exist?)
   end
 
   def self.tests
@@ -240,6 +240,7 @@ module Homebrew
 
     # TODO: remove this and fix tests when possible.
     ENV["HOMEBREW_NO_INSTALL_FROM_API"] = "1"
+    ENV.delete("HOMEBREW_INTERNAL_JSON_V3")
 
     ENV["USER"] ||= system_command!("id", args: ["-nu"]).stdout.chomp
 

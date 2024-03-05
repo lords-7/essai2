@@ -111,7 +111,7 @@ RSpec.describe Formulary do
       it "raises an error" do
         expect do
           described_class.factory(formula_name)
-        end.to raise_error(FormulaClassUnavailableError)
+        end.to raise_error(TapFormulaClassUnavailableError)
       end
     end
 
@@ -139,7 +139,7 @@ RSpec.describe Formulary do
     context "when given an alias" do
       subject(:formula) { described_class.factory("foo") }
 
-      let(:alias_dir) { CoreTap.instance.alias_dir.tap(&:mkpath) }
+      let(:alias_dir) { CoreTap.instance.alias_dir }
       let(:alias_path) { alias_dir/"foo" }
 
       before do
@@ -152,7 +152,7 @@ RSpec.describe Formulary do
       end
 
       it "calling #alias_path on the returned Formula returns the alias path" do
-        expect(formula.alias_path).to eq(alias_path.to_s)
+        expect(formula.alias_path).to eq(alias_path)
       end
     end
 
@@ -229,23 +229,26 @@ RSpec.describe Formulary do
       let(:tap) { Tap.new("homebrew", "foo") }
       let(:another_tap) { Tap.new("homebrew", "bar") }
       let(:formula_path) { tap.path/"Formula/#{formula_name}.rb" }
+      let(:alias_name) { "bar" }
+      let(:alias_dir) { tap.alias_dir }
+      let(:alias_path) { alias_dir/alias_name }
+
+      before do
+        alias_dir.mkpath
+        FileUtils.ln_s formula_path, alias_path
+        tap.clear_cache
+      end
 
       it "returns a Formula when given a name" do
         expect(described_class.factory(formula_name)).to be_a(Formula)
       end
 
       it "returns a Formula from an Alias path" do
-        alias_dir = tap.path/"Aliases"
-        alias_dir.mkpath
-        FileUtils.ln_s formula_path, alias_dir/"bar"
-        expect(described_class.factory("bar")).to be_a(Formula)
+        expect(described_class.factory(alias_name)).to be_a(Formula)
       end
 
       it "returns a Formula from a fully qualified Alias path" do
-        alias_dir = tap.path/"Aliases"
-        alias_dir.mkpath
-        FileUtils.ln_s formula_path, alias_dir/"bar"
-        expect(described_class.factory("#{tap}/bar")).to be_a(Formula)
+        expect(described_class.factory("#{tap.name}/#{alias_name}")).to be_a(Formula)
       end
 
       it "raises an error when the Formula cannot be found" do
@@ -328,6 +331,7 @@ RSpec.describe Formulary do
               "working_dir" => "/$HOME",
             },
             "ruby_source_path"         => "Formula/#{formula_name}.rb",
+            "ruby_source_checksum"     => { "sha256" => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
           }.merge(extra_items),
         }
       end
@@ -415,6 +419,8 @@ RSpec.describe Formulary do
         expect(formula.service.working_dir).to eq(Dir.home)
         expect(formula.plist_name).to eq("custom.launchd.name")
         expect(formula.service_name).to eq("custom.systemd.name")
+
+        expect(formula.ruby_source_checksum.hexdigest).to eq("abcdefghijklmnopqrstuvwxyz")
 
         expect do
           formula.install
@@ -529,6 +535,22 @@ RSpec.describe Formulary do
   end
 
   describe "::loader_for" do
+    context "when given a relative path with two slashes" do
+      it "returns a `FromPathLoader`" do
+        mktmpdir.cd do
+          FileUtils.mkdir "Formula"
+          FileUtils.touch "Formula/gcc.rb"
+          expect(described_class.loader_for("./Formula/gcc.rb")).to be_a Formulary::FromPathLoader
+        end
+      end
+    end
+
+    context "when given a tapped name" do
+      it "returns a `FromTapLoader`" do
+        expect(described_class.loader_for("homebrew/core/gcc")).to be_a Formulary::FromTapLoader
+      end
+    end
+
     context "when not using the API" do
       before do
         ENV["HOMEBREW_NO_INSTALL_FROM_API"] = "1"
@@ -547,8 +569,7 @@ RSpec.describe Formulary do
         before do
           old_tap.path.mkpath
           (old_tap.path/"tap_migrations.json").write tap_migrations.to_json
-          old_tap.clear_cache
-          default_tap.clear_cache
+          FileUtils.touch default_tap.formula_dir/"foo.rb"
         end
 
         it "does not warn when loading the short token" do
@@ -575,7 +596,6 @@ RSpec.describe Formulary do
         #     (default_tap.path/"tap_migrations.json").write({
         #       token => old_tap.name,
         #     }.to_json)
-        #     default_tap.clear_cache
         #   end
         #
         #   it "stops recursing" do

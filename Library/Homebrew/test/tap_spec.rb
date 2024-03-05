@@ -126,6 +126,18 @@ RSpec.describe Tap do
     it "returns the Tap when given its exact path" do
       expect(described_class.from_path(path)).to eq tap
     end
+
+    context "when path contains a dot" do
+      let(:tap) { described_class.fetch("str4d.xyz", "rage") }
+
+      after do
+        tap.uninstall
+      end
+
+      it "returns the Tap when given its exact path" do
+        expect(described_class.from_path(path)).to eq tap
+      end
+    end
   end
 
   specify "::names" do
@@ -243,6 +255,37 @@ RSpec.describe Tap do
       setup_git_repo
       allow(Utils::Git).to receive(:available?).and_return(false)
       expect(homebrew_foo_tap.remote_repo).to be_nil
+    end
+  end
+
+  describe "#custom_remote?" do
+    subject(:tap) { described_class.new("Homebrew", "services") }
+
+    let(:remote) { nil }
+
+    before do
+      tap.path.mkpath
+      system "git", "-C", tap.path, "init"
+      system "git", "-C", tap.path, "remote", "add", "origin", remote if remote
+    end
+
+    context "if no remote is available" do
+      it "returns true" do
+        expect(tap.remote).to be_nil
+        expect(tap.custom_remote?).to be true
+      end
+    end
+
+    context "when using the default remote" do
+      let(:remote) { "https://github.com/Homebrew/homebrew-services" }
+
+      its(:custom_remote?) { is_expected.to be false }
+    end
+
+    context "when using a non-default remote" do
+      let(:remote) { "git@github.com:Homebrew/homebrew-services" }
+
+      its(:custom_remote?) { is_expected.to be true }
     end
   end
 
@@ -574,6 +617,37 @@ RSpec.describe Tap do
       expect(core_tap.audit_exceptions).to eq({ formula_list: formula_list_file_contents })
       expect(core_tap.style_exceptions).to eq({ formula_hash: formula_list_file_contents })
       expect(core_tap.pypi_formula_mappings).to eq formula_list_file_contents
+    end
+  end
+
+  describe "#repo_var_suffix" do
+    it "converts the repo directory to an environment variable suffix" do
+      expect(CoreTap.instance.repo_var_suffix).to eq "_HOMEBREW_HOMEBREW_CORE"
+    end
+
+    it "converts non-alphanumeric characters to underscores" do
+      expect(described_class.fetch("my", "tap-with-dashes").repo_var_suffix).to eq "_MY_HOMEBREW_TAP_WITH_DASHES"
+      expect(described_class.fetch("my", "tap-with-@-symbol").repo_var_suffix).to eq "_MY_HOMEBREW_TAP_WITH___SYMBOL"
+    end
+  end
+
+  describe "::with_formula_name" do
+    it "returns the tap and formula name when given a full name" do
+      expect(described_class.with_formula_name("homebrew/core/gcc")).to eq [CoreTap.instance, "gcc"]
+    end
+
+    it "returns nil when given a relative path" do
+      expect(described_class.with_formula_name("./Formula/gcc.rb")).to be_nil
+    end
+  end
+
+  describe "::with_cask_token" do
+    it "returns the tap and cask token when given a full token" do
+      expect(described_class.with_cask_token("homebrew/cask/alfred")).to eq [CoreCaskTap.instance, "alfred"]
+    end
+
+    it "returns nil when given a relative path" do
+      expect(described_class.with_cask_token("./Casks/alfred.rb")).to be_nil
     end
   end
 end

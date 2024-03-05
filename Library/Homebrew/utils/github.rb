@@ -211,7 +211,7 @@ module GitHub
     reviews = result["repository"]["pullRequest"]["reviews"]["nodes"]
 
     valid_associations = %w[MEMBER OWNER]
-    reviews.map do |r|
+    reviews.filter_map do |r|
       next if commit.present? && commit != r["commit"]["oid"]
       next unless valid_associations.include? r["authorAssociation"]
 
@@ -226,7 +226,7 @@ module GitHub
         "name"  => name,
         "login" => r["author"]["login"],
       }
-    end.compact
+    end
   end
 
   def self.dispatch_event(user, repo, event, **payload)
@@ -497,8 +497,10 @@ module GitHub
     end
   end
 
-  def self.get_repo_license(user, repo)
-    response = API.open_rest("#{API_URL}/repos/#{user}/#{repo}/license")
+  def self.get_repo_license(user, repo, ref: nil)
+    url = "#{API_URL}/repos/#{user}/#{repo}/license"
+    url += "?ref=#{ref}" if ref.present?
+    response = API.open_rest(url)
     return unless response.key?("license")
 
     response["license"]["spdx_id"]
@@ -568,7 +570,6 @@ module GitHub
     end
     return if pull_requests.blank?
 
-    force = ENV.fetch("HOMEBREW_TEST_BOT_AUTOBUMP", nil).present?
     duplicates_message = <<~EOS
       These #{state} pull requests may be duplicates:
       #{pull_requests.map { |pr| "#{pr["title"]} #{pr["html_url"]}" }.join("\n")}
@@ -577,11 +578,10 @@ module GitHub
       Duplicate PRs should not be opened.
       Manually open these PRs if you are sure that they are not duplicates.
     EOS
-    if force && !quiet
-      opoo duplicates_message
-    elsif !force && quiet
+
+    if quiet
       odie error_message
-    elsif !force
+    else
       odie <<~EOS
         #{duplicates_message.chomp}
         #{error_message}
@@ -593,6 +593,13 @@ module GitHub
     API.open_rest(url_to("repos", tap_remote_repo, "pulls", pull_request, "files"))
   end
 
+  private_class_method def self.add_auth_token_to_url!(url)
+    if API.credentials_type == :env_token
+      url.sub!(%r{^https://github\.com/}, "https://#{API.credentials}@github.com/")
+    end
+    url
+  end
+
   def self.forked_repo_info!(tap_remote_repo, org: nil)
     response = create_fork(tap_remote_repo, org: org)
     # GitHub API responds immediately but fork takes a few seconds to be ready.
@@ -600,11 +607,7 @@ module GitHub
     remote_url = if system("git", "config", "--local", "--get-regexp", "remote..*.url", "git@github.com:.*")
       response.fetch("ssh_url")
     else
-      url = response.fetch("clone_url")
-      if (api_token = Homebrew::EnvConfig.github_api_token)
-        url.gsub!(%r{^https://github\.com/}, "https://#{api_token}@github.com/")
-      end
-      url
+      add_auth_token_to_url!(response.fetch("clone_url"))
     end
     username = response.fetch("owner").fetch("login")
     [remote_url, username]
@@ -651,6 +654,7 @@ module GitHub
         unless args.commit?
           if args.no_fork?
             remote_url = Utils.popen_read("git", "remote", "get-url", "--push", "origin").chomp
+            add_auth_token_to_url!(remote_url)
             username = tap.user
           else
             begin

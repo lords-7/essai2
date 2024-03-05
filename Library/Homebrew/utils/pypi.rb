@@ -13,12 +13,13 @@ module PyPI
   # or it can be a non-PyPI URL.
   # @api private
   class Package
-    sig { params(package_string: String, is_url: T::Boolean).void }
-    def initialize(package_string, is_url: false)
+    sig { params(package_string: String, is_url: T::Boolean, python_name: String).void }
+    def initialize(package_string, is_url: false, python_name: "python")
       @pypi_info = nil
       @package_string = package_string
       @is_url = is_url
       @is_pypi_url = package_string.start_with? PYTHONHOSTED_URL_PREFIX
+      @python_name = python_name
     end
 
     sig { returns(String) }
@@ -131,7 +132,7 @@ module PyPI
         @extras ||= []
         @version ||= match[2]
       elsif @is_url
-        ensure_formula_installed!("python")
+        ensure_formula_installed!(@python_name)
 
         # The URL might be a source distribution hosted somewhere;
         # try and use `pip install -q --no-deps --dry-run --report ...` to get its
@@ -140,7 +141,7 @@ module PyPI
         # do below, in that it uses `--no-deps` because we only care about resolving
         # this specific URL's project metadata.
         command =
-          [Formula["python"].bin/"python3", "-m", "pip", "install", "-q", "--no-deps",
+          [Formula[@python_name].opt_libexec/"bin/python", "-m", "pip", "install", "-q", "--no-deps",
            "--dry-run", "--ignore-installed", "--report", "/dev/stdout", @package_string]
         pip_output = Utils.popen_read({ "PIP_REQUIRE_VIRTUALENV" => "false" }, *command)
         unless $CHILD_STATUS.success?
@@ -197,6 +198,8 @@ module PyPI
       package_name:             T.nilable(String),
       extra_packages:           T.nilable(T::Array[String]),
       exclude_packages:         T.nilable(T::Array[String]),
+      dependencies:             T.nilable(T::Array[String]),
+      install_dependencies:     T.nilable(T::Boolean),
       print_only:               T.nilable(T::Boolean),
       silent:                   T.nilable(T::Boolean),
       verbose:                  T.nilable(T::Boolean),
@@ -204,7 +207,8 @@ module PyPI
     ).returns(T.nilable(T::Boolean))
   }
   def self.update_python_resources!(formula, version: nil, package_name: nil, extra_packages: nil,
-                                    exclude_packages: nil, print_only: false, silent: false, verbose: false,
+                                    exclude_packages: nil, dependencies: nil, install_dependencies: false,
+                                    print_only: false, silent: false, verbose: false,
                                     ignore_non_pypi_packages: false)
 
     auto_update_list = formula.tap&.pypi_formula_mappings
@@ -223,11 +227,37 @@ module PyPI
         package_name = list_entry["package_name"]
         extra_packages = list_entry["extra_packages"]
         exclude_packages = list_entry["exclude_packages"]
+        dependencies = list_entry["dependencies"]
       end
     end
 
+    missing_dependencies = Array(dependencies).reject do |dependency|
+      Formula[dependency].any_version_installed?
+    rescue FormulaUnavailableError
+      odie "Formula \"#{dependency}\" not found but it is a dependency to update \"#{formula.name}\" resources."
+    end
+    if missing_dependencies.present?
+      missing_msg = "formulae required to update \"#{formula.name}\" resources: #{missing_dependencies.join(", ")}"
+      odie "Missing #{missing_msg}" unless install_dependencies
+      ohai "Installing #{missing_msg}"
+      missing_dependencies.each(&method(:ensure_formula_installed!))
+    end
+
+    python_deps = formula.deps
+                         .select { |d| d.name.match?(/^python(@.+)?$/) }
+                         .map(&:to_formula)
+                         .sort_by(&:version)
+                         .reverse
+    python_name = if python_deps.empty?
+      "python"
+    else
+      (python_deps.find(&:any_version_installed?) || python_deps.first).name
+    end
+
     main_package = if package_name.present?
-      Package.new(package_name)
+      Package.new(package_name, python_name: python_name)
+    elsif package_name == ""
+      nil
     else
       stable = T.must(formula.stable)
       url = if stable.specs[:tag].present?
@@ -235,10 +265,12 @@ module PyPI
       else
         stable.url
       end
-      Package.new(url, is_url: true)
+      Package.new(url, is_url: true, python_name: python_name)
     end
 
-    if version.present?
+    if main_package.nil?
+      odie "The main package was skipped but no PyPI `extra_packages` were provided." if extra_packages.blank?
+    elsif version.present?
       if main_package.valid_pypi_package?
         main_package.version = version
       else
@@ -249,12 +281,6 @@ module PyPI
       end
     end
 
-    python_deps = formula.deps
-                         .select { |d| d.name.match?(/^python(@.+)?$/) }
-                         .map(&:to_formula)
-                         .sort_by(&:version)
-                         .reverse
-
     extra_packages = (extra_packages || []).map { |p| Package.new p }
     exclude_packages = (exclude_packages || []).map { |p| Package.new p }
     exclude_packages += %w[argparse pip wsgiref].map { |p| Package.new p }
@@ -264,7 +290,7 @@ module PyPI
     # remove packages from the exclude list if we've explicitly requested them as an extra package
     exclude_packages.delete_if { |package| extra_packages.include?(package) }
 
-    input_packages = [main_package]
+    input_packages = Array(main_package)
     extra_packages.each do |extra_package|
       if !extra_package.valid_pypi_package? && !ignore_non_pypi_packages
         odie "\"#{extra_package}\" is not available on PyPI."
@@ -286,11 +312,6 @@ module PyPI
       end
     end
 
-    python_name = if python_deps.empty?
-      "python"
-    else
-      (python_deps.find(&:any_version_installed?) || python_deps.first).name
-    end
     ensure_formula_installed!(python_name)
 
     # Resolve the dependency tree of all input packages
@@ -301,7 +322,7 @@ module PyPI
     exclude_packages.delete_if { |package| found_packages.exclude? package }
     ohai "Retrieving PyPI dependencies for excluded \"#{exclude_packages.join(" ")}\"..." if show_info
     exclude_packages = pip_report(exclude_packages, python_name: python_name, print_stderr: verbose && show_info)
-    exclude_packages += [Package.new(main_package.name)]
+    exclude_packages += [Package.new(main_package.name)] unless main_package.nil?
 
     new_resource_blocks = ""
     found_packages.sort.each do |package|
@@ -353,7 +374,7 @@ module PyPI
 
     ohai "Updating resource blocks" unless silent
     Utils::Inreplace.inreplace formula.path do |s|
-      if s.inreplace_string.scan(inreplace_regex).length > 1
+      if T.must(s.inreplace_string.split(/^  test do\b/, 2).first).scan(inreplace_regex).length > 1
         odie "Unable to update resource blocks for \"#{formula.name}\" automatically. Please update them manually."
       end
       s.sub! inreplace_regex, new_resource_blocks
@@ -372,7 +393,7 @@ module PyPI
     return [] if packages.blank?
 
     command = [
-      Formula[python_name].libexec/"bin/python", "-m", "pip", "install", "-q", "--disable-pip-version-check",
+      Formula[python_name].opt_libexec/"bin/python", "-m", "pip", "install", "-q", "--disable-pip-version-check",
       "--dry-run", "--ignore-installed", "--report=/dev/stdout", *packages.map(&:to_s)
     ]
     options = {}
@@ -391,11 +412,11 @@ module PyPI
   def self.pip_report_to_packages(report)
     return [] if report.blank?
 
-    report["install"].map do |package|
+    report["install"].filter_map do |package|
       name = normalize_python_package(package["metadata"]["name"])
       version = package["metadata"]["version"]
 
       Package.new "#{name}==#{version}"
-    end.compact
+    end
   end
 end

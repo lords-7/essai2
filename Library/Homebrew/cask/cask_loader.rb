@@ -18,7 +18,7 @@ module Cask
       extend T::Helpers
       interface!
 
-      sig { abstract.params(config: Config).returns(Cask) }
+      sig { abstract.params(config: T.nilable(Config)).returns(Cask) }
       def load(config:); end
     end
 
@@ -118,6 +118,7 @@ module Cask
         @tap = Tap.from_path(path) || Homebrew::API.tap_from_source_download(path)
       end
 
+      sig { override.params(config: T.nilable(Config)).returns(Cask) }
       def load(config:)
         raise CaskUnavailableError.new(token, "'#{path}' does not exist.")  unless path.exist?
         raise CaskUnavailableError.new(token, "'#{path}' is not readable.") unless path.readable?
@@ -206,9 +207,9 @@ module Cask
       def self.try_new(ref, warn: false)
         ref = ref.to_s
 
-        return unless ref.match?(HOMEBREW_TAP_CASK_REGEX)
+        return unless (token_tap_type = CaskLoader.tap_cask_token_type(ref, warn: warn))
 
-        token, tap, = CaskLoader.tap_cask_token_type(ref, warn: warn)
+        token, tap, = token_tap_type
         new("#{tap}/#{token}")
       end
 
@@ -220,6 +221,7 @@ module Cask
         super cask
       end
 
+      sig { override.params(config: T.nilable(Config)).returns(Cask) }
       def load(config:)
         raise TapCaskUnavailableError.new(tap, token) unless T.must(tap).installed?
 
@@ -467,15 +469,14 @@ module Cask
 
         token = ref
 
-        loaders = Tap.map { |tap| super("#{tap}/#{token}", warn: warn) }
-                     .compact
+        loaders = Tap.filter_map { |tap| super("#{tap}/#{token}", warn: warn) }
                      .select { _1.path.exist? }
 
         case loaders.count
         when 1
           loaders.first
         when 2..Float::INFINITY
-          raise TapCaskAmbiguityError.new(token, loaders.map(&:tap))
+          raise TapCaskAmbiguityError.new(token, loaders)
         end
       end
     end
@@ -528,9 +529,12 @@ module Cask
       self.for(ref, warn: warn).load(config: config)
     end
 
+    sig { params(tapped_token: String, warn: T::Boolean).returns(T.nilable([String, Tap, T.nilable(Symbol)])) }
     def self.tap_cask_token_type(tapped_token, warn:)
-      user, repo, token = tapped_token.split("/", 3).map(&:downcase)
-      tap = Tap.fetch(user, repo)
+      return unless (tap_with_token = Tap.with_cask_token(tapped_token))
+
+      tap, token = tap_with_token
+
       type = nil
 
       if (new_token = tap.cask_renames[token].presence)
@@ -549,7 +553,9 @@ module Cask
           opoo "Tap migration for #{tapped_token} points to itself, stopping recursion."
         else
           old_token = tap.core_cask_tap? ? token : tapped_token
-          token, tap, = tap_cask_token_type(new_tapped_token, warn: false)
+          return unless (token_tap_type = tap_cask_token_type(new_tapped_token, warn: false))
+
+          token, tap, = token_tap_type
           new_token = new_tap.core_cask_tap? ? token : "#{tap}/#{token}"
           type = :migration
         end
@@ -584,17 +590,10 @@ module Cask
       find_cask_in_tap(token.to_s.downcase, CoreCaskTap.instance)
     end
 
-    def self.tap_paths(token)
-      token = token.to_s.downcase
-
-      Tap.map { |tap| find_cask_in_tap(token, tap) }.select(&:exist?)
-    end
-
     def self.find_cask_in_tap(token, tap)
       filename = "#{token}.rb"
 
-      Tap.cask_files_by_name(tap)
-         .fetch(token, tap.cask_dir/filename)
+      tap.cask_files_by_name.fetch(token, tap.cask_dir/filename)
     end
   end
 end

@@ -142,8 +142,8 @@ on_request: true)
       return unless @cask.conflicts_with
 
       @cask.conflicts_with[:cask].each do |conflicting_cask|
-        if (match = conflicting_cask.match(HOMEBREW_TAP_CASK_REGEX))
-          conflicting_cask_tap = Tap.fetch(match[1], match[2])
+        if (conflicting_cask_tap_with_token = Tap.with_cask_token(conflicting_cask))
+          conflicting_cask_tap, = conflicting_cask_tap_with_token
           next unless conflicting_cask_tap.installed?
         end
 
@@ -207,7 +207,7 @@ on_request: true)
       basename = downloader.basename
 
       if (nested_container = @cask.container&.nested)
-        Dir.mktmpdir do |tmpdir|
+        Dir.mktmpdir("cask-installer", HOMEBREW_TEMP) do |tmpdir|
           tmpdir = Pathname(tmpdir)
           primary_container.extract(to: tmpdir, basename: basename, verbose: verbose?)
 

@@ -37,6 +37,8 @@ module Homebrew
              description: "Check only casks."
       switch "--installed",
              description: "Check formulae and casks that are currently installed."
+      switch "--no-fork",
+             description: "Don't try to fork the repository."
       switch "--open-pr",
              description: "Open a pull request for the new version if none have been opened yet."
       flag   "--limit=",
@@ -467,12 +469,11 @@ module Homebrew
       Latest livecheck version: #{new_versions}
       Latest Repology version:  #{repology_latest}
     EOS
-    if formula_or_cask.is_a?(Formula)
-      require "formula_auditor"
-      auditor = FormulaAuditor.new(formula_or_cask)
-      puts <<~EOS if auditor.synced_with_other_formulae?
+    if formula_or_cask.is_a?(Formula) && formula_or_cask.synced_with_other_formulae?
+      outdated_synced_formulae = synced_with(formula_or_cask, new_version.general)
+      puts <<~EOS if outdated_synced_formulae.present?
         Version syncing:          #{title_name} version should be kept in sync with
-                                  #{synced_with(auditor, formula_or_cask, new_version.general).join(", ")}.
+                                  #{outdated_synced_formulae.join(", ")}.
       EOS
     end
     puts <<~EOS unless args.no_pull_requests?
@@ -509,20 +510,21 @@ module Homebrew
       "--message=Created by `brew bump`",
     ]
 
+    bump_cask_pr_args << "--no-fork" if args.no_fork?
+
     system HOMEBREW_BREW_FILE, *bump_cask_pr_args
   end
 
   sig {
     params(
-      auditor:     FormulaAuditor,
       formula:     Formula,
       new_version: T.nilable(T.any(Version, Cask::DSL::Version)),
     ).returns(T::Array[String])
   }
-  def synced_with(auditor, formula, new_version)
+  def synced_with(formula, new_version)
     synced_with = []
 
-    auditor.synced_versions_formulae_json.each do |synced_formulae|
+    formula.tap&.synced_versions_formulae&.each do |synced_formulae|
       next unless synced_formulae.include?(formula.name)
 
       synced_formulae.each do |synced_formula|
