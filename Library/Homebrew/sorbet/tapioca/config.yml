@@ -13,16 +13,17 @@ gem:
     - docile
     - hana
     - highline
-    - hpricot
+    - kramdown
+    - kramdown-parser-gfm
     - language_server-protocol
     - mustache
     - netrc
+    - nokogiri
     - parallel
     - public_suffix
     - racc
-    - rdiscount
     - rexml
-    - ronn
+    - ronn-ng
     - rspec-github
     - rspec-mocks
     - rspec-retry
