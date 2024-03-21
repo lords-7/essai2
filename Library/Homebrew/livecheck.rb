@@ -40,10 +40,10 @@ class Livecheck
   sig {
     params(
       # Name of cask to inherit livecheck info from.
-      cask_name: String,
+      cask_name: T.nilable(String),
     ).returns(T.nilable(String))
   }
-  def cask(cask_name = T.unsafe(nil))
+  def cask(cask_name = nil)
     case cask_name
     when nil
       @referenced_cask_name
@@ -59,10 +59,10 @@ class Livecheck
   sig {
     params(
       # Name of formula to inherit livecheck info from.
-      formula_name: String,
+      formula_name: T.nilable(String),
     ).returns(T.nilable(String))
   }
-  def formula(formula_name = T.unsafe(nil))
+  def formula(formula_name = nil)
     case formula_name
     when nil
       @referenced_formula_name
@@ -76,10 +76,10 @@ class Livecheck
   sig {
     params(
       # Regex to use for matching versions in content.
-      pattern: Regexp,
+      pattern: T.nilable(Regexp),
     ).returns(T.nilable(Regexp))
   }
-  def regex(pattern = T.unsafe(nil))
+  def regex(pattern = nil)
     case pattern
     when nil
       @regex
@@ -96,10 +96,10 @@ class Livecheck
   sig {
     params(
       # String describing why the formula/cask is skipped.
-      skip_msg: String,
+      skip_msg: T.nilable(String),
     ).returns(T::Boolean)
   }
-  def skip(skip_msg = T.unsafe(nil))
+  def skip(skip_msg = nil)
     @skip_msg = skip_msg if skip_msg.is_a?(String)
 
     @skip = true
@@ -118,11 +118,11 @@ class Livecheck
   sig {
     params(
       # Symbol for the desired strategy.
-      symbol: Symbol,
+      symbol: T.nilable(Symbol),
       block:  T.nilable(Proc),
     ).returns(T.nilable(Symbol))
   }
-  def strategy(symbol = T.unsafe(nil), &block)
+  def strategy(symbol = nil, &block)
     @strategy_block = block if block
 
     case symbol
@@ -141,10 +141,10 @@ class Livecheck
   sig {
     params(
       # Throttle rate of version patch number to use for bumpable versions.
-      rate: Integer,
+      rate: T.nilable(Integer),
     ).returns(T.nilable(Integer))
   }
-  def throttle(rate = T.unsafe(nil))
+  def throttle(rate = nil)
     case rate
     when nil
       @throttle
@@ -160,10 +160,10 @@ class Livecheck
   sig {
     params(
       # URL to check for version information.
-      url: T.any(String, Symbol),
+      url: T.nilable(T.any(String, Symbol)),
     ).returns(T.nilable(T.any(String, Symbol)))
   }
-  def url(url = T.unsafe(nil))
+  def url(url = nil)
     case url
     when nil
       @url
