@@ -154,7 +154,6 @@ class GitHubRunnerMatrix
       next if macos_version < :big_sur
 
       runner = +"#{version}-arm64"
-      runner_timeout = timeout
 
       use_ephemeral = macos_version >= :monterey
       runner << ephemeral_suffix if use_ephemeral
