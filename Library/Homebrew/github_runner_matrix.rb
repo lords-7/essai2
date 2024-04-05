@@ -105,7 +105,6 @@ class GitHubRunnerMatrix
     runner.freeze
   end
 
-  NEWEST_GITHUB_ACTIONS_MACOS_RUNNER = :ventura
   OLDEST_GITHUB_ACTIONS_MACOS_RUNNER = :big_sur
   GITHUB_ACTIONS_RUNNER_TIMEOUT = 360
 
@@ -137,7 +136,6 @@ class GitHubRunnerMatrix
 
       # Use GitHub Actions macOS Runner for testing dependents if compatible with timeout.
       runner, runner_timeout = if (@dependent_matrix || use_github_runner) &&
-                                  macos_version <= NEWEST_GITHUB_ACTIONS_MACOS_RUNNER &&
                                   macos_version >= OLDEST_GITHUB_ACTIONS_MACOS_RUNNER &&
                                   runner_timeout <= GITHUB_ACTIONS_RUNNER_TIMEOUT
         ["macos-#{version}", GITHUB_ACTIONS_RUNNER_TIMEOUT]
@@ -164,7 +162,9 @@ class GitHubRunnerMatrix
       runner.freeze
 
       # The ARM runners are typically over twice as fast as the Intel runners.
-      runner_timeout /= 2 if runner_timeout < GITHUB_ACTIONS_LONG_TIMEOUT
+      if runner_timeout != GITHUB_ACTIONS_LONG_TIMEOUT && runner_timeout != GITHUB_ACTIONS_RUNNER_TIMEOUT
+        runner_timeout /= 2
+      end
       spec = MacOSRunnerSpec.new(
         name:    "macOS #{version}-arm64",
         runner:,
