@@ -3264,6 +3264,10 @@ and Linux workers.
 
 : Only test the direct dependents.
 
+`--skip-repository-audit`
+
+: Don't audit the repository.
+
 `--skip-checksum-only-audit`
 
 : Don't audit checksum-only changes.
