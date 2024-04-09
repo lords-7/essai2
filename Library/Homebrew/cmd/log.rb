@@ -42,7 +42,7 @@ module Homebrew
         ENV["PATH"] = PATH.new(ORIGINAL_PATHS).to_s
 
         if args.no_named?
-          git_log(HOMEBREW_REPOSITORY, args:)
+          git_log(HOMEBREW_REPOSITORY)
         else
           path = args.named.to_paths.first
           tap = Tap.from_path(path)
