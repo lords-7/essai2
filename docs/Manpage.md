@@ -2169,7 +2169,7 @@ Display the path where *`formula`* is located.
 
 ### `generate-cask-api` \[`--dry-run`\]
 
-Generate `homebrew/cask` API data files for <https://formulae.brew.sh>.
+Generate `homebrew/cask` API data files for <https://formulae.brew.sh>. The
 generated files are written to the current directory.
 
 `-n`, `--dry-run`
@@ -2178,7 +2178,7 @@ generated files are written to the current directory.
 
 ### `generate-formula-api` \[`--dry-run`\]
 
-Generate `homebrew/core` API data files for <https://formulae.brew.sh>.
+Generate `homebrew/core` API data files for <https://formulae.brew.sh>. The
 generated files are written to the current directory.
 
 `-n`, `--dry-run`
@@ -2975,6 +2975,7 @@ control system ignores it if you'd prefer to rely on debugging information from
 a local machine).
 
 `brew bundle dump`
+
 : Write all installed casks/formulae/images/taps into a `Brewfile` in the
   current directory.
 
@@ -2993,6 +2994,7 @@ This provides a successful exit code if everything is up-to-date, making it
 useful for scripting.
 
 `brew bundle list`
+
 : List all dependencies present in the `Brewfile`.
 
 By default, only Homebrew formula dependencies are listed.
@@ -3538,7 +3540,7 @@ command execution e.g. `$(cat file)`.
   supported. For example, you might add something like the following to your
   `~/.profile`, `~/.bash_profile`, or `~/.zshenv`:
 
-    `export HOMEBREW_CASK_OPTS="--appdir=~/Applications --fontdir=/Library/Fonts"`
+  `export HOMEBREW_CASK_OPTS="--appdir=~/Applications --fontdir=/Library/Fonts"`
 
 `HOMEBREW_CLEANUP_MAX_AGE_DAYS`
 
@@ -3611,9 +3613,7 @@ command execution e.g. `$(cat file)`.
 
 : If set, print install times for each formula at the end of the run.
 
-- `HOMEBREW_DOCKER_REGISTRY_TOKEN`
-  <br>Use this bearer token for authenticating with a Docker registry proxying GitHub Packages.
-Preferred over `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN`.
+`HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN`
 
 : Use this base64 encoded username and password for authenticating with a Docker
   registry proxying GitHub Packages. If `HOMEBREW_DOCKER_REGISTRY_TOKEN` is set,
@@ -3623,6 +3623,8 @@ Preferred over `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN`.
 
 : Use this bearer token for authenticating with a Docker registry proxying
   GitHub Packages. Preferred over `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN`.
+
+  *Default:* `QQ==` unless `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN` is set.
 
 `HOMEBREW_EDITOR`
 
@@ -3717,10 +3719,17 @@ Preferred over `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN`.
 : Use this personal access token for the GitHub API, for features such as `brew
   search`. You can create one at <https://github.com/settings/tokens>. If set,
   GitHub will allow you a greater number of API requests. For more information,
-  see: <https://docs.github.com/en/rest/overview/rate-limits-for-the-rest-api>
+  see: "<https://docs.github.com/en/rest/overview/rate-limits-for-the-rest-api>"
 
   *Note:* Homebrew doesn't require permissions for any of the scopes, but some
   developer commands may require additional permissions.
+
+  *Note:* If set, this token will also be used to authenticating against
+  `ghcr.io` unless `HOMEBREW_DOCKER_REGISTRY_TOKEN` or
+  `HOMEBREW_DOCKER_REGISTRY_BASIC_AUTH_TOKEN` has been set. In this case, the
+  token will require the `packages` permission to be set.
+  `HOMEBREW_GITHUB_PACKAGES_TOKEN` is not used for this permission, but only for
+  uploading packages.
 
 `HOMEBREW_GITHUB_PACKAGES_TOKEN`
 
