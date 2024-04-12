@@ -243,8 +243,13 @@ module Homebrew
         user, repo = get_repo_data(%r{https?://github\.com/([^/]+)/([^/]+)/?.*})
         return if user.blank?
 
-        tag = SharedAudits.github_tag_from_url(formula.stable.url)
+        tag = if formula.stable.url.include?("pythonhosted.org")
+          formula.stable.url.match(%r{/([^/]*)\.tar\.gz$})[1]
+        else
+          SharedAudits.github_tag_from_url(formula.stable.url)
+        end
         tag ||= formula.stable.specs[:tag]
+
         github_license = GitHub.get_repo_license(user, repo, ref: tag)
         return unless github_license
         return if (licenses + ["NOASSERTION"]).include?(github_license)
