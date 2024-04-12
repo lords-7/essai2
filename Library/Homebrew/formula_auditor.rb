@@ -243,7 +243,7 @@ module Homebrew
         user, repo = get_repo_data(%r{https?://github\.com/([^/]+)/([^/]+)/?.*})
         return if user.blank?
 
-        tag = if formula.stable.url.start_with?("https://files.pythonhosted.org")
+        tag = if formula.stable.url.start_with?("https://files.pythonhosted.org/")
           formula.stable.url.match(%r{/([^/]*)\.tar\.gz$})[1]
         else
           SharedAudits.github_tag_from_url(formula.stable.url)
