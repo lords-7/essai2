@@ -1,0 +1,36 @@
+def calculate_capital_repayment(loan_amount, annual_interest_rate, loan_term_years):
+    # Convert annual interest rate to monthly and get number of monthly payments
+    monthly_interest_rate = annual_interest_rate / 12 / 100
+    total_payments = loan_term_years * 12
+    
+    # Calculate monthly payment using formula for amortizing loans
+    monthly_payment = (loan_amount * monthly_interest_rate) / (1 - (1 + monthly_interest_rate)**-total_payments)
+    
+    # Initialize lists to store balance, principal, and interest for each month
+    balances = [loan_amount]
+    principals = []
+    interests = []
+    
+    # Calculate principal and interest for each month
+    for month in range(1, total_payments + 1):
+        interest_payment = balances[-1] * monthly_interest_rate
+        principal_payment = monthly_payment - interest_payment
+        
+        # Adjust last month's balance
+        new_balance = balances[-1] - principal_payment
+        
+        # Add to lists
+        interests.append(interest_payment)
+        principals.append(principal_payment)
+        balances.append(new_balance)
+    
+    return principals
+
+# Example usage
+loan_amount = 10000
+annual_interest_rate = 5
+loan_term_years = 5
+
+principal_payments = calculate_capital_repayment(loan_amount, annual_interest_rate, loan_term_years)
+for month, payment in enumerate(principal_payments, start=1):
+    print(f"Month {month}: ${payment:.2f}")
