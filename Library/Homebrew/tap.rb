@@ -673,8 +673,11 @@ class Tap
 
   sig { params(token: String).returns(String) }
   def relative_cask_path(token)
-    new_cask_path(token).to_s
-                        .delete_prefix("#{path}/")
+    if token.start_with?("font-")
+      new_cask_font_path(token)
+    else
+      new_cask_path(token)
+    end.to_s.delete_prefix("#{path}/")
   end
 
   def contents
