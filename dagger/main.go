@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Brew struct{}
 
@@ -20,4 +23,11 @@ func (m *Brew) BaseContainer(src *Directory, version, commitSha, githubRepo, rep
 		WithLabel("org.opencontainers.image.version", version).
 		WithLabel("org.opencontainers.image.revision", commitSha).
 		WithLabel("org.opencontainers.image.vendor", repoOwner)
+}
+
+func (m *Brew) Test(ctx context.Context, src *Directory) error {
+	_, err := m.BaseContainer(src, "foo", "foo", "franela/brew", "franela", "20.04").
+		WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
+
+	return err
 }
