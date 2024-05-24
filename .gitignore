@@ -7,6 +7,9 @@
 # Unignore the contents of `Library` as that's where our code lives.
 !/Library
 
+!dagger.json
+!dagger/
+
 # Ignore files within `Library` (again).
 /Library/Homebrew/.npmignore
 /Library/Homebrew/bin

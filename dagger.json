@@ -1,0 +1,6 @@
+{
+  "name": "brew",
+  "sdk": "go",
+  "source": "dagger",
+  "engineVersion": "v0.11.4"
+}
