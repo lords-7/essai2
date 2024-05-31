@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -28,7 +29,39 @@ func (m *Brew) BaseContainer(src *Directory, version, commitSha, githubRepo, rep
 		WithLabel("org.opencontainers.image.vendor", repoOwner)
 }
 
-// foo
+func (m *Brew) PublishAll(ctx context.Context, src *Directory, hubUsername string, hubToken *Secret, ghUsername string, ghToken *Secret) error {
+	if err := m.Publish(ctx, src, "docker.io", hubUsername, hubToken); err != nil {
+		return err
+	}
+	return m.Publish(ctx, src, "ghcr.io", ghUsername, ghToken)
+}
+
+func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username string, token *Secret) error {
+	src = src.WithoutDirectory("dagger").WithoutFile("dagger.json")
+
+	for _, version := range versions {
+		c := m.BaseContainer(src, version, "foo", "franela/brew", "franela", version)
+
+		addr, err := c.
+			WithRegistryAuth(registry, username, token).
+			Publish(ctx, registry+"/franela/brew-ubuntu:"+version)
+		if err != nil {
+			return err
+		}
+		fmt.Println("published at", addr)
+
+		addr, err = c.
+			Publish(ctx, registry+"/franela/brew-ubuntu:latest")
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("published at", addr)
+	}
+
+	return nil
+}
+
 func (m *Brew) Test(ctx context.Context, src *Directory) error {
 	src = src.WithoutDirectory("dagger").WithoutFile("dagger.json")
 
