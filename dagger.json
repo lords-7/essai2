@@ -1,10 +1,10 @@
 {
   "name": "brew",
   "sdk": "go",
-  "source": "dagger",
-  "engineVersion": "v0.11.4",
   "exclude": [
     "Library/Homebrew/vendor/portable-ruby",
     "Library/Taps"
-  ]
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.11.6"
 }

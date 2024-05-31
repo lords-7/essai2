@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// var versions = []string{"20.04", "18.04", "16.04"}
+var versions = []string{"20.04"}
+
 type Brew struct{}
 
 // BaseContainer returns the container from homebrew's Dockerfile.
@@ -25,9 +28,17 @@ func (m *Brew) BaseContainer(src *Directory, version, commitSha, githubRepo, rep
 		WithLabel("org.opencontainers.image.vendor", repoOwner)
 }
 
+// foo
 func (m *Brew) Test(ctx context.Context, src *Directory) error {
-	_, err := m.BaseContainer(src, "foo", "foo", "franela/brew", "franela", "20.04").
-		WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
+	src = src.WithoutDirectory("dagger").WithoutFile("dagger.json")
 
-	return err
+	for _, version := range versions {
+		_, err := m.BaseContainer(src, version, "foo", "franela/brew", "franela", version).
+			WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
