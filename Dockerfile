@@ -48,7 +48,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   && sed -i -E 's/^(USERGROUPS_ENAB\s+)yes$/\1no/' /etc/login.defs \
   && localedef -i en_US -f UTF-8 en_US.UTF-8 \
-  && useradd --create-home --shell /bin/bash --user-group linuxbrew \
+  && useradd -u 1001 --create-home --shell /bin/bash --user-group linuxbrew \
   && echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers \
   && su - linuxbrew -c 'mkdir ~/.linuxbrew'
 
@@ -58,13 +58,20 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
   XDG_CACHE_HOME=/home/linuxbrew/.cache
 WORKDIR /home/linuxbrew
 
-RUN --mount=type=cache,target=Homebrew/Library/Homebrew/vendor/portable-ruby,uid=1000 \
-   --mount=type=cache,target=Homebrew/Library/Taps,uid=1000 \
-   --mount=type=cache,target=.cache,uid=1000 \
+
+RUN --mount=type=cache,target=/tmp/homebrew-core,uid=1001,sharing=locked \
+    # Clone the homebre-core repo into /tmp/homebrew-core or pull latest changes if it exists
+    git clone https://github.com/homebrew/homebrew-core /tmp/homebrew-core || { cd /tmp/homebrew-core && git pull; } \
+    && mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core \
+    && cp -r /tmp/homebrew-core /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/
+
+
+RUN --mount=type=cache,target=/home/linuxbrew/.cache,uid=1001 \
+   --mount=type=cache,target=/home/linuxbrew/.bundle,uid=1001 \
    mkdir -p \
   .linuxbrew/bin \
-  .linuxbrew/etc \
   .linuxbrew/include \
+  .linuxbrew/etc \
   .linuxbrew/lib \
   .linuxbrew/opt \
   .linuxbrew/sbin \
