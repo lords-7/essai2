@@ -58,7 +58,10 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}
   XDG_CACHE_HOME=/home/linuxbrew/.cache
 WORKDIR /home/linuxbrew
 
-RUN mkdir -p \
+RUN --mount=type=cache,target=Homebrew/Library/Homebrew/vendor/portable-ruby,uid=1000 \
+   --mount=type=cache,target=Homebrew/Library/Taps,uid=1000 \
+   --mount=type=cache,target=.cache,uid=1000 \
+   mkdir -p \
   .linuxbrew/bin \
   .linuxbrew/etc \
   .linuxbrew/include \
@@ -76,5 +79,4 @@ RUN mkdir -p \
   && brew cleanup \
   && { git -C .linuxbrew/Homebrew config --unset gc.auto; true; } \
   && { git -C .linuxbrew/Homebrew config --unset homebrew.devcmdrun; true; } \
-  && rm -rf .cache \
   && touch .linuxbrew/.homebrewdocker

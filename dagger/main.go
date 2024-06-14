@@ -37,8 +37,6 @@ func (m *Brew) PublishAll(ctx context.Context, src *Directory, hubUsername strin
 }
 
 func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username string, token *Secret) error {
-	src = src.WithoutDirectory("dagger").WithoutFile("dagger.json")
-
 	for _, version := range versions {
 		c := m.BaseContainer(src, version, "foo", "franela/brew", "franela", version)
 
@@ -63,8 +61,6 @@ func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username s
 }
 
 func (m *Brew) Test(ctx context.Context, src *Directory) error {
-	src = src.WithoutDirectory("dagger").WithoutFile("dagger.json")
-
 	for _, version := range versions {
 		_, err := m.BaseContainer(src, version, "foo", "franela/brew", "franela", version).
 			WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
