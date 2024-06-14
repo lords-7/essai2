@@ -29,16 +29,16 @@ func (m *Brew) BaseContainer(src *Directory, version, commitSha, githubRepo, rep
 		WithLabel("org.opencontainers.image.vendor", repoOwner)
 }
 
-func (m *Brew) PublishAll(ctx context.Context, src *Directory, hubUsername string, hubToken *Secret, ghUsername string, ghToken *Secret) error {
-	if err := m.Publish(ctx, src, "docker.io", hubUsername, hubToken); err != nil {
+func (m *Brew) PublishAll(ctx context.Context, src *Directory, hubUsername string, hubToken *Secret, ghUsername string, ghToken *Secret, commitSHA string) error {
+	if err := m.Publish(ctx, src, "docker.io", hubUsername, hubToken, commitSHA); err != nil {
 		return err
 	}
-	return m.Publish(ctx, src, "ghcr.io", ghUsername, ghToken)
+	return m.Publish(ctx, src, "ghcr.io", ghUsername, ghToken, commitSHA)
 }
 
-func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username string, token *Secret) error {
+func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username string, token *Secret, commitSHA string) error {
 	for _, version := range versions {
-		c := m.BaseContainer(src, version, "foo", "franela/brew", "franela", version)
+		c := m.BaseContainer(src, version, commitSHA, "franela/brew", "franela", version)
 
 		addr, err := c.
 			WithRegistryAuth(registry, username, token).
