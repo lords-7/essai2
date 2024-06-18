@@ -29,8 +29,8 @@ Cask/Desc:
   Description: "Ensure that the desc stanza conforms to various content and style checks."
   Enabled: true
 
-Cask/HomepageUrlTrailingSlash:
-  Description: "Ensure that the homepage url has a slash after the domain name."
+Cask/HomepageUrlStyling:
+  Description: "Ensure that the homepage url has the correct format and styling."
   Enabled: true
 
 Cask/StanzaGrouping:
@@ -244,8 +244,6 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/DescribedClassModuleWrapping:
   Enabled: true
-RSpec/FilePath:
-  SpecSuffixOnly: true
 # Annoying to have these autoremoved.
 RSpec/Focus:
   AutoCorrect: false
@@ -405,11 +403,6 @@ Style/RescueStandardError:
 # Returning `nil` is unnecessary.
 Style/ReturnNil:
   Enabled: true
-
-# Broken with rubocop-1.64.0, tries to autocorrect calls to e.g. :"1?"
-# TODO: report to rubocop
-Style/SendWithLiteralMethodName:
-  Enabled: false
 
 # We have no use for using `warn` because we
 # are calling Ruby with warnings disabled.

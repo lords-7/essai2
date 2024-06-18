@@ -31,44 +31,66 @@ func (m *Brew) BaseContainer(src *Directory, version, commitSha, githubRepo, rep
 }
 
 // publishes to both docker.io and ghcr registries
-func (m *Brew) PublishAll(ctx context.Context, src *Directory, hubUsername string, hubToken *Secret, ghUsername string, ghToken *Secret, commitSHA string, brewVersion string) error {
-	if err := m.Publish(ctx, src, "docker.io", hubUsername, hubToken, commitSHA, brewVersion); err != nil {
+func (m *Brew) PublishAll(ctx context.Context, src *Directory,
+	hubUsername string,
+	hubToken *Secret,
+	ghUsername string,
+	ghToken *Secret,
+	commitSHA string,
+	brewVersion string,
+	repo string,
+	repoOwner string,
+) error {
+	if err := m.Publish(ctx, src, "docker.io", hubUsername, hubToken, commitSHA, brewVersion, repo, repoOwner); err != nil {
 		return err
 	}
-	return m.Publish(ctx, src, "ghcr.io", ghUsername, ghToken, commitSHA, brewVersion)
+	return m.Publish(ctx, src, "ghcr.io", ghUsername, ghToken, commitSHA, brewVersion, repo, repoOwner)
 }
 
 // publishes image to specified registry
-func (m *Brew) Publish(ctx context.Context, src *Directory, registry, username string, token *Secret, commitSHA string, brewVersion string) error {
-	for _, version := range versions {
-		c := m.BaseContainer(src, version, commitSHA, "franela/brew", "franela", version, brewVersion)
+func (m *Brew) Publish(ctx context.Context, src *Directory,
+	registry,
+	username string,
+	token *Secret,
+	commitSHA string,
+	brewVersion string,
+	repo string,
+	repoOwner string,
+) error {
+	eg := errgroup.Group{}
 
-		addr, err := c.
-			WithRegistryAuth(registry, username, token).
-			Publish(ctx, registry+"/"+username+"/brew-ubuntu:"+version)
-		if err != nil {
-			return err
-		}
-		fmt.Println("published at", addr)
+	eg.Go(func() error {
+		for _, version := range versions {
+			c := m.BaseContainer(src, version, commitSHA, repo, repoOwner, version, brewVersion)
 
-		addr, err = c.
-			Publish(ctx, registry+"/"+username+"/brew-ubuntu:latest")
-		if err != nil {
-			return err
-		}
-
-		if version == "22.04" {
-			addr, err = c.
-				Publish(ctx, registry+"/"+username+"/brew:latest")
+			addr, err := c.
+				WithRegistryAuth(registry, username, token).
+				Publish(ctx, registry+"/"+username+"/brew-ubuntu:"+version)
 			if err != nil {
 				return err
 			}
+			fmt.Println("published at", addr)
+
+			addr, err = c.
+				Publish(ctx, registry+"/"+username+"/brew-ubuntu:latest")
+			if err != nil {
+				return err
+			}
+
+			if version == "22.04" {
+				addr, err = c.
+					Publish(ctx, registry+"/"+username+"/brew:latest")
+				if err != nil {
+					return err
+				}
+			}
+
+			fmt.Println("published at", addr)
 		}
+		return nil
+	})
 
-		fmt.Println("published at", addr)
-	}
-
-	return nil
+	return eg.Wait()
 }
 
 // runs brew test-bot against latest ubuntu image
@@ -81,7 +103,7 @@ func (m *Brew) Test(ctx context.Context,
 	// +default=""
 	brewVersion string,
 ) error {
-	_, err := m.BaseContainer(src, version, commitSHA, "franela/brew", "franela", version, brewVersion).
+	_, err := m.BaseContainer(src, version, commitSHA, "", "", version, brewVersion).
 		WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
 	if err != nil {
 		return err
@@ -102,7 +124,7 @@ func (m *Brew) TestAll(ctx context.Context,
 
 	for _, version := range versions {
 		eg.Go(func() error {
-			_, err := m.BaseContainer(src, version, commitSHA, "franela/brew", "franela", version, brewVersion).
+			_, err := m.BaseContainer(src, version, commitSHA, "", "", version, brewVersion).
 				WithExec([]string{"brew", "test-bot", "--only-setup"}).Sync(ctx)
 			return err
 		})

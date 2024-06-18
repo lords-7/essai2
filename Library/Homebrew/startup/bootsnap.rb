@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 homebrew_bootsnap_enabled = ENV["HOMEBREW_NO_BOOTSNAP"].nil? && !ENV["HOMEBREW_BOOTSNAP"].nil?
@@ -14,7 +14,7 @@ if homebrew_bootsnap_enabled
   begin
     require "bootsnap"
   rescue LoadError
-    raise if ENV["HOMEBREW_BOOTSNAP_RETRY"]
+    raise if ENV["HOMEBREW_BOOTSNAP_RETRY"] || HOMEBREW_USING_PORTABLE_RUBY
 
     Homebrew.install_bundler_gems!(groups: ["bootsnap"], only_warn_on_failure: true)
 

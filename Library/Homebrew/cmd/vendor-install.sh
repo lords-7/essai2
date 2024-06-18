@@ -8,6 +8,7 @@
 # HOMEBREW_MACOS_VERSION_NUMERIC and HOMEBREW_PROCESSOR are set by brew.sh
 # shellcheck disable=SC2154
 source "${HOMEBREW_LIBRARY}/Homebrew/utils/lock.sh"
+source "${HOMEBREW_LIBRARY}/Homebrew/utils/ruby.sh"
 
 VENDOR_DIR="${HOMEBREW_LIBRARY}/Homebrew/vendor"
 
@@ -21,19 +22,19 @@ set_ruby_variables() {
        # use a x86_64 Portable Ruby.
        [[ "${VENDOR_PHYSICAL_PROCESSOR}" == "arm64" && "${HOMEBREW_PREFIX}" == "/usr/local" ]]
     then
-      ruby_FILENAME="portable-ruby-3.3.1.el_capitan.bottle.tar.gz"
-      ruby_SHA="34312337c0add491f876b04e8b273a258453d6b633226130ef3105373a97c950"
+      ruby_FILENAME="portable-ruby-${HOMEBREW_PORTABLE_RUBY_VERSION}.el_capitan.bottle.tar.gz"
+      ruby_SHA="a5ef040e054444a0eb2cbcc1032fed14702dfbe2e55b25e609f3ce643f23c4ee"
     elif [[ "${VENDOR_PHYSICAL_PROCESSOR}" == "arm64" ]]
     then
-      ruby_FILENAME="portable-ruby-3.3.1.arm64_big_sur.bottle.tar.gz"
-      ruby_SHA="86ff822590529e8e9093cdc1702a1d3321678c85347d30f82db4f993db8f9eb1"
+      ruby_FILENAME="portable-ruby-${HOMEBREW_PORTABLE_RUBY_VERSION}.arm64_big_sur.bottle.tar.gz"
+      ruby_SHA="49847c7a13f7094b211f6d0025900dd23716be07dac894a3d6941d7696296306"
     fi
   elif [[ -n "${HOMEBREW_LINUX}" ]]
   then
     case "${VENDOR_PROCESSOR}" in
       x86_64)
-        ruby_FILENAME="portable-ruby-3.3.1.x86_64_linux.bottle.tar.gz"
-        ruby_SHA="f49956aa43522c8e86127f7f5d377af2651fe35da975f5993eb2d038865c118c"
+        ruby_FILENAME="portable-ruby-${HOMEBREW_PORTABLE_RUBY_VERSION}.x86_64_linux.bottle.tar.gz"
+        ruby_SHA="40a1dbc25bb1a8bbdf0bba53d3f16c45416be12d4c6d48b4530f90b2a77d64ce"
         ;;
       *) ;;
     esac
@@ -59,7 +60,7 @@ set_ruby_variables() {
     fi
     ruby_URLs+=(
       "https://ghcr.io/v2/homebrew/portable-ruby/portable-ruby/blobs/sha256:${ruby_SHA}"
-      "https://github.com/Homebrew/homebrew-portable-ruby/releases/download/3.3.1/${ruby_FILENAME}"
+      "https://github.com/Homebrew/homebrew-portable-ruby/releases/download/${HOMEBREW_PORTABLE_RUBY_VERSION}/${ruby_FILENAME}"
     )
     ruby_URL="${ruby_URLs[0]}"
   fi
@@ -186,21 +187,33 @@ EOS
   if [[ -x "/usr/bin/shasum" ]]
   then
     sha="$(/usr/bin/shasum -a 256 "${CACHED_LOCATION}" | cut -d' ' -f1)"
-  elif [[ -x "$(type -P sha256sum)" ]]
+  fi
+
+  if [[ -z "${sha}" && -x "$(type -P sha256sum)" ]]
   then
     sha="$(sha256sum "${CACHED_LOCATION}" | cut -d' ' -f1)"
-  elif [[ -x "$(type -P ruby)" ]]
+  fi
+
+  if [[ -z "${sha}" ]]
   then
-    sha="$(
-      ruby <<EOSCRIPT
+    if [[ -x "$(type -P ruby)" ]]
+    then
+      sha="$(
+        ruby <<EOSCRIPT
 require 'digest/sha2'
 digest = Digest::SHA256.new
 File.open('${CACHED_LOCATION}', 'rb') { |f| digest.update(f.read) }
 puts digest.hexdigest
 EOSCRIPT
-    )"
-  else
-    odie "Cannot verify checksum ('shasum' or 'sha256sum' not found)!"
+      )"
+    else
+      odie "Cannot verify checksum ('shasum', 'sha256sum' and 'ruby' not found)!"
+    fi
+  fi
+
+  if [[ -z "${sha}" ]]
+  then
+    odie "Could not get checksum ('shasum', 'sha256sum' and 'ruby' produced no output)!"
   fi
 
   if [[ "${sha}" != "${VENDOR_SHA}" ]]

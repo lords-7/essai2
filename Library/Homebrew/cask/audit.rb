@@ -318,13 +318,18 @@ module Cask
       return if block_url_offline?
 
       odebug "Auditing URL format"
-      if bad_sourceforge_url?
-        add_error "SourceForge URL format incorrect. See #{Formatter.url(SOURCEFORGE_OSDN_REFERENCE_URL)}",
-                  location: cask.url.location
-      elsif bad_osdn_url?
-        add_error "OSDN URL format incorrect. See #{Formatter.url(SOURCEFORGE_OSDN_REFERENCE_URL)}",
-                  location: cask.url.location
-      end
+      return unless bad_sourceforge_url?
+
+      add_error "SourceForge URL format incorrect. See #{Formatter.url(SOURCEFORGE_OSDN_REFERENCE_URL)}",
+                location: cask.url.location
+    end
+
+    def audit_download_url_is_osdn
+      return unless cask.url
+      return if block_url_offline?
+      return unless bad_osdn_url?
+
+      add_error "OSDN download urls are disabled.", location: cask.url.location, strict_only: true
     end
 
     VERIFIED_URL_REFERENCE_URL = "https://docs.brew.sh/Cask-Cookbook#when-url-and-homepage-domains-differ-add-verified"
@@ -529,6 +534,12 @@ module Cask
 
       @tmpdir ||= Pathname(Dir.mktmpdir("cask-audit", HOMEBREW_TEMP))
 
+      # Clean up tmp dir when @tmpdir object is destroyed
+      ObjectSpace.define_finalizer(
+        @tmpdir,
+        proc { FileUtils.remove_entry(@tmpdir) },
+      )
+
       ohai "Downloading and extracting artifacts"
 
       downloaded_path = download.fetch
@@ -538,6 +549,13 @@ module Cask
 
       # Extract the container to the temporary directory.
       primary_container.extract_nestedly(to: @tmpdir, basename: downloaded_path.basename, verbose: false)
+
+      if (nested_container = @cask.container&.nested)
+        FileUtils.chmod_R "+rw", @tmpdir/nested_container, force: true, verbose: false
+        UnpackStrategy.detect(@tmpdir/nested_container, merge_xattrs: true)
+                      .extract_nestedly(to: @tmpdir, verbose: false)
+      end
+
       @artifacts_extracted = true # Set the flag to indicate that extraction has occurred.
 
       # Yield the artifacts and temp directory to the block if provided.
@@ -821,7 +839,8 @@ module Cask
 
       validate_url_for_https_availability(
         url, "livecheck URL",
-        check_content: true
+        check_content: true,
+        user_agents:   [:default, :browser]
       )
     end
 
@@ -889,7 +908,7 @@ module Cask
 
     sig { returns(T::Boolean) }
     def bad_osdn_url?
-      bad_url_format?(/osd/, [%r{\Ahttps?://([^/]+.)?dl\.osdn\.jp/}])
+      domain.match?(%r{^(?:\w+\.)*osdn\.jp(?=/|$)})
     end
 
     # sig { returns(String) }

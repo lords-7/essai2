@@ -462,7 +462,6 @@ module Formulary
       end
     end
 
-    klass = T.cast(klass, T.class_of(Formula))
     mod.const_set(class_name, klass)
 
     platform_cache[:api] ||= {}
@@ -828,6 +827,7 @@ module Formulary
 
       loaders = Tap.select { |tap| tap.installed? && !tap.core_tap? }
                    .filter_map { |tap| super("#{tap}/#{name}", warn:) }
+                   .uniq(&:path)
                    .select { |tap| tap.path.exist? }
 
       case loaders.count
