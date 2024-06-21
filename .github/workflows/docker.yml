@@ -46,5 +46,4 @@ jobs:
           HOMEBREW_BREW_GITHUB_PACKAGES_TOKEN: ${{ secrets.HOMEBREW_BREW_GITHUB_PACKAGES_TOKEN }}
         with:
           version: "latest"
-          verb: call
           args: publish-all --src . --hub-username brewtestbot --hub-token HOMEBREW_BREW_DOCKER_TOKEN --gh-username BrewTestBot --gh-token HOMEBREW_BREW_GITHUB_PACKAGES_TOKEN --commit-sha ${{ github.sha }} --repo-owner "${GITHUB_REPOSITORY_OWNER}" --repo "${GITHUB_REPOSITORY}" --brew-version "${GITHUB_REF:10}"
