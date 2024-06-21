@@ -115,9 +115,9 @@ func (m *Brew) Test(ctx context.Context,
 // runs brew test-bot against all versions
 func (m *Brew) TestAll(ctx context.Context,
 	src *Directory,
-	// +default=""
+	// +optional
 	commitSHA string,
-	// +default=""
+	// +optional
 	brewVersion string,
 ) error {
 	eg := errgroup.Group{}
