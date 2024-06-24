@@ -917,12 +917,13 @@ module Formulary
     def self.try_new(ref, from: T.unsafe(nil), warn: false)
       return if Homebrew::EnvConfig.no_install_from_api?
       return unless ref.is_a?(String)
-      return unless (name = ref[HOMEBREW_DEFAULT_TAP_FORMULA_REGEX, :name])
-      if !Homebrew::API::Formula.all_formulae.key?(name) &&
-         !Homebrew::API::Formula.all_aliases.key?(name) &&
-         !Homebrew::API::Formula.all_renames.key?(name)
-        return
+
+      name = parse_name(ref)
+      name ||= begin
+        ref = CoreTap.instance.tap_migration_renames[ref]
+        parse_name(ref) if ref
       end
+      return unless name
 
       alias_name = name
 
@@ -932,7 +933,7 @@ module Formulary
 
       name, tap, type = name_tap_type
 
-      options =  if type == :alias
+      options = if type == :alias
         { alias_name: alias_name.downcase }
       else
         {}
@@ -940,6 +941,16 @@ module Formulary
 
       new(name, tap:, **options)
     end
+
+    sig { params(ref: String).returns(T.nilable(String)) }
+    def self.parse_name(ref)
+      return unless (name = ref[HOMEBREW_DEFAULT_TAP_FORMULA_REGEX, :name])
+      return name if Homebrew::API::Formula.all_formulae.key?(name)
+      return name if Homebrew::API::Formula.all_aliases.key?(name)
+
+      name if Homebrew::API::Formula.all_renames.key?(name)
+    end
+    private_class_method :parse_name
 
     sig { params(name: String, tap: Tap, alias_name: String).void }
     def initialize(name, tap: T.unsafe(nil), alias_name: T.unsafe(nil))
