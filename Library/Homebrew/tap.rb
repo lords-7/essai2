@@ -236,6 +236,7 @@ class Tap
     @command_files = nil
 
     @tap_migrations = nil
+    @tap_migration_renames = nil
     @reverse_tap_migrations_renames = nil
 
     @audit_exceptions = nil
