@@ -567,7 +567,7 @@ RSpec.describe Tap do
         JSON
       end
 
-      describe "#reverse_tap_migration_renames" do
+      describe "#reverse_tap_migrations_renames" do
         it "returns the expected hash" do
           expect(homebrew_foo_tap.reverse_tap_migrations_renames).to eq({
             "homebrew/cask/google-cloud-sdk" => %w[app-engine-go-32 app-engine-go-64],

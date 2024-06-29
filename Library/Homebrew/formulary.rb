@@ -918,23 +918,23 @@ module Formulary
       return if Homebrew::EnvConfig.no_install_from_api?
       return unless ref.is_a?(String)
 
-      name = parse_name(ref)
-      name ||= begin
-        ref = CoreTap.instance.tap_migration_renames[ref]
-        parse_name(ref) if ref
+      ref = if (name = parse_name(ref))
+        "#{CoreTap.instance}/#{name}"
+      else
+        name = ref.split("/").last
+        CoreTap.instance.tap_migration_oldnames_to_full_names[ref]
       end
-      return unless name
+
+      return unless ref
 
       alias_name = name
-
-      ref = "#{CoreTap.instance}/#{name}"
 
       return unless (name_tap_type = Formulary.tap_formula_name_type(ref, warn:))
 
       name, tap, type = name_tap_type
 
       options = if type == :alias
-        { alias_name: alias_name.downcase }
+        { alias_name: T.must(alias_name).downcase }
       else
         {}
       end

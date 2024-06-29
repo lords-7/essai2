@@ -269,14 +269,13 @@ module Cask
         return if Homebrew::EnvConfig.no_install_from_api?
         return unless ref.is_a?(String)
 
-        token = parse_token(ref)
-        token ||= begin
-          ref = CoreCaskTap.instance.tap_migration_renames[ref]
-          parse_token(ref) if ref
+        ref = if (token = parse_token(ref))
+          "#{CoreCaskTap.instance}/#{token}"
+        else
+          CoreCaskTap.instance.tap_migration_oldnames_to_full_names[ref]
         end
-        return unless token
 
-        ref = "#{CoreCaskTap.instance}/#{token}"
+        return unless ref
 
         token, tap, = CaskLoader.tap_cask_token_type(ref, warn:)
         new("#{tap}/#{token}")

@@ -236,7 +236,7 @@ class Tap
     @command_files = nil
 
     @tap_migrations = nil
-    @tap_migration_renames = nil
+    @tap_migration_oldnames_to_full_names = nil
     @reverse_tap_migrations_renames = nil
 
     @audit_exceptions = nil
@@ -1285,15 +1285,16 @@ class CoreTap < AbstractCoreTap
     end
   end
 
-  # External formula names to core formula renames
+  # Old formula names (that were migrated to homebrew/core) to old full names.
   sig { returns(T::Hash[String, String]) }
-  def tap_migration_renames
-    @tap_migration_renames ||= Tap.each_with_object({}) do |tap, hash|
+  def tap_migration_oldnames_to_full_names
+    @tap_migration_oldnames_to_full_names ||= Tap.each_with_object({}) do |tap, hash|
       tap.tap_migrations.each do |old_name, new_name|
         next unless new_name.start_with?("homebrew/core/")
 
-        hash[old_name] = new_name
-        hash["#{tap}/#{old_name}"] = new_name
+        full_name = "#{tap}/#{old_name}"
+        hash[old_name] = full_name
+        hash[full_name] = full_name
       end
     end
   end
@@ -1470,15 +1471,16 @@ class CoreCaskTap < AbstractCoreTap
     end
   end
 
-  # External cask names to core cask renames
+  # Old cask names (that were migrated to homebrew/cask) to old full names.
   sig { returns(T::Hash[String, String]) }
-  def tap_migration_renames
-    @tap_migration_renames ||= Tap.each_with_object({}) do |tap, hash|
+  def tap_migration_oldnames_to_full_names
+    @tap_migration_oldnames_to_full_names ||= Tap.each_with_object({}) do |tap, hash|
       tap.tap_migrations.each do |old_name, new_name|
         next unless new_name.start_with?("homebrew/cask/")
 
-        hash[old_name] = new_name
-        hash["#{tap}/#{old_name}"] = new_name
+        full_name = "#{tap}/#{old_name}"
+        hash[old_name] = full_name
+        hash[full_name] = full_name
       end
     end
   end
