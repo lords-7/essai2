@@ -323,7 +323,8 @@ module GitHub
       if raise_errors
         if result["errors"].present?
           related_errors = result["errors"].reject do |e|
-            e.key?("extensions") && e["extensions"]["saml_failure"] == true
+            # comment explaining why we don't care about saml_failure
+            e.dig("extensions", "saml_failure") == true
           end
 
           if related_errors.present?
