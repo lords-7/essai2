@@ -917,6 +917,8 @@ module GitHub
     return false if !more_graphql_data && prs.length < MAXIMUM_OPEN_PRS
 
     homebrew_prs_count = graphql_result.dig("viewer", "pullRequests", "nodes").count do |pr|
+      next unless pr.present?
+
       pr["headRepositoryOwner"]["login"] == "Homebrew"
     end
     return true if homebrew_prs_count >= MAXIMUM_OPEN_PRS

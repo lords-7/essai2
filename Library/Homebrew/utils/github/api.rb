@@ -322,7 +322,15 @@ module GitHub
 
       if raise_errors
         if result["errors"].present?
-          raise Error, result["errors"].map { |e| "#{e["type"]}: #{e["message"]}" }.join("\n")
+          related_errors = result["errors"].reject do |e|
+            e.key?("extensions") && e["extensions"]["saml_failure"] == true
+          end
+
+          if related_errors.present?
+            raise Error, related_errors.map { |e|
+                           "#{e["type"]}: #{e["message"]}"
+                         }.join("\n")
+          end
         end
 
         result["data"]
