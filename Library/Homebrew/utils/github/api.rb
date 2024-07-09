@@ -323,7 +323,7 @@ module GitHub
       if raise_errors
         if result["errors"].present?
           related_errors = result["errors"].reject do |e|
-            # comment explaining why we don't care about saml_failure
+            # saml_failure only happens for other orgs, Homebrew doesn't have it
             e.dig("extensions", "saml_failure") == true
           end
 
