@@ -48,7 +48,9 @@ group :style, optional: true do
   gem "rubocop-md", require: false
   gem "rubocop-performance", require: false
   gem "rubocop-rspec", require: false
-  gem "rubocop-sorbet", require: false
+  # use rubocop-sorbet from github until a fix for this is released:
+  # https://github.com/Shopify/rubocop-sorbet/issues/238
+  gem "rubocop-sorbet", require: false, github: "Shopify/rubocop-sorbet"
 end
 group :tests, optional: true do
   gem "parallel_tests", require: false
