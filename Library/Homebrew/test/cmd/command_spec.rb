@@ -7,7 +7,7 @@ RSpec.describe Homebrew::Cmd::Command do
   it_behaves_like "parseable arguments"
 
   it "returns the file for a given command", :integration_test do
-    expect { brew "command", "info" }
+    expect { brew_sh "command", "info" }
       .to output(%r{#{Regexp.escape(HOMEBREW_LIBRARY_PATH)}/cmd/info.rb}o).to_stdout
       .and be_a_success
   end
