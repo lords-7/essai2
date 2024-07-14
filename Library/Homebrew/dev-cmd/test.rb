@@ -86,7 +86,7 @@ module Homebrew
                 sandbox = Sandbox.new
                 f.logs.mkpath
                 sandbox.record_log(f.logs/"test.sandbox.log")
-                sandbox.allow_write_temp_and_cache
+                sandbox.allow_write_temp_and_cache(formula)
                 sandbox.allow_write_log(f)
                 sandbox.allow_write_xcode
                 sandbox.allow_write_path(HOMEBREW_PREFIX/"var/cache")

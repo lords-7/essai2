@@ -1548,6 +1548,15 @@ class Formula
   # @see .disable!
   delegate disable_reason: :"self.class"
 
+  # Sandbox rules that should be skipped when installing or testing this {Formula}.
+  # Returns `nil` if there are no sandbox rules to skip.
+  # @!method reduced_sandbox
+  # @return [Array<Symbol>]
+  # @see .reduce_sandbox
+  def reduced_sandbox
+    self.class.reduced_sandbox || []
+  end
+
   sig { returns(T::Boolean) }
   def skip_cxxstdlib_check?
     false
@@ -3272,6 +3281,9 @@ class Formula
     # The reason for why this software is not linked (by default) to {::HOMEBREW_PREFIX}.
     attr_reader :keg_only_reason
 
+    # The types of sandbox restrictions that should be lifted from the formula.
+    attr_reader :reduced_sandbox
+
     # A one-line description of the software. Used by users to get an overview
     # of the software and Homebrew maintainers.
     # Shows when running `brew info`.
@@ -4290,6 +4302,31 @@ class Formula
     def link_overwrite(*paths)
       paths.flatten!
       link_overwrite_paths.merge(paths)
+    end
+
+    # Skip certain sandbox restrictions when installing this formula.
+    # This can be useful if the upstream build system needs to write to
+    # locations that are protected by sandbox restrictions.
+    #
+    # ### Example
+    #
+    # If upstream needs to write to `/private/tmp`:
+    #
+    # ```ruby
+    # reduce_sandbox :allow_write_to_temp
+    # ```
+    def reduce_sandbox!(*types)
+      invalid_types = types.select { |type| Sandbox::SANDBOX_REDUCTIONS.exclude?(type) }
+      if invalid_types.any?
+        noun = if invalid_types.count > 1
+          "types"
+        else
+          "type"
+        end
+        raise ArgumentError, "Unsupported sandbox reduction #{noun}: #{invalid_types.join(", ")}"
+      end
+
+      @reduced_sandbox = types
     end
   end
 end

@@ -937,7 +937,7 @@ on_request: installed_on_request?, options:)
         formula.logs.mkpath
         sandbox.record_log(formula.logs/"build.sandbox.log")
         sandbox.allow_write_path(Dir.home) if interactive?
-        sandbox.allow_write_temp_and_cache
+        sandbox.allow_write_temp_and_cache(formula)
         sandbox.allow_write_log(formula)
         sandbox.allow_cvs
         sandbox.allow_fossil
@@ -1153,7 +1153,7 @@ on_request: installed_on_request?, options:)
         sandbox = Sandbox.new
         formula.logs.mkpath
         sandbox.record_log(formula.logs/"postinstall.sandbox.log")
-        sandbox.allow_write_temp_and_cache
+        sandbox.allow_write_temp_and_cache(formula)
         sandbox.allow_write_log(formula)
         sandbox.allow_write_xcode
         sandbox.deny_write_homebrew_repository

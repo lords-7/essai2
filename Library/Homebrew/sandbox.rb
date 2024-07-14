@@ -11,6 +11,8 @@ class Sandbox
   SANDBOX_EXEC = "/usr/bin/sandbox-exec"
   private_constant :SANDBOX_EXEC
 
+  SANDBOX_REDUCTIONS = [:allow_write_to_temp].freeze
+
   sig { returns(T::Boolean) }
   def self.available?
     false
@@ -55,9 +57,12 @@ class Sandbox
     deny_write path:, type: :subpath
   end
 
-  sig { void }
-  def allow_write_temp_and_cache
-    allow_write_path "/private/var/tmp"
+  sig { params(formula: T.nilable(Formula)).void }
+  def allow_write_temp_and_cache(formula = nil)
+    if formula&.reduced_sandbox&.include?(:allow_write_to_temp)
+      allow_write_path "/private/tmp"
+      allow_write_path "/private/var/tmp"
+    end
     allow_write path: "^/private/var/folders/[^/]+/[^/]+/[C,T]/", type: :regex
     allow_write_path HOMEBREW_TEMP
     allow_write_path HOMEBREW_CACHE
