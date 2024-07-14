@@ -57,7 +57,6 @@ class Sandbox
 
   sig { void }
   def allow_write_temp_and_cache
-    allow_write_path "/private/tmp"
     allow_write_path "/private/var/tmp"
     allow_write path: "^/private/var/folders/[^/]+/[^/]+/[C,T]/", type: :regex
     allow_write_path HOMEBREW_TEMP
