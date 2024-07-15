@@ -4,6 +4,7 @@
 require "abstract_command"
 require "formula"
 require "formula_versions"
+require "utils/backtrace"
 require "utils/curl"
 require "utils/github/actions"
 require "utils/shared_audits"
