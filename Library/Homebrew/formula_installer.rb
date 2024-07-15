@@ -943,6 +943,7 @@ on_request: installed_on_request?, options:)
         sandbox.allow_fossil
         sandbox.allow_write_xcode
         sandbox.allow_write_cellar(formula)
+        sandbox.deny_signal(formula)
         sandbox.deny_all_network_except_pipe(error_pipe) unless formula.network_access_allowed?(:build)
         sandbox.exec(*args)
       else

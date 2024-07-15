@@ -11,7 +11,7 @@ class Sandbox
   SANDBOX_EXEC = "/usr/bin/sandbox-exec"
   private_constant :SANDBOX_EXEC
 
-  SANDBOX_REDUCTIONS = [:allow_write_to_temp].freeze
+  SANDBOX_REDUCTIONS = [:allow_write_to_temp, :allow_signal].freeze
 
   sig { returns(T::Boolean) }
   def self.available?
@@ -66,6 +66,14 @@ class Sandbox
     allow_write path: "^/private/var/folders/[^/]+/[^/]+/[C,T]/", type: :regex
     allow_write_path HOMEBREW_TEMP
     allow_write_path HOMEBREW_CACHE
+  end
+
+  sig { params(formula: T.nilable(Formula)).void }
+  def deny_signal(formula = nil)
+    puts "deny_signal:  #{formula&.reduced_sandbox&.include?(:allow_signal)}"
+    unless formula&.reduced_sandbox&.include?(:allow_signal)
+      add_rule allow: false, operation: "signal", filter: "target others"
+    end
   end
 
   sig { void }
