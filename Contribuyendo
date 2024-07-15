@@ -1,0 +1,11 @@
+Contribuyendo a Homebrew
+¿Es la primera vez que colaboras con Homebrew? Lee nuestro Código de conducta y revisa Cómo abrir una solicitud de incorporación de cambios en Homebrew .
+
+Reportar un error
+Correr brew update(dos veces).
+Corre y lee brew doctor.
+Lea la lista de verificación de solución de problemas .
+Abra un problema en el repositorio de la fórmula o en Homebrew/brew si no es un problema específico de la fórmula.
+Proponer una característica
+Abra un problema con una descripción detallada de la característica propuesta, la motivación para ella y las alternativas consideradas. Tenga en cuenta que podemos cerrar este problema o solicitarle que cree una solicitud de incorporación de cambios si no consideramos que se trata de algo con la prioridad suficiente.
+¡Gracias!
