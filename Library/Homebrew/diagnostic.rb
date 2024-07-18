@@ -520,6 +520,26 @@ module Homebrew
         examine_git_origin(repo, Homebrew::EnvConfig.brew_git_remote)
       end
 
+      def check_git_fsmonitor_settings
+        return unless Utils::Git.available?
+
+        fsmonitor = HOMEBREW_REPOSITORY.cd { `git config --get core.fsmonitor`.chomp }
+        return if fsmonitor != "true"
+
+        <<~EOS
+          Suspicious Git fsmonitor settings found.
+
+          The detected Git fsmonitor settings could interfere with Homebrew operations:
+            core.fsmonitor = #{fsmonitor}
+
+          This setting might block the lock file during a `brew upgrade` operation,
+          leading to potential issues and interruptions.
+
+          If you encounter problems, consider disabling fsmonitor in the Homebrew repository by running:
+            cd #{HOMEBREW_REPOSITORY} && git config core.fsmonitor false
+        EOS
+      end
+
       def check_coretap_integrity
         core_tap = CoreTap.instance
         unless core_tap.installed?
