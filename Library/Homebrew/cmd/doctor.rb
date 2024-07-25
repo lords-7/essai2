@@ -23,6 +23,11 @@ module Homebrew
         switch "-D", "--audit-debug",
                description: "Enable debugging and profiling of audit methods."
 
+        switch "--ignore-warnings",
+               description: "Only exit with a non-zero status if errors are " \
+                            "encountered. Warnings are still displayed but will " \
+                            "not cause the command to fail."
+
         named_args :diagnostic_check
       end
 
@@ -48,7 +53,7 @@ module Homebrew
           methods = args.named
         end
 
-        first_warning = T.let(true, T::Boolean)
+        seen_warning = T.let(false, T::Boolean)
         methods.each do |method|
           $stderr.puts Formatter.headline("Checking #{method}", color: :magenta) if args.debug?
           unless checks.respond_to?(method)
@@ -59,7 +64,7 @@ module Homebrew
           out = checks.send(method)
           next if out.blank?
 
-          if first_warning
+          unless seen_warning
             $stderr.puts <<~EOS
               #{Tty.bold}Please note that these warnings are just used to help the Homebrew maintainers
               with debugging if you file an issue. If everything you use Homebrew for is
@@ -69,11 +74,11 @@ module Homebrew
 
           $stderr.puts
           opoo out
-          Homebrew.failed = true
-          first_warning = false
+          Homebrew.failed = true unless args.ignore_warnings?
+          seen_warning = true
         end
 
-        puts "Your system is ready to brew." if !Homebrew.failed? && !args.quiet?
+        puts "Your system is ready to brew." if !Homebrew.failed? && !seen_warning && !args.quiet?
       end
     end
   end
