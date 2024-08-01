@@ -26,6 +26,7 @@ homebrew-shellenv() {
       echo "fish_add_path -gP \"${HOMEBREW_PREFIX}/bin\" \"${HOMEBREW_PREFIX}/sbin\";"
       echo "set -q MANPATH; and set MANPATH[1] \":\$(string trim --left --chars=\":\" \$MANPATH[1])\";"
       echo "! set -q INFOPATH; and set INFOPATH ''; set -gx INFOPATH \"${HOMEBREW_PREFIX}/share/info\" \$INFOPATH;"
+      echo "set -q XDG_DATA_DIRS; and set XDG_DATA_DIRS \"${HOMEBREW_PREFIX}/share:\$XDG_DATA_DIRS\";"
       ;;
     csh | -csh | tcsh | -tcsh)
       echo "setenv HOMEBREW_PREFIX ${HOMEBREW_PREFIX};"
@@ -34,6 +35,7 @@ homebrew-shellenv() {
       echo "setenv PATH ${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin:\$PATH;"
       echo "if ( \${?MANPATH} == 1 ) setenv MANPATH :\${MANPATH};"
       echo "setenv INFOPATH ${HOMEBREW_PREFIX}/share/info\`if ( \${?INFOPATH} == 1 ) echo \":\${INFOPATH}\"\`;"
+      echo "if ( \${?XDG_DATA_DIRS} == 1 ) setenv XDG_DATA_DIRS ${HOMEBREW_PREFIX}/share:\${XDG_DATA_DIRS};"
       ;;
     pwsh | -pwsh | pwsh-preview | -pwsh-preview)
       echo "[System.Environment]::SetEnvironmentVariable('HOMEBREW_PREFIX','${HOMEBREW_PREFIX}',[System.EnvironmentVariableTarget]::Process)"
@@ -50,6 +52,7 @@ homebrew-shellenv() {
       echo "export PATH=\"${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin\${PATH+:\$PATH}\";"
       echo "[ -z \"\${MANPATH-}\" ] || export MANPATH=\":\${MANPATH#:}\";"
       echo "export INFOPATH=\"${HOMEBREW_PREFIX}/share/info:\${INFOPATH:-}\";"
+      echo "[ -z \"\${XDG_DATA_DIRS-}\" ] || export XDG_DATA_DIRS=\"${HOMEBREW_PREFIX}/share:\${XDG_DATA_DIRS#:}\";"
       ;;
   esac
 }
