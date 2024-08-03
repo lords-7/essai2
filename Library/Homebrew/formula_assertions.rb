@@ -21,11 +21,11 @@ module Homebrew
     # Returns the output of running cmd and asserts the exit status.
     #
     # @api public
-    sig { params(cmd: T.any(Pathname, String), result: Integer).returns(String) }
+    sig { params(cmd: T.any(Pathname, String), result: T.nilable(Integer)).returns(String) }
     def shell_output(cmd, result = 0)
       ohai cmd
       output = `#{cmd}`
-      assert_equal result, $CHILD_STATUS.exitstatus
+      assert_equal result, $CHILD_STATUS.exitstatus unless result.nil?
       output
     rescue Minitest::Assertion
       puts output if verbose?
