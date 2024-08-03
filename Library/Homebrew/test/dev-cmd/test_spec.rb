@@ -7,10 +7,23 @@ require "sandbox"
 RSpec.describe Homebrew::DevCmd::Test do
   it_behaves_like "parseable arguments"
 
-  it "tests a given Formula", :integration_test do
+  it "tests a given Formula when exitStatus as 0", :integration_test do
     install_test_formula "testball", <<~'RUBY'
       test do
         assert_equal "test", shell_output("#{bin}/test")
+      end
+    RUBY
+
+    expect { brew "test", "--verbose", "testball" }
+      .to output(/Testing testball/).to_stdout
+      .and not_to_output.to_stderr
+      .and be_a_success
+  end
+
+  it "tests a given Formula when exitStatus as nil", :integration_test do
+    install_test_formula "testball", <<~'RUBY'
+      test do
+        assert_equal "test", shell_output("#{bin}/test", nil)
       end
     RUBY
 
