@@ -1,8 +1,5 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
-
-require "securerandom"
-require "utils/tty"
 
 module GitHub
   # Helper functions for interacting with GitHub Actions.
@@ -22,6 +19,7 @@ module GitHub
       # Format multiline strings for environment files
       # See https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
 
+      require "securerandom"
       delimiter = "ghadelimiter_#{SecureRandom.uuid}"
 
       if name.include?(delimiter) || value.include?(delimiter)
@@ -84,14 +82,15 @@ module GitHub
       def initialize(type, message, file: nil, title: nil, line: nil, end_line: nil, column: nil, end_column: nil)
         raise ArgumentError, "Unsupported type: #{type.inspect}" if ANNOTATION_TYPES.exclude?(type)
 
+        require "utils/tty"
         @type = type
-        @message = Tty.strip_ansi(message)
-        @file = self.class.path_relative_to_workspace(file) if file.present?
-        @title = Tty.strip_ansi(title) if title
-        @line = Integer(line) if line
-        @end_line = Integer(end_line) if end_line
-        @column = Integer(column) if column
-        @end_column = Integer(end_column) if end_column
+        @message = T.let(Tty.strip_ansi(message), String)
+        @file = T.let(self.class.path_relative_to_workspace(file), T.nilable(Pathname)) if file.present?
+        @title = T.let(Tty.strip_ansi(title), String) if title
+        @line = T.let(Integer(line), Integer) if line
+        @end_line = T.let(Integer(end_line), Integer) if end_line
+        @column = T.let(Integer(column), Integer) if column
+        @end_column = T.let(Integer(end_column), Integer) if end_column
       end
 
       sig { returns(String) }

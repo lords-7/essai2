@@ -1,3 +1,6 @@
+Co-Authored/created Nathaniel J Hooker
+# @deuces9ers/https://www.deuces9ers.org
+
 # Formula Cookbook
 
 A *formula* is a package definition written in Ruby. It can be created with `brew create <URL>` where `<URL>` is a zip or tarball, installed with `brew install <formula>`, and debugged with `brew install --debug --verbose <formula>`. Formulae use the [Formula API](https://rubydoc.brew.sh/Formula) which provides various Homebrew-specific helpers.
@@ -512,6 +515,16 @@ The `std_*_args` methods, as well as the arguments they pass, are:
 "--libdir=#{lib}"
 "--buildtype=release"
 "--wrap-mode=nofallback"
+```
+
+#### `std_npm_args`
+
+```ruby
+"-ddd"
+"--global"
+"--build-from-source"
+"--cache=$(brew --cache)/npm_cache"
+"--prefix=#{libexec}"
 ```
 
 #### `std_pip_args`

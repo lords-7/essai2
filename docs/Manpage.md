@@ -3691,6 +3691,11 @@ command execution e.g. `$(cat file)`.
 : If set, tweak behaviour to be more relevant for Homebrew developers (active or
   budding) by e.g. turning warnings into errors.
 
+`HOMEBREW_DISABLE_DEBREW`
+
+: If set, the interactive formula debugger available via `--debug` will be
+  disabled.
+
 `HOMEBREW_DISABLE_LOAD_FORMULA`
 
 : If set, refuse to load formulae. This is useful when formulae are not trusted
@@ -3770,6 +3775,11 @@ command execution e.g. `$(cat file)`.
 
 : A space-separated list of taps. Homebrew will refuse to install a formula if
   it or any of its dependencies is in a tap on this list.
+
+`HOMEBREW_FORBID_PACKAGES_FROM_PATHS`
+
+: If set, Homebrew will refuse to read formulae or casks provided from file
+  paths, e.g. `brew install ./package.rb`.
 
 `HOMEBREW_FORCE_BREWED_CA_CERTIFICATES`
 
@@ -3861,6 +3871,11 @@ command execution e.g. `$(cat file)`.
   *Default:* `$XDG_CONFIG_HOME/homebrew/livecheck_watchlist.txt` if
   `$XDG_CONFIG_HOME` is set or `$HOME/.homebrew/livecheck_watchlist.txt`
   otherwise.
+
+`HOMEBREW_LOCK_CONTEXT`
+
+: If set, Homebrew will add this output as additional context for locking
+  errors. This is useful when running `brew` in the background.
 
 `HOMEBREW_LOGS`
 
