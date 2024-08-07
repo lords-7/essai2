@@ -82,18 +82,18 @@ module Cask
     def self.deps_info(cask)
       require "utils/info"
 
-      formulas = cask.depends_on[:formula]
-      casks = cask.depends_on[:cask]
+      return if cask.depends_on.empty?
 
-      formula_deps = formulas&.any? ? ::Utils::Info.decorate_dependencies(formulas) : []
-      cask_deps = casks&.any? ? ::Utils::Info.decorate_dependencies(casks) : []
+      output_strings = []
 
-      all_deps = formula_deps + cask_deps
-      return if all_deps.empty?
+      %w[formula cask].each do |type|
+        deps = cask.depends_on.send(type).uniq
+        output_strings << "#{type.capitalize}: #{::Utils::Info.decorate_dependencies(deps)}" unless deps.empty?
+      end
 
       <<~EOS
         #{ohai_title("Dependencies")}
-        #{all_deps.join(", ")}
+        #{output_strings.join("\n")}
       EOS
     end
 
