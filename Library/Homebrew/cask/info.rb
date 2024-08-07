@@ -80,10 +80,13 @@ module Cask
 
     sig { params(cask: Cask).returns(T.nilable(String)) }
     def self.deps_info(cask)
-      depends_on = cask.depends_on
+      require "utils/info"
 
-      formula_deps = Array(depends_on[:formula]).map(&:to_s)
-      cask_deps = Array(depends_on[:cask]).map { |dep| "#{dep} (cask)" }
+      formulas = cask.depends_on[:formula]
+      casks = cask.depends_on[:cask]
+
+      formula_deps = formulas&.any? ? ::Utils::Info.decorate_dependencies(formulas) : []
+      cask_deps = casks&.any? ? ::Utils::Info.decorate_dependencies(casks) : []
 
       all_deps = formula_deps + cask_deps
       return if all_deps.empty?
