@@ -84,6 +84,28 @@ module RuboCop
         end
       end
 
+      # Ensure every `skip_clean` is documented with a comment.
+      class SkipCleanCommented < FormulaCop
+        sig { override.params(formula_nodes: FormulaNodes).void }
+        def audit_formula(formula_nodes)
+          return if formula_tap != "homebrew-core"
+          return if (body_node = formula_nodes.body_node).nil?
+
+          # Some formulae call `skip_clean` multiple times, only require a
+          # comment on the first
+          method = find_every_method_call_by_name(body_node, :skip_clean).first
+          return if method.nil?
+
+          method_comment = processed_source.comments.find do |comment|
+            (method.loc.line - comment.loc.line).abs <= 1
+          end
+          return unless method_comment.nil?
+
+          offending_node(method)
+          problem "Formulae in homebrew/core should document why `skip_clean` is needed with a comment."
+        end
+      end
+
       # This cop makes sure that idiomatic `assert_*` statements are used.
       class AssertStatements < FormulaCop
         sig { override.params(formula_nodes: FormulaNodes).void }
