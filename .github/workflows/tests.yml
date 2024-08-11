@@ -57,6 +57,23 @@ jobs:
 
       - run: brew style
 
+      - name: Check new files are Sorbet strictly typed
+        working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        run: |
+          new_files=$(git diff --cached --name-only --diff-filter=A origin/master -- "*.rb" :^sorbet :^vendor | sort)
+          missing_comment=false
+
+          for file in ${new_files}; do
+            if ! grep -q '# typed: strict' "${file}"; then
+              echo "Add the Sorbet strict sigil ("# typed: strict") to ${file}."
+              missing_comment=true
+            fi
+          done
+
+          if [[ "${missing_comment}" = true ]]; then
+            exit 1
+          fi
+
       - run: brew typecheck
 
       - name: Check RuboCop filepaths
