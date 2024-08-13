@@ -62,8 +62,8 @@ module Homebrew
       return false if ENV.fetch("CI", false)
       return false if OS.unsupported_configuration?
 
-      gh_version = Formula["gh"].any_installed_version.to_s
-      return false if gh_version.nil? || gh_version < "2.49"
+      gh_version = Formula["gh"].any_installed_version
+      return false if gh_version.nil? || gh_version.version < "2.49"
 
       # Always check credentials last to avoid unnecessary credential extraction.
       (Homebrew::EnvConfig.developer? || Homebrew::EnvConfig.devcmdrun?) && GitHub::API.credentials.present?
