@@ -1,4 +1,4 @@
-# typed: true # rubocop:todo Sorbet/StrictSigil
+# typed: strict
 # frozen_string_literal: true
 
 require "language/python"
@@ -8,12 +8,15 @@ require "utils/service"
 class Caveats
   extend Forwardable
 
+  sig { returns(Formula) }
   attr_reader :formula
 
+  sig { params(formula: Formula).void }
   def initialize(formula)
     @formula = formula
   end
 
+  sig { returns(String) }
   def caveats
     caveats = []
     begin
@@ -46,6 +49,7 @@ class Caveats
 
   delegate [:empty?, :to_s] => :caveats
 
+  sig { params(skip_reason: T::Boolean).returns(T.nilable(String)) }
   def keg_only_text(skip_reason: false)
     return unless formula.keg_only?
 
@@ -99,20 +103,25 @@ class Caveats
 
   private
 
+  sig { returns(T.nilable(Keg)) }
   def keg
-    @keg ||= [formula.prefix, formula.opt_prefix, formula.linked_keg].filter_map do |d|
-      Keg.new(d.resolved_path)
-    rescue
-      nil
-    end.first
+    @keg ||= T.let(
+      [formula.prefix, formula.opt_prefix, formula.linked_keg].filter_map do |d|
+        Keg.new(d.resolved_path)
+      rescue
+        nil
+      end.first,
+      T.nilable(Keg)
+    )
   end
 
+  sig { params(shell: Symbol).returns(T.nilable(String)) }
   def function_completion_caveats(shell)
     return unless keg
     return unless which(shell.to_s, ORIGINAL_PATHS)
 
-    completion_installed = keg.completion_installed?(shell)
-    functions_installed = keg.functions_installed?(shell)
+    completion_installed = keg&.completion_installed?(shell)
+    functions_installed = keg&.functions_installed?(shell)
     return if !completion_installed && !functions_installed
 
     installed = []
@@ -140,10 +149,11 @@ class Caveats
     end
   end
 
+  sig { returns(T.nilable(String)) }
   def elisp_caveats
     return if formula.keg_only?
     return unless keg
-    return unless keg.elisp_installed?
+    return unless keg&.elisp_installed?
 
     <<~EOS
       Emacs Lisp files have been installed to:
@@ -151,6 +161,7 @@ class Caveats
     EOS
   end
 
+  sig { returns(T.nilable(String)) }
   def service_caveats
     return if !formula.service? && !Utils::Service.installed?(formula) && !keg&.plist_installed?
     return if formula.service? && !formula.service.command? && !Utils::Service.installed?(formula)
