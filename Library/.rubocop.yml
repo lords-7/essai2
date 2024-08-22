@@ -279,6 +279,7 @@ Sorbet/StrictSigil:
     - "/**/{Formula,Casks}/**/*.rb"
     - "**/{Formula,Casks}/**/*.rb"
     - "Homebrew/test/**/*.rb"
+    - "**/.md*.rb"
 
 Sorbet/TrueSigil:
   Enabled: true
