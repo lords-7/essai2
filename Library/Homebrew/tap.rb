@@ -715,7 +715,7 @@ class Tap
         formula_dir.children
       else
         formula_dir.find
-      end.select { formula_file?(_1) }
+      end.select { ruby_file?(_1) }
     else
       []
     end
@@ -756,7 +756,7 @@ class Tap
   # Check whether the file has a Ruby extension.
   sig { params(file: Pathname).returns(T::Boolean) }
   def ruby_file?(file)
-    file.extname == ".rb"
+    File.extname(file.to_s) == ".rb"
   end
   private :ruby_file?
 
