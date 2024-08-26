@@ -388,10 +388,10 @@ class Bottle
     resource.downloader.stage
   end
 
-  def fetch_tab
+  def fetch_tab(quiet: false)
     return if github_packages_manifest_resource.blank?
 
-    github_packages_manifest_resource.fetch
+    github_packages_manifest_resource.fetch(quiet:)
   rescue DownloadError
     raise unless fallback_on_error
 
@@ -408,6 +408,20 @@ class Bottle
     return {} unless github_packages_manifest_resource&.downloaded?
 
     github_packages_manifest_resource.tab
+  end
+
+  sig { returns(Integer) }
+  def bottle_size
+    return 0 unless github_packages_manifest_resource&.downloaded?
+
+    github_packages_manifest_resource.bottle_size
+  end
+
+  sig { returns(Integer) }
+  def installed_size
+    return 0 unless github_packages_manifest_resource&.downloaded?
+
+    github_packages_manifest_resource.installed_size
   end
 
   sig { returns(Filename) }

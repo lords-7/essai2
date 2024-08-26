@@ -140,7 +140,7 @@ class Resource < Downloadable
     Partial.new(self, files)
   end
 
-  def fetch(verify_download_integrity: true)
+  def fetch(verify_download_integrity: true, quiet: false)
     fetch_patches
 
     super
@@ -286,6 +286,27 @@ class Resource < Downloadable
     end
 
     def tab
+      tab = manifest_annotations["sh.brew.tab"]
+      raise Error, "Couldn't find tab from manifest." if tab.blank?
+
+      begin
+        JSON.parse(tab)
+      rescue JSON::ParserError
+        raise Error, "Couldn't parse tab JSON."
+      end
+    end
+
+    def bottle_size
+      manifest_annotations["sh.brew.bottle.size"].to_i
+    end
+
+    def installed_size
+      manifest_annotations["sh.brew.bottle.installed_size"].to_i
+    end
+
+    private
+
+    def manifest_annotations
       json = begin
         JSON.parse(cached_download.read)
       rescue JSON::ParserError
@@ -308,14 +329,7 @@ class Resource < Downloadable
       end
       raise Error, "Couldn't find manifest matching bottle checksum." if manifest_annotations.blank?
 
-      tab = manifest_annotations["sh.brew.tab"]
-      raise Error, "Couldn't find tab from manifest." if tab.blank?
-
-      begin
-        JSON.parse(tab)
-      rescue JSON::ParserError
-        raise Error, "Couldn't parse tab JSON."
-      end
+      manifest_annotations
     end
   end
 

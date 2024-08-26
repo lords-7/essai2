@@ -79,11 +79,18 @@ class Downloadable
     end
   end
 
-  sig { params(verify_download_integrity: T::Boolean, timeout: T.nilable(T.any(Integer, Float))).returns(Pathname) }
-  def fetch(verify_download_integrity: true, timeout: nil)
+  sig {
+    params(
+      verify_download_integrity: T::Boolean,
+      timeout:                   T.nilable(T.any(Integer, Float)),
+      quiet:                     T::Boolean,
+    ).returns(Pathname)
+  }
+  def fetch(verify_download_integrity: true, timeout: nil, quiet: false)
     cache.mkpath
 
     begin
+      downloader.quiet! if quiet
       downloader.fetch(timeout:)
     rescue ErrorDuringExecution, CurlDownloadStrategyError => e
       raise DownloadError.new(self, e)
