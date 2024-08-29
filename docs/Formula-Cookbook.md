@@ -238,7 +238,8 @@ The preferred mechanism for installing gem dependencies is to use `bundler` with
 
 ```ruby
 ENV["GEM_HOME"] = libexec
-system "bundle", "install", "--without", "development"
+system "bundle", "config", "set", "without", "development", "test"
+system "bundle", "install"
 ```
 
 From there, you can build and install the project itself:
