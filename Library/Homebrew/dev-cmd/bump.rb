@@ -187,7 +187,7 @@ module Homebrew
 
             If BrewTestBot doesn't open a version update pull request in the next 3
             hours, it might be because there is an existing open pull request for
-            the #{what.downcase}.
+            the #{T.must(what).downcase}.
 
             If this is the case, please open a version update pull request manually.
           EOS
