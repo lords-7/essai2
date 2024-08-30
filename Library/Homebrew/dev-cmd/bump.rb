@@ -181,7 +181,16 @@ module Homebrew
         end
         if (tap = formula_or_cask.tap) && !tap.allow_bump?(name)
           skip = true
-          text = "#{text.split.first} is autobumped so will have bump PRs opened by BrewTestBot every ~3 hours.\n"
+          what = text.split.first
+          text = <<~EOS
+            #{what} is autobumped so will have bump PRs opened by BrewTestBot every ~3 hours.
+
+            If BrewTestBot doesn't open a version update pull request in the next 3
+            hours, it might be because there is an existing open pull request for
+            the #{what.downcase}.
+
+            If this is the case, please open a version update pull request manually.
+          EOS
         end
         return false unless skip
 

@@ -118,6 +118,13 @@ module Homebrew
           We'd still love your contributions, though, so try another one
           that's not in the autobump list:
             #{Formatter.url("#{formula.tap.remote}/blob/master/.github/autobump.txt")}
+
+          If BrewTestBot doesn't open a version update pull request in the next 3
+          hours, it might be because there is an existing open pull request for
+          the #{formula.name} formula.
+
+          If this is the case, please open a version update pull request manually:
+            #{Formatter.url("https://docs.brew.sh/How-To-Open-a-Homebrew-Pull-Request#formulae-related-pull-request")}
         EOS
 
         odie "You have too many PRs open: close or merge some first!" if GitHub.too_many_open_prs?(formula.tap)
