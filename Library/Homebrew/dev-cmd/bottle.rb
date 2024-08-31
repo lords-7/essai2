@@ -685,7 +685,7 @@ module Homebrew
               "root_url" => bottle.root_url,
               "cellar"   => bottle_cellar.to_s,
               "rebuild"  => bottle.rebuild,
-              "date"     => Pathname(filename.to_s).mtime.strftime("%F"),
+              "date"     => Pathname(filename.to_s).mtime.iso8601,
               "tags"     => {
                 bottle_tag.to_s => {
                   "filename"        => filename.url_encode,
