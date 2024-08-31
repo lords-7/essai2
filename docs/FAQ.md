@@ -136,7 +136,7 @@ Yes! It’s easy! If `brew tap` doesn't show `homebrew/core`, set yourself up to
 2. Run `brew tap --force homebrew/core` and wait for the clone to complete, then
 3. Run `brew edit <formula>` to open the formula in `EDITOR`.
 
-You don’t have to submit modifications back to `homebrew/core`, just edit the formula to what you personally need and `brew install <formula>`. As a bonus, `brew update` will merge your changes with upstream so you can still keep the formula up-to-date **with** your personal modifications!
+You don’t have to submit modifications back to `homebrew/core`, just edit the formula to what you personally need and `brew install --build-from-source <formula>`. As a bonus, `brew update` will merge your changes with upstream so you can still keep the formula up-to-date **with** your personal modifications!
 
 Note that if you are editing a core formula or cask you must set `HOMEBREW_NO_INSTALL_FROM_API=1` before using `brew install` or `brew update` otherwise they will ignore your local changes and default to the API.
 
