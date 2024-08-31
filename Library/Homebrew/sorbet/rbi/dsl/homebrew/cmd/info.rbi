@@ -39,6 +39,9 @@ class Homebrew::Cmd::Info::Args < Homebrew::CLI::Args
   def github?; end
 
   sig { returns(T::Boolean) }
+  def github_manifest?; end
+
+  sig { returns(T::Boolean) }
   def github_packages_downloads?; end
 
   sig { returns(T::Boolean) }
