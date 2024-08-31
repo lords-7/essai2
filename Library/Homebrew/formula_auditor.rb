@@ -199,14 +199,28 @@ module Homebrew
       "LGPL-3.0" => ["LGPL-3.0-only", "LGPL-3.0-or-later"],
     }.freeze
 
+    INCOMPATIBLE_LICENSES = %w[
+      JSON
+    ].freeze
+
+    INCOMPATIBLE_LICENSE_PREFIXES = %w[
+      BUSL
+      CC-BY-NC
+      Elastic
+      SSPL
+    ].freeze
+
     def audit_license
       if formula.license.present?
         licenses, exceptions = SPDX.parse_license_expression formula.license
 
-        sspl_licensed = licenses.any? { |license| license.to_s.start_with?("SSPL") }
-        if sspl_licensed && @core_tap
+        incompatible_licenses = licenses.select do |license|
+          license.to_s.start_with?(*INCOMPATIBLE_LICENSE_PREFIXES) || INCOMPATIBLE_LICENSES.include?(license.to_s)
+        end
+        if incompatible_licenses.present? && @core_tap
           problem <<~EOS
-            Formula #{formula.name} is SSPL-licensed. Software under the SSPL must not be packaged in homebrew/core.
+            Formula #{formula.name} contains incompatible licenses: #{incompatible_licenses}.
+            Software under these licenses must not be packaged in homebrew/core.
           EOS
         end
 
@@ -255,7 +269,7 @@ module Homebrew
 
         problem "Formula license #{licenses} does not match GitHub license #{Array(github_license)}."
 
-      elsif @new_formula && @core_tap
+      elsif @core_tap && !formula.disabled?
         problem "Formulae in homebrew/core must specify a license."
       end
     end
