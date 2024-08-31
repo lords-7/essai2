@@ -201,6 +201,18 @@ module Homebrew
             virtualenv_install_with_resources
         <% elsif @mode == :ruby %>
             ENV["GEM_HOME"] = libexec
+
+            # Install dependencies declared in a Gemfile.lock
+            # system "bundle", "config", "set", "without", "development", "test"
+            # system "bundle", "install"
+
+            # Install dependencies declared as resources
+            # resources.each do |r|
+            #   r.fetch
+            #   system "gem", "install", r.cached_download, "--ignore-dependencies",
+            #          "--no-document", "--install-dir", libexec
+            # end
+
             system "gem", "build", "\#{name}.gemspec"
             system "gem", "install", "\#{name}-\#{@version}.gem"
             bin.install libexec/"bin/\#{name}"
