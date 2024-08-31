@@ -129,8 +129,8 @@ RSpec.describe "ENV" do
 
     describe "#compiler" do
       it "allows switching compilers" do
-        subject.public_send(:"gcc-6")
-        expect(subject.compiler).to eq("gcc-6")
+        subject.public_send(:"gcc-9")
+        expect(subject.compiler).to eq("gcc-9")
       end
     end
 
@@ -179,14 +179,8 @@ RSpec.describe "ENV" do
     end
 
     describe "#cxx11" do
-      it "supports gcc-5" do
-        env["HOMEBREW_CC"] = "gcc-5"
-        env.cxx11
-        expect(env["HOMEBREW_CCCFG"]).to include("x")
-      end
-
-      example "supports gcc-6" do
-        env["HOMEBREW_CC"] = "gcc-6"
+      it "supports gcc-9" do
+        env["HOMEBREW_CC"] = "gcc-9"
         env.cxx11
         expect(env["HOMEBREW_CCCFG"]).to include("x")
       end
